@@ -2606,10 +2606,23 @@ function updateUI() {
     let elEstAtual = document.getElementById('estamina-atual');
     if (elEstAtual) elEstAtual.value = i.estaminaAtual.toLocaleString("pt-BR");
 
+    let elEstHakiArm = document.getElementById('info-estaminaHakiArm');
+    if (elEstHakiArm) {
+        let htmlHakiArm = '<option value="nao">Não</option><option value="sim">Sim</option>';
+        if (i.unlockHA4) htmlHakiArm += '<option value="fullbody">Full Body</option>';
+        if (elEstHakiArm.innerHTML !== htmlHakiArm) elEstHakiArm.innerHTML = htmlHakiArm;
+        if (Array.from(elEstHakiArm.options).some(o => o.value === i.estaminaHakiArm)) {
+            elEstHakiArm.value = i.estaminaHakiArm;
+        } else {
+            elEstHakiArm.value = "nao";
+            i.estaminaHakiArm = "nao";
+        }
+    }
+
     let eVel = parseInt(i.estaminaVelocidade) || 0;
     let eDano = parseInt(i.estaminaDano) || 0;
     let eBuff = parseInt(i.estaminaBuffPct) || 0;
-    let eHArm = i.estaminaHakiArm === 'sim' ? 300 : 0;
+    let eHArm = i.estaminaHakiArm === 'sim' ? 300 : (i.estaminaHakiArm === 'fullbody' ? 600 : 0);
     let eHObs = i.estaminaHakiObs === 'sim' ? 200 : 0;
 
     let custoVel = Math.floor(eVel * 0.10);
