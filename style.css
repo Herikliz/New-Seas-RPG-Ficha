@@ -68,10 +68,10 @@ textarea { overflow: hidden; resize: none; min-height: 80px; text-align: justify
 .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;}
 .three-col-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; align-items: start; margin-bottom: 20px;}
 .box { perspective: 1000px; margin-bottom: 20px; background-color: transparent; border: none; padding: 0; display: block; transition: all 0.3s ease; }
-.box-inner { position: relative; width: 100%; transition: transform 0.6s; transform-style: preserve-3d; display: block; }
+.box-inner { display: block; position: relative; width: 100%; transition: transform 0.6s; transform-style: preserve-3d; will-change: transform; }
 .box.flipped .box-inner { transform: rotateY(180deg); }
-.box-front { backface-visibility: hidden; border: 1px solid #444; padding: 15px; border-radius: 8px; background-color: rgba(0,0,0,0.2); display: flex; flex-direction: column; width: 100%; box-sizing: border-box; }
-.box-back { backface-visibility: hidden; border: 1px solid #444; padding: 15px; border-radius: 8px; background-color: rgba(0,0,0,0.2); top: 0; left: 0; width: 100%; transform: rotateY(180deg); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; }
+.box-front { -webkit-backface-visibility: hidden; backface-visibility: hidden; -webkit-transform: translateZ(0); box-sizing: border-box; border: 1px solid #444; padding: 15px; border-radius: 8px; background-color: rgba(0,0,0,0.2); display: flex; flex-direction: column; width: 100%; }
+.box-back { -webkit-backface-visibility: hidden; backface-visibility: hidden; box-sizing: border-box; border: 1px solid #444; padding: 15px; border-radius: 8px; background-color: rgba(0,0,0,0.2); top: 0; left: 0; width: 100%; transform: rotateY(180deg); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
 .box:not(.flipped) .box-front { position: relative; visibility: visible; }
 .box:not(.flipped) .box-back { position: absolute; visibility: hidden; }
 .box.flipped .box-front { position: absolute; visibility: hidden; }
