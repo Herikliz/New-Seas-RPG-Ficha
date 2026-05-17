@@ -728,7 +728,7 @@ function runFallbackChecks() {
               personalidade: "", historia: "", aparencia: "", inventario: "", hasAmiAlc: true, hasAmiDur: true, hasAmiPot: true, hasAmiVel: true, hasAmiDesp: false,
               amiResPct: "", amiAlcMult: "1", calcUseAttr: "", calcInimigoRes: "", calcResIgnorada: "", calcBuffFlat: "", calcBuffPct: "", calcBuffDanoFinalPct: "", calcUseAmi: "sim", amiPotBuff: "", calcUseHaki: "nao", sceneType: "Treino Padrão", sceneText: "", hpAtual: -1,
               boxIden: false, boxMec: false, boxSoc: false, boxBase: false, boxEsp: false, boxAmi: false, boxHist: false, 
-              boxInv: false, boxCalc: false, boxEstamina: false, estaminaAtual: -1, estaminaVelocidade: "", estaminaDano: "", estaminaBuffPct: "", estaminaHakiArm: "nao", estaminaHakiObs: "nao", boxScene: false, akumaId: "", selCharR1: "", selCharR2: "", treinosAcumulados: 0, ordemTecnicas: "alfabetica", hideHistoria: false, hidePersonality: false, exaustaoCompleta: false, habilidadesExclusivas: [], habCaminhoAtiradorAtivo: false, habFavArmistaAtivo: "nenhum", habFavArmistaAttr: "d", habQIAvancadoAtivo: false, linhagemBeckmanArma: false, habRetornoUso: 1, merito: 0, aliadosEspiritoContagiante: 0,
+              boxInv: false, boxCalc: false, boxEstamina: false, estaminaAtual: -1, estaminaVelocidade: "", estaminaDano: "", estaminaBuffPct: "", estaminaHakiArm: "nao", estaminaHakiObs: "nao", boxScene: false, akumaId: "", selCharR1: "", selCharR2: "", treinosAcumulados: 0, ordemTecnicas: "alfabetica", hideHistoria: false, hidePersonality: false, hideTecNome: false, hideTecDesc: false, hideTecEfeito: false, hiddenStyles: [], exaustaoCompleta: false, habilidadesExclusivas: [], habCaminhoAtiradorAtivo: false, habFavArmistaAtivo: "nenhum", habFavArmistaAttr: "d", habQIAvancadoAtivo: false, linhagemBeckmanArma: false, habRetornoUso: 1, merito: 0, aliadosEspiritoContagiante: 0,
               unlockHA1: false, unlockHA2: false, unlockHA3: false, unlockHA4: false, unlockHA5: false, unlockHA6: false,
               unlockHO2: false, unlockHO3: false, unlockHO4: false,
               unlockHR1: false, unlockHR2: false, unlockHR3: false, unlockHR4: false, unlockHR5: false, unlockHR6: false
@@ -768,6 +768,17 @@ window.toggleAllBoxes = function(state) {
     const boxKeys = ['boxIden', 'boxMec', 'boxSoc', 'boxHab', 'boxBase', 'boxEsp', 'boxAmi', 'boxHist', 'boxLog', 'boxInv', 'boxTec', 'boxRes', 'boxCalc', 'boxEstamina', 'boxScene'];
     boxKeys.forEach(k => currentChar.info[k] = state);
     document.querySelectorAll('.box').forEach(box => box.classList.remove('flipped'));
+    saveData();
+    updateUI();
+};
+
+window.toggleHiddenStyle = function(styleName, isChecked) {
+    if (!currentChar.info.hiddenStyles) currentChar.info.hiddenStyles = [];
+    if (isChecked) {
+        if (!currentChar.info.hiddenStyles.includes(styleName)) currentChar.info.hiddenStyles.push(styleName);
+    } else {
+        currentChar.info.hiddenStyles = currentChar.info.hiddenStyles.filter(s => s !== styleName);
+    }
     saveData();
     updateUI();
 };
@@ -1539,6 +1550,37 @@ function updateUI() {
     let chkHideHist = document.getElementById('info-hideHistoria'); if (chkHideHist) chkHideHist.checked = i.hideHistoria || false;
     let chkHidePers = document.getElementById('hide-personality'); if (chkHidePers) chkHidePers.checked = i.hidePersonality || false;
     let chkExaustao = document.getElementById('info-exaustaoCompleta'); if (chkExaustao) chkExaustao.checked = i.exaustaoCompleta || false;
+    
+    let chkHideTecNome = document.getElementById('info-hideTecNome'); if (chkHideTecNome) chkHideTecNome.checked = i.hideTecNome || false;
+    let chkHideTecDesc = document.getElementById('info-hideTecDesc'); if (chkHideTecDesc) chkHideTecDesc.checked = i.hideTecDesc || false;
+    let chkHideTecEfeito = document.getElementById('info-hideTecEfeito'); if (chkHideTecEfeito) chkHideTecEfeito.checked = i.hideTecEfeito || false;
+    
+    let hideStylesContainer = document.getElementById('hide-styles-container');
+    if (hideStylesContainer) {
+        let availableStylesToHide = [];
+        let isMinkEstiloUI = (i.raca === "Mink" || (i.linhagem === "Charlotte" && i.raca2 === "Mink") || (currentChar.isNPC && i.raca === 'Outra'));
+        if (isMinkEstiloUI) availableStylesToHide.push("Electro");
+        if (i.akumaNome && i.akumaNome !== "nenhuma" && i.akumaNome.trim() !== "") availableStylesToHide.push(i.akumaNome);
+        [1, 2, 3, 4].forEach(n => {
+            let st = i['estilo'+n];
+            if (st && st !== "Nenhum") {
+                let dName = st === "Freestyle" ? (i['freestyle'+n] && i['freestyle'+n].trim() !== "" ? i['freestyle'+n] : "Freestyle") : st;
+                availableStylesToHide.push(dName);
+            }
+        });
+        let hiddenStylesHtml = '';
+        if (!i.hiddenStyles) i.hiddenStyles = [];
+        availableStylesToHide.forEach(stName => {
+            let checked = i.hiddenStyles.includes(stName) ? 'checked' : '';
+            hiddenStylesHtml += `<label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
+                <input type="checkbox" onchange="toggleHiddenStyle('${stName.replace(/'/g, "\\'")}', this.checked)" style="width:auto; margin:0;" ${checked}> Ocultar ${stName}
+            </label>`;
+        });
+        hiddenStylesHtml += `<label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
+            <input type="checkbox" onchange="toggleHiddenStyle('Sem Estilo', this.checked)" style="width:auto; margin:0;" ${i.hiddenStyles.includes('Sem Estilo') ? 'checked' : ''}> Ocultar Sem Estilo
+        </label>`;
+        hideStylesContainer.innerHTML = hiddenStylesHtml;
+    }
 
     let selAlcunha = document.getElementById('info-alcunha');
     if(selAlcunha) {
@@ -3022,15 +3064,27 @@ function updateUI() {
             return a.localeCompare(b);
         });
 
+        if (!i.hiddenStyles) i.hiddenStyles = [];
+
         estilosKeys.forEach(stKey => {
-            tecnicasOut += `« ${stKey} »\n`;
+            if (i.hiddenStyles.includes(stKey)) return;
+
+            let stKeyContent = "";
             agrupado[stKey].forEach(t => {
+                let tContent = "";
                 let unt = t.naoTreinada ? "~" : "";
-                if (t.nome) tecnicasOut += `* ${unt}${t.nome}${unt}\n`;
-                if (t.desc) { t.desc.split('\n').forEach(line => { let trimLine = line.trim(); if(trimLine !== "") tecnicasOut += `> ${unt}${trimLine.replace(/^>\s*/, '')}${unt}\n`; }); }
-                if (t.efeito) { t.efeito.split('\n').forEach((line, idx) => { let trimLine = line.trim(); if(trimLine !== "") { if (idx === 0) tecnicasOut += `> ${unt}Efeito: ${trimLine.replace(/^>\s*/, '')}${unt}\n`; else tecnicasOut += `> ${unt}${trimLine.replace(/^>\s*/, '')}${unt}\n`; } }); }
-                tecnicasOut += `\n`;
+                if (t.nome && !i.hideTecNome) tContent += `* ${unt}${t.nome}${unt}\n`;
+                if (t.desc && !i.hideTecDesc) { t.desc.split('\n').forEach(line => { let trimLine = line.trim(); if(trimLine !== "") tContent += `> ${unt}${trimLine.replace(/^>\s*/, '')}${unt}\n`; }); }
+                if (t.efeito && !i.hideTecEfeito) { t.efeito.split('\n').forEach((line, idx) => { let trimLine = line.trim(); if(trimLine !== "") { if (idx === 0) tContent += `> ${unt}Efeito: ${trimLine.replace(/^>\s*/, '')}${unt}\n`; else tContent += `> ${unt}${trimLine.replace(/^>\s*/, '')}${unt}\n`; } }); }
+                
+                if (tContent !== "") {
+                    stKeyContent += tContent + "\n";
+                }
             });
+
+            if (stKeyContent !== "") {
+                tecnicasOut += `« ${stKey} »\n` + stKeyContent;
+            }
         });
 
         tecnicasOut += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;

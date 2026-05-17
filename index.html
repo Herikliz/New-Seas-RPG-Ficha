@@ -741,6 +741,21 @@
                 <span>Técnicas <span onclick="openInfoModal('Técnicas', 'Clique em Adicionar Técnica. É imperativo que selecione o Estilo de Luta correspondente no menu. Em Nome, apenas insira o título do golpe. Em Descrição, detalhe puramente as ações narrativas da movimentação. O espaço de Efeitos é estritamente mecânico: escreva o debuff ou buff com exatidão matemática para que os avaliadores validem sem erros de interpretação.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px; color: var(--info);">ⓘ</span></span><span id="icon-boxTec" class="toggle-icon">▼</span>
             </div>
             <div id="wrapper-boxTec" class="box-content">
+                <div class="input-group" style="margin-bottom: 15px; border-bottom: 1px dashed #444; padding-bottom: 10px;">
+                    <label style="color: var(--warning); margin-bottom: 5px;">Opções de Ocultamento</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
+                            <input type="checkbox" id="info-hideTecNome" onchange="updateField('info', 'hideTecNome', this.checked)" style="width:auto; margin:0;"> Ocultar Nomes
+                        </label>
+                        <label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
+                            <input type="checkbox" id="info-hideTecDesc" onchange="updateField('info', 'hideTecDesc', this.checked)" style="width:auto; margin:0;"> Ocultar Descrições
+                        </label>
+                        <label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
+                            <input type="checkbox" id="info-hideTecEfeito" onchange="updateField('info', 'hideTecEfeito', this.checked)" style="width:auto; margin:0;"> Ocultar Efeitos
+                        </label>
+                    </div>
+                    <div id="hide-styles-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px;"></div>
+                </div>
                 <div class="input-group">
                     <label>Treinos Acumulados</label>
                     <input type="text" id="info-treinosAcumulados" placeholder="0" oninput="formatAndSave('info', 'treinosAcumulados', this)">
