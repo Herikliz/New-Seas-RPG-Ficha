@@ -92,7 +92,27 @@ const patenteGender = {
   "CP-9": {m: "CP-9", f: "CP-9"},
   "CP-0": {m: "CP-0", f: "CP-0"},
   "Gorosei": {m: "Gorosei", f: "Gorosei"},
-  "Líder do Governo": {m: "Líder do Governo", f: "Líder do Governo"}
+  "Líder do Governo": {m: "Líder do Governo", f: "Líder do Governo"},
+  "Iniciado": {m: "Iniciado", f: "Iniciada"},
+  "Operador": {m: "Operador", f: "Operadora"},
+  "Infiltrador": {m: "Infiltrador", f: "Infiltradora"},
+  "Soldado Revolucionário": {m: "Soldado Revolucionário", f: "Soldada Revolucionária"},
+  "Coordenador De Operações": {m: "Coordenador de Operações", f: "Coordenadora de Operações"},
+  "Esquadrão de Combate": {m: "Esquadrão de Combate", f: "Esquadrão de Combate"},
+  "Esquadrão de Operações": {m: "Esquadrão de Operações", f: "Esquadrão de Operações"},
+  "Esquadrão de Inteligência": {m: "Esquadrão de Inteligência", f: "Esquadrão de Inteligência"},
+  "Esquadrão de Defesa": {m: "Esquadrão de Defesa", f: "Esquadrão de Defesa"},
+  "Comandante Tático de Combate": {m: "Comandante Tático de Combate", f: "Comandante Tática de Combate"},
+  "Comandante Tático de Operações": {m: "Comandante Tático de Operações", f: "Comandante Tática de Operações"},
+  "Comandante Tático de Inteligência": {m: "Comandante Tático de Inteligência", f: "Comandante Tática de Inteligência"},
+  "Comandante Tático de Defesa": {m: "Comandante Tático de Defesa", f: "Comandante Tática de Defesa"},
+  "Capitão Tático de Combate": {m: "Capitão Tático de Combate", f: "Capitã Tática de Combate"},
+  "Capitão Tático de Operações": {m: "Capitão Tático de Operações", f: "Capitã Tática de Operações"},
+  "Capitão Tático de Inteligência": {m: "Capitão Tático de Inteligência", f: "Capitã Tática de Inteligência"},
+  "Capitão Tático de Defesa": {m: "Capitão Tático de Defesa", f: "Capitã Tática de Defesa"},
+  "Pilar": {m: "Pilar", f: "Pilar"},
+  "Vice-Líder": {m: "Vice-Líder", f: "Vice-Líder"},
+  "Eixo": {m: "Eixo", f: "Eixo"}
 };
 
 const baseClassGender = {
@@ -125,7 +145,7 @@ const classTitles = {
   "Navegador": [{m:"Marujo",f:"Maruja"},{m:"Cartógrafo",f:"Cartógrafa"},{m:"Timoneiro",f:"Timoneira"},{m:"Capitão dos Ventos",f:"Capitã dos Ventos"},{m:"Semipeixe",f:"Semipeixe"}]
 };
 
-const salarios = {"Aprendiz":0,"Recruta":10000000,"Cabo":20000000,"Sargento":30000000,"Tenente":40000000,"Comandante":50000000,"Capitão":60000000,"Comodoro":80000000,"Contra-Almirante":90000000,"Vice-Almirante":100000000,"Almirante":150000000,"Almirante-de-Frota":200000000,"Agente Judicial":10000000,"CP-1":20000000,"CP-2":30000000,"CP-3":40000000,"CP-4":50000000,"CP-5":60000000,"CP-6":70000000,"CP-7":80000000,"CP-8":100000000,"CP-9":150000000,"CP-0":200000000,"Gorosei":500000000,"Líder do Governo":0};
+const salarios = {"Aprendiz":0,"Recruta":10000000,"Cabo":20000000,"Sargento":30000000,"Tenente":40000000,"Comandante":50000000,"Capitão":60000000,"Comodoro":80000000,"Contra-Almirante":90000000,"Vice-Almirante":100000000,"Almirante":150000000,"Almirante-de-Frota":200000000,"Agente Judicial":10000000,"CP-1":20000000,"CP-2":30000000,"CP-3":40000000,"CP-4":50000000,"CP-5":60000000,"CP-6":70000000,"CP-7":80000000,"CP-8":100000000,"CP-9":150000000,"CP-0":200000000,"Gorosei":500000000,"Líder do Governo":0,"Iniciado":5000000,"Operador":10000000,"Infiltrador":20000000,"Soldado Revolucionário":30000000,"Coordenador De Operações":50000000,"Esquadrão de Combate":60000000,"Esquadrão de Operações":60000000,"Esquadrão de Inteligência":60000000,"Esquadrão de Defesa":60000000,"Comandante Tático de Combate":80000000,"Comandante Tático de Operações":80000000,"Comandante Tático de Inteligência":80000000,"Comandante Tático de Defesa":80000000,"Comandante Tática de Combate":80000000,"Comandante Tática de Operações":80000000,"Comandante Tática de Inteligência":80000000,"Comandante Tática de Defesa":80000000,"Capitão Tático de Combate":100000000,"Capitão Tático de Operações":100000000,"Capitão Tático de Inteligência":100000000,"Capitão Tático de Defesa":100000000,"Capitã Tática de Combate":100000000,"Capitã Tática de Operações":100000000,"Capitã Tática de Inteligência":100000000,"Capitã Tática de Defesa":100000000,"Pilar":150000000,"Vice-Líder":175000000,"Eixo":200000000};
 
 let charData = {
   password: "",
@@ -1697,22 +1717,65 @@ function updateUI() {
             else if (currentPts >= 5000 * modifier) potentialPatente = "CP-2";
             else if (currentPts >= 2500 * modifier) potentialPatente = "CP-1";
             else potentialPatente = "Agente Judicial";
+        } else if (orgTipo === "Vanguarda Popular Revolucionária") {
+            if (i.patente === "Vice-Líder") {
+                potentialPatente = "Eixo";
+                meritReq = 0;
+            } else if (i.patente === "Pilar") {
+                potentialPatente = "Vice-Líder";
+                meritReq = 18;
+            } else if (currentPts >= 30000 && (i.patente.startsWith("Capitão Tático") || i.patente === "Pilar")) {
+                potentialPatente = "Pilar";
+                meritReq = 10;
+            } else if (currentPts >= 25000 && (i.patente.startsWith("Comandante Tático") || i.patente.startsWith("Capitão Tático"))) {
+                potentialPatente = "Capitão Tático";
+                meritReq = 6;
+            } else if (currentPts >= 20000 && (i.patente.startsWith("Esquadrão") || i.patente.startsWith("Comandante Tático"))) {
+                potentialPatente = "Comandante Tático";
+                meritReq = 0;
+            } else if (currentPts >= 15000) {
+                if (i.patente.startsWith("Esquadrão") || i.patente.startsWith("Comandante Tático") || i.patente.startsWith("Capitão Tático") || i.patente === "Pilar" || i.patente === "Vice-Líder" || i.patente === "Eixo") {
+                    potentialPatente = i.patente;
+                } else {
+                    potentialPatente = "Esquadrão";
+                    meritReq = 0;
+                }
+            } else if (currentPts >= 10000) potentialPatente = "Coordenador De Operações";
+            else if (currentPts >= 5000) potentialPatente = "Soldado Revolucionário";
+            else if (currentPts >= 2500) potentialPatente = "Infiltrador";
+            else if (currentPts >= 1000) potentialPatente = "Operador";
+            else potentialPatente = "Iniciado";
         }
 
-        const manualRanks = ["Vice-Almirante", "Almirante", "Almirante-de-Frota", "CP-8", "CP-9", "CP-0"];
+        const manualRanks = ["Vice-Almirante", "Almirante", "Almirante-de-Frota", "CP-8", "CP-9", "CP-0", "Esquadrão", "Comandante Tático", "Capitão Tático", "Pilar", "Vice-Líder", "Eixo"];
         if (!manualRanks.includes(potentialPatente)) {
             i.patente = potentialPatente;
             document.getElementById('btn-promover').style.display = 'none';
         } else {
-            const rankOrder = orgTipo === "Marinha" ? ["Aprendiz", "Recruta", "Cabo", "Sargento", "Tenente", "Comandante", "Capitão", "Comodoro", "Contra-Almirante", "Vice-Almirante", "Almirante", "Almirante-de-Frota"] : ["Agente Judicial", "CP-1", "CP-2", "CP-3", "CP-4", "CP-5", "CP-6", "CP-7", "CP-8", "CP-9", "CP-0"];
+            const rankOrder = orgTipo === "Marinha" ? ["Aprendiz", "Recruta", "Cabo", "Sargento", "Tenente", "Comandante", "Capitão", "Comodoro", "Contra-Almirante", "Vice-Almirante", "Almirante", "Almirante-de-Frota"] : (orgTipo === "Governo Mundial" ? ["Agente Judicial", "CP-1", "CP-2", "CP-3", "CP-4", "CP-5", "CP-6", "CP-7", "CP-8", "CP-9", "CP-0"] : ["Iniciado", "Operador", "Infiltrador", "Soldado Revolucionário", "Coordenador De Operações", "Esquadrão de Combate", "Esquadrão de Operações", "Esquadrão de Inteligência", "Esquadrão de Defesa", "Comandante Tático de Combate", "Comandante Tático de Operações", "Comandante Tático de Inteligência", "Comandante Tático de Defesa", "Capitão Tático de Combate", "Capitão Tático de Operações", "Capitão Tático de Inteligência", "Capitão Tático de Defesa", "Pilar", "Vice-Líder", "Eixo"]);
             let currentIdx = rankOrder.indexOf(i.patente);
             let potentialIdx = rankOrder.indexOf(potentialPatente);
             
-            if (potentialIdx > currentIdx) {
+            if (potentialPatente === "Esquadrão" && currentIdx < rankOrder.indexOf("Esquadrão de Combate")) {
                 document.getElementById('btn-promover').style.display = 'inline-block';
                 document.getElementById('btn-promover').dataset.nextRank = potentialPatente;
                 document.getElementById('btn-promover').dataset.meritReq = meritReq;
-                document.getElementById('btn-promover').disabled = (i.merito < meritReq && potentialPatente !== "Almirante-de-Frota");
+                document.getElementById('btn-promover').disabled = false;
+            } else if (potentialPatente === "Comandante Tático" && currentIdx >= rankOrder.indexOf("Esquadrão de Combate") && currentIdx <= rankOrder.indexOf("Esquadrão de Defesa")) {
+                document.getElementById('btn-promover').style.display = 'inline-block';
+                document.getElementById('btn-promover').dataset.nextRank = potentialPatente;
+                document.getElementById('btn-promover').dataset.meritReq = meritReq;
+                document.getElementById('btn-promover').disabled = false;
+            } else if (potentialPatente === "Capitão Tático" && currentIdx >= rankOrder.indexOf("Comandante Tático de Combate") && currentIdx <= rankOrder.indexOf("Comandante Tático de Defesa")) {
+                document.getElementById('btn-promover').style.display = 'inline-block';
+                document.getElementById('btn-promover').dataset.nextRank = potentialPatente;
+                document.getElementById('btn-promover').dataset.meritReq = meritReq;
+                document.getElementById('btn-promover').disabled = (i.merito < meritReq);
+            } else if (potentialIdx > currentIdx && !["Esquadrão", "Comandante Tático", "Capitão Tático"].includes(potentialPatente)) {
+                document.getElementById('btn-promover').style.display = 'inline-block';
+                document.getElementById('btn-promover').dataset.nextRank = potentialPatente;
+                document.getElementById('btn-promover').dataset.meritReq = meritReq;
+                document.getElementById('btn-promover').disabled = (i.merito < meritReq && potentialPatente !== "Almirante-de-Frota" && potentialPatente !== "Eixo");
             } else {
                 document.getElementById('btn-promover').style.display = 'none';
             }
@@ -3904,9 +3967,46 @@ window.promoverCargo = async function() {
             await customAlert("Senha incorreta.");
             return;
         }
+    } else if (nextRank === "Eixo") {
+        let pwd = await customPrompt("A promoção para Eixo exige autorização. Digite a senha de ADM:");
+        if (pwd !== ADMIN_PASSWORD) {
+            await customAlert("Senha incorreta.");
+            return;
+        }
     } else if (currentChar.info.merito < req) {
         await customAlert("Você não possui Méritos suficientes.");
         return;
+    }
+
+    if (nextRank === "Esquadrão") {
+        let escolha = await customPrompt("Escolha seu esquadrão (Digite exatamente: Combate, Operações, Inteligência ou Defesa):");
+        if (!escolha) return;
+        escolha = escolha.trim().toLowerCase();
+        let tipo = "";
+        if (escolha === "combate") tipo = "Esquadrão de Combate";
+        else if (escolha === "operações" || escolha === "operacoes") tipo = "Esquadrão de Operações";
+        else if (escolha === "inteligência" || escolha === "inteligencia") tipo = "Esquadrão de Inteligência";
+        else if (escolha === "defesa") tipo = "Esquadrão de Defesa";
+        else {
+            await customAlert("Opção inválida.");
+            return;
+        }
+        let conf = await customPrompt(`Deseja aceitar a promoção para ${tipo}? Digite 'SIM' para confirmar:`);
+        if (conf === "SIM" || conf === "sim") {
+            currentChar.info.merito -= req;
+            currentChar.info.patente = tipo;
+            saveData(); updateUI();
+            await customAlert("Promoção realizada com sucesso!");
+        }
+        return;
+    }
+
+    if (nextRank === "Comandante Tático") {
+        let tipoAtual = currentChar.info.patente.replace("Esquadrão de ", "");
+        nextRank = "Comandante Tático de " + tipoAtual;
+    } else if (nextRank === "Capitão Tático") {
+        let tipoAtual = currentChar.info.patente.replace("Comandante Tático de ", "").replace("Comandante Tática de ", "");
+        nextRank = "Capitão Tático de " + tipoAtual;
     }
 
     let gKey = currentChar.info.sexo === 'Feminino' ? 'f' : 'm';
@@ -3914,7 +4014,7 @@ window.promoverCargo = async function() {
     let conf = await customPrompt(`Deseja aceitar a promoção para ${dName}? Digite 'SIM' para confirmar:`);
     
     if (conf === "SIM" || conf === "sim") {
-        if (nextRank !== "Almirante-de-Frota") {
+        if (nextRank !== "Almirante-de-Frota" && nextRank !== "Eixo") {
             currentChar.info.merito -= req;
         }
         currentChar.info.patente = nextRank;
