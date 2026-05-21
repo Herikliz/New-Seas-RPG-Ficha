@@ -1718,6 +1718,14 @@ function updateUI() {
             else if (currentPts >= 2500 * modifier) potentialPatente = "CP-1";
             else potentialPatente = "Agente Judicial";
         } else if (orgTipo === "Vanguarda Popular Revolucionária") {
+            if (!i.patente || i.patente === "" || i.patente === "Iniciado") {
+                if (currentPts >= 15000) i.patente = "Coordenador De Operações";
+                else if (currentPts >= 10000) i.patente = "Coordenador De Operações";
+                else if (currentPts >= 5000) i.patente = "Soldado Revolucionário";
+                else if (currentPts >= 2500) i.patente = "Infiltrador";
+                else if (currentPts >= 1000) i.patente = "Operador";
+                else i.patente = "Iniciado";
+            }
             if (i.patente === "Vice-Líder") {
                 potentialPatente = "Eixo";
                 meritReq = 0;
@@ -1734,8 +1742,9 @@ function updateUI() {
                 potentialPatente = "Comandante Tático";
                 meritReq = 0;
             } else if (currentPts >= 15000) {
-                if (i.patente.startsWith("Esquadrão") || i.patente.startsWith("Comandante Tático") || i.patente.startsWith("Capitão Tático") || i.patente === "Pilar" || i.patente === "Vice-Líder" || i.patente === "Eixo") {
-                    potentialPatente = i.patente;
+                if (i.patente.startsWith("Esquadrão") || i.patente.startsWith("Comandante Tático") || i.patente.startsWith("Capitão Tático") || i.patente === "Pilar" || i.patente === "Vice-Líder" || i.patente === "Eixo" || i.patente === "Coordenador De Operações") {
+                    potentialPatente = i.patente === "Coordenador De Operações" ? "Esquadrão" : i.patente;
+                    if (i.patente === "Coordenador De Operações") meritReq = 0;
                 } else {
                     potentialPatente = "Esquadrão";
                     meritReq = 0;
@@ -2103,8 +2112,7 @@ function updateUI() {
             if (rc2 === "Oni") mandHab.push("Contração Muscular");
         }
         
-        let allLineageHabs = ["Arte da Esgrima", "Batedor de Carteiras", "Caminho do Atirador", "Constituição Única", "Contração Muscular", "Espírito Contagiante", "Favoritismo Armista", "Filho do Mar", "Flexibilidade", "Fúria Ardente", "O Escolhido", "Pensamento Acelerado", "Vontade Inabalável", "Treinamento de Cavaleiro", "QI Avançado"];
-        let currentList = (i.habilidadesExclusivas || []).filter(h => !allLineageHabs.includes(h) || mandHab.includes(h));
+        let currentList = i.habilidadesExclusivas || [];
         mandHab.forEach(h => { if (!currentList.includes(h)) currentList.push(h); });
         i.habilidadesExclusivas = currentList;
 
@@ -3222,6 +3230,12 @@ function updateUI() {
     
     let habilidadesOut = "";
     if (i.habilidadesExclusivas && i.habilidadesExclusivas.length > 0) {
+        i.habilidadesExclusivas.sort((a, b) => {
+            let displayA = formatHabDisplay(a).toLowerCase();
+            let displayB = formatHabDisplay(b).toLowerCase();
+            return displayA.localeCompare(displayB);
+        });
+
         if (i.habilidadesExclusivas.length === 1) {
             habilidadesOut = `  : ᓩ _𝐇ᴀʙɪʟɪᴅᴀᴅᴇ 𝐔́ɴɪᴄᴀ:_\n`;
         } else {
@@ -3249,10 +3263,14 @@ function updateUI() {
         i.habilidadesExclusivas.forEach(hab => {
             let desc = getHabDesc(hab, totalBase);
             let displayHab = formatHabDisplay(hab);
+            let isMandatoryLin = linhagemHabilidades[ln] && linhagemHabilidades[ln].includes(hab);
+            let isMandatoryRace = !isMandatoryLin && mandHab.includes(hab);
+            let specText = isMandatoryLin ? " _*(Linhagem)*_" : (isMandatoryRace ? " _*(Raça Exclusiva)*_" : "");
+            
             if (desc && desc !== "oculta") {
-                habilidadesOut += `> ${displayHab}: ${desc}\n`;
+                habilidadesOut += `> ${displayHab}: ${desc}${specText}\n`;
             } else {
-                habilidadesOut += `> ${displayHab}\n`;
+                habilidadesOut += `> ${displayHab}${specText}\n`;
             }
         });
         habilidadesOut += `\n`;
