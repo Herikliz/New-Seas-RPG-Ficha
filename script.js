@@ -1652,6 +1652,99 @@ function updateUI() {
         if(berEl) berEl.value = i.berries ? i.berries.toLocaleString("pt-BR") : "";
     }
 
+    let D = currentChar.stats.d, F = currentChar.stats.f, R = currentChar.stats.r, V = currentChar.stats.v;
+    let totalBase = D + F + R + V;
+
+    let totalFinal = totalBase;
+    let finalHA = 0, finalHO = 0, finalHR = 0;
+    {
+        let tempRc = i.raca, tempRc2 = i.raca2, tempLn = i.linhagem;
+        if (tempLn !== "Nenhuma" && linhagens[tempLn] && linhagens[tempLn].req && !linhagens[tempLn].req.includes(tempRc) && !(currentChar.isNPC && tempRc === 'Outra')) tempLn = "";
+        let tComb = 0;
+        [i.classe, i.classe2, i.classe3, i.classe4, i.classe5].forEach(c => {
+            if(c && c.startsWith("Combatente")) {
+                let match = c.match(/Combatente (\d+)/);
+                if(match) tComb = Math.max(tComb, parseInt(match[1]));
+            }
+        });
+        let tBonus = {d:0, f:0, r:0, v:0, esp:0, ha:0, ho:0, hr:0};
+        let tFlat = {d:0, f:0, r:0, v:0, esp:0, ha:0, ho:0, hr:0};
+        if (i.alcunhasList && i.alcunhaAtiva) {
+            let ativa = i.alcunhasList.find(a => a.nome === i.alcunhaAtiva);
+            if (ativa && ativa.buffs) {
+                ativa.buffs.forEach(b => {
+                    let targets = b.stat === "tudo" ? ["d","f","r","v"] : [b.stat];
+                    targets.forEach(t => {
+                        if(tBonus[t] !== undefined) {
+                            if (b.type === "pct") tBonus[t] += (b.val / 100);
+                            else tFlat[t] += b.val;
+                        }
+                    });
+                });
+            }
+        }
+        if(tComb > 0 && i.selClasseDF) { tBonus[i.selClasseDF] += tComb * 0.05; }
+        if(tempLn !== "Charlotte") {
+            if(racas[tempRc]) { tBonus.d += racas[tempRc].d || 0; tBonus.f += racas[tempRc].f || 0; tBonus.r += racas[tempRc].r || 0; tBonus.v += racas[tempRc].v || 0; }
+            else if (currentChar.isNPC && tempRc === 'Outra') { tBonus.f += (parseInt(i.customBuffF) || 0) / 100; tBonus.d += (parseInt(i.customBuffD) || 0) / 100; tBonus.r += (parseInt(i.customBuffR) || 0) / 100; tBonus.v += (parseInt(i.customBuffV) || 0) / 100; }
+            if(tempRc === "Humano") { tBonus[i.selDF] += 0.20; tBonus[i.selRV] += 0.20; } else if(tempRc === "Kuja") { tBonus[i.selDF] += 0.30; tBonus[i.selRV] += 0.15; } else if(tempRc === "Mink") { tBonus[i.selDF] += 0.10; }
+        } else {
+            let appChar = (rName, selVal, suffix = "") => {
+                if (racas[rName]) { for (let s in racas[rName]) { if (racas[rName][s] < 0 && tBonus[s] !== undefined) tBonus[s] += racas[rName][s]; } }
+                else if (currentChar.isNPC && rName === 'Outra') { tBonus.f += (parseInt(i['customBuffF' + suffix]) || 0) / 100; tBonus.d += (parseInt(i['customBuffD' + suffix]) || 0) / 100; tBonus.r += (parseInt(i['customBuffR' + suffix]) || 0) / 100; tBonus.v += (parseInt(i['customBuffV' + suffix]) || 0) / 100; }
+                if (selVal && tBonus[selVal] !== undefined) {
+                    if (rName === "Humano") tBonus[selVal] += 0.20;
+                    else if (rName === "Kuja") tBonus[selVal] += (selVal === "f" || selVal === "d") ? 0.30 : 0.20;
+                    else if (racas[rName] && racas[rName][selVal] > 0) tBonus[selVal] += racas[rName][selVal];
+                }
+            };
+            appChar(tempRc, i.selCharR1); appChar(tempRc2, i.selCharR2, "2");
+        }
+        if(linhagens[tempLn]) {
+            tBonus.d += linhagens[tempLn].d || 0; tBonus.f += linhagens[tempLn].f || 0; tBonus.r += linhagens[tempLn].r || 0; tBonus.v += linhagens[tempLn].v || 0; tBonus.esp += linhagens[tempLn].esp || 0; tBonus.ha += linhagens[tempLn].ha || 0; tBonus.ho += linhagens[tempLn].ho || 0; tBonus.hr += linhagens[tempLn].hr || 0;
+            if(tempLn === "Barnum") { tBonus[i.selLinDF] += 0.10; tBonus[i.selLinRV] += 0.20; } else if(tempLn === "D.") { tBonus[i.selLin4] += 0.25; } else if(tempLn === "Gan") { tBonus[i.selLinDF] += 0.20; } else if(tempLn === "Kong") { tBonus[i.selLin4] += 0.20; } else if(tempLn === "Silvers") { tBonus[i.selLin4] += 0.15; } else if(tempLn === "Nico") { tBonus[i.selLinDF] += 0.10; tBonus[i.selLinRV] += 0.05; }
+        }
+        let habs = i.habilidadesExclusivas || [];
+        let hHas = (hab) => habs.includes(hab);
+        if(hHas("Arte da Esgrima")) { if(totalBase >= 15000) tBonus.d += 0.20; else if(totalBase >= 10000) tBonus.d += 0.15; else if(totalBase >= 5000) tBonus.d += 0.10; }
+        if(hHas("Batedor de Carteiras")) { if(totalBase >= 15000) tBonus.d += 0.25; else if(totalBase >= 10000) tBonus.d += 0.20; else if(totalBase >= 5000) tBonus.d += 0.15; }
+        if(hHas("Caminho do Atirador")) {
+            if(totalBase >= 15000) tBonus.d += 0.15; else if(totalBase >= 10000) tBonus.d += 0.10; else if(totalBase >= 5000) tBonus.d += 0.05;
+            if(i.habCaminhoAtiradorAtivo) { if(totalBase >= 15000) tBonus.d += 0.20; else if(totalBase >= 10000) tBonus.d += 0.15; else if(totalBase >= 5000) tBonus.d += 0.10; }
+        }
+        if(hHas("Constituição Única")) { tBonus.f += 0.10; tBonus.r += 0.15; }
+        if(hHas("Contração Muscular")) { if(totalBase >= 10000) { tBonus.f += 0.20; tBonus.r += 0.20; } else if(totalBase >= 5000) { tBonus.f += 0.10; tBonus.r += 0.10; } }
+        if(hHas("Favoritismo Armista")) {
+            if(totalBase >= 15000) {
+                if(i.habFavArmistaAtivo === "favorita") { tBonus.r += 0.15; tBonus.v += 0.15; }
+                else if(i.habFavArmistaAtivo === "criacao") { tBonus.r += 0.20; tBonus.v += 0.20; }
+                else if(i.habFavArmistaAtivo === "criacao_favorita") { tBonus.r += 0.25; tBonus.v += 0.25; }
+            } else if(totalBase >= 10000) {
+                if(i.habFavArmistaAtivo === "criacao" || i.habFavArmistaAtivo === "criacao_favorita") {
+                    tBonus.r += 0.10; tBonus.v += 0.10;
+                    if(i.habFavArmistaAttr === 'f') tBonus.f += 0.10; else tBonus.d += 0.10;
+                }
+            }
+        }
+        if(hHas("Filho do Mar")) { if(totalBase >= 15000) { tBonus.r += 0.15; } else if(totalBase >= 10000) { tBonus.r += 0.10; } else if(totalBase >= 5000) { tBonus.r += 0.05; } }
+        if(hHas("Flexibilidade")) { if(totalBase >= 10000) tBonus.v += 0.20; else if(totalBase >= 5000) tBonus.v += 0.10; }
+        if(hHas("Fúria Ardente")) { if(totalBase >= 15000) tBonus.f += 0.15; else if(totalBase >= 10000) tBonus.f += 0.10; else if(totalBase >= 5000) tBonus.f += 0.05; }
+        if(hHas("O Escolhido")) { if(totalBase >= 20000) { tBonus.ha += 0.15; tBonus.ho += 0.15; tBonus.hr += 0.15; } else if(totalBase >= 10000) { tBonus.ha += 0.10; tBonus.ho += 0.10; tBonus.hr += 0.10; } else if(totalBase >= 5000) { tBonus.ha += 0.05; tBonus.ho += 0.05; tBonus.hr += 0.05; } }
+        if(tempLn === "Beckman" && i.linhagemBeckmanArma) { tBonus.v += 0.05; }
+        if(hHas("Golpe de Retorno")) { let usos = i.habRetornoUso || 1; if(usos === 2) tBonus.r -= 0.10; else if(usos === 3) tBonus.r -= 0.20; }
+        let qEsp = parseInt(i.aliadosEspiritoContagiante) || 0;
+        if (qEsp > 0) { let bEsp = qEsp * 0.05; tBonus.d += bEsp; tBonus.f += bEsp; tBonus.r += bEsp; tBonus.v += bEsp; }
+        for (let key in tBonus) { if (tBonus[key] > 1.0) tBonus[key] = 1.0; }
+        if (i.exaustaoCompleta) { tBonus.d -= 0.20; tBonus.f -= 0.20; tBonus.r -= 0.20; tBonus.v -= 0.20; tBonus.esp -= 0.20; }
+        totalFinal = Math.round((D + tFlat.d) * (1 + tBonus.d)) +
+                     Math.round((F + tFlat.f) * (1 + tBonus.f)) +
+                     Math.round((R + tFlat.r) * (1 + tBonus.r)) +
+                     Math.round((V + tFlat.v) * (1 + tBonus.v));
+        finalHA = Math.round(((currentChar.substats.hArm || 0) + tFlat.ha) * (1 + tBonus.ha));
+        finalHO = Math.round(((currentChar.substats.hObs || 0) + tFlat.ho) * (1 + tBonus.ho));
+        finalHR = Math.round(((currentChar.substats.hRei || 0) + tFlat.hr) * (1 + tBonus.hr));
+    }
+
     let orgTipo = i.orgTipo || "";
     document.getElementById('info-orgTipo').value = orgTipo;
     let labelTripulacao = document.getElementById('label-tripulacao');
@@ -1666,7 +1759,7 @@ function updateUI() {
         document.getElementById('box-tripulacao').style.display = "none";
         document.getElementById('box-patente-salario').style.display = "flex";
         
-        let currentPts = currentChar.stats.d + currentChar.stats.f + currentChar.stats.r + currentChar.stats.v;
+        let currentPts = totalFinal;
         let modifier = 1.0;
         const racasDesvantagem = ["Oni", "Lunariano", "Wotan", "Tritão", "Sereiano", "Tontatta", "Povo do Céu: Birkan", "Povo do Céu: Shandia", "Povo do Céu: Skypieano", "Mink", "Meio-Gigante", "Gigante", "Três-Olhos", "Pernas Longas", "Braços Longos"];
         if (racasDesvantagem.includes(i.raca) || racasDesvantagem.includes(i.raca2) || i.linhagem === "D.") modifier = 1.1;
@@ -1811,99 +1904,6 @@ function updateUI() {
     
     let elSalario = document.getElementById('info-salario');
     if (elSalario) elSalario.value = i.salario || "";
-
-    let D = currentChar.stats.d, F = currentChar.stats.f, R = currentChar.stats.r, V = currentChar.stats.v;
-    let totalBase = D + F + R + V;
-
-    let totalFinal = totalBase;
-    let finalHA = 0, finalHO = 0, finalHR = 0;
-    {
-        let tempRc = i.raca, tempRc2 = i.raca2, tempLn = i.linhagem;
-        if (tempLn !== "Nenhuma" && linhagens[tempLn] && linhagens[tempLn].req && !linhagens[tempLn].req.includes(tempRc) && !(currentChar.isNPC && tempRc === 'Outra')) tempLn = "";
-        let tComb = 0;
-        [i.classe, i.classe2, i.classe3, i.classe4, i.classe5].forEach(c => {
-            if(c && c.startsWith("Combatente")) {
-                let match = c.match(/Combatente (\d+)/);
-                if(match) tComb = Math.max(tComb, parseInt(match[1]));
-            }
-        });
-        let tBonus = {d:0, f:0, r:0, v:0, esp:0, ha:0, ho:0, hr:0};
-        let tFlat = {d:0, f:0, r:0, v:0, esp:0, ha:0, ho:0, hr:0};
-        if (i.alcunhasList && i.alcunhaAtiva) {
-            let ativa = i.alcunhasList.find(a => a.nome === i.alcunhaAtiva);
-            if (ativa && ativa.buffs) {
-                ativa.buffs.forEach(b => {
-                    let targets = b.stat === "tudo" ? ["d","f","r","v"] : [b.stat];
-                    targets.forEach(t => {
-                        if(tBonus[t] !== undefined) {
-                            if (b.type === "pct") tBonus[t] += (b.val / 100);
-                            else tFlat[t] += b.val;
-                        }
-                    });
-                });
-            }
-        }
-        if(tComb > 0 && i.selClasseDF) { tBonus[i.selClasseDF] += tComb * 0.05; }
-        if(tempLn !== "Charlotte") {
-            if(racas[tempRc]) { tBonus.d += racas[tempRc].d || 0; tBonus.f += racas[tempRc].f || 0; tBonus.r += racas[tempRc].r || 0; tBonus.v += racas[tempRc].v || 0; }
-            else if (currentChar.isNPC && tempRc === 'Outra') { tBonus.f += (parseInt(i.customBuffF) || 0) / 100; tBonus.d += (parseInt(i.customBuffD) || 0) / 100; tBonus.r += (parseInt(i.customBuffR) || 0) / 100; tBonus.v += (parseInt(i.customBuffV) || 0) / 100; }
-            if(tempRc === "Humano") { tBonus[i.selDF] += 0.20; tBonus[i.selRV] += 0.20; } else if(tempRc === "Kuja") { tBonus[i.selDF] += 0.30; tBonus[i.selRV] += 0.15; } else if(tempRc === "Mink") { tBonus[i.selDF] += 0.10; }
-        } else {
-            let appChar = (rName, selVal, suffix = "") => {
-                if (racas[rName]) { for (let s in racas[rName]) { if (racas[rName][s] < 0 && tBonus[s] !== undefined) tBonus[s] += racas[rName][s]; } }
-                else if (currentChar.isNPC && rName === 'Outra') { tBonus.f += (parseInt(i['customBuffF' + suffix]) || 0) / 100; tBonus.d += (parseInt(i['customBuffD' + suffix]) || 0) / 100; tBonus.r += (parseInt(i['customBuffR' + suffix]) || 0) / 100; tBonus.v += (parseInt(i['customBuffV' + suffix]) || 0) / 100; }
-                if (selVal && tBonus[selVal] !== undefined) {
-                    if (rName === "Humano") tBonus[selVal] += 0.20;
-                    else if (rName === "Kuja") tBonus[selVal] += (selVal === "f" || selVal === "d") ? 0.30 : 0.20;
-                    else if (racas[rName] && racas[rName][selVal] > 0) tBonus[selVal] += racas[rName][selVal];
-                }
-            };
-            appChar(tempRc, i.selCharR1); appChar(tempRc2, i.selCharR2, "2");
-        }
-        if(linhagens[tempLn]) {
-            tBonus.d += linhagens[tempLn].d || 0; tBonus.f += linhagens[tempLn].f || 0; tBonus.r += linhagens[tempLn].r || 0; tBonus.v += linhagens[tempLn].v || 0; tBonus.esp += linhagens[tempLn].esp || 0; tBonus.ha += linhagens[tempLn].ha || 0; tBonus.ho += linhagens[tempLn].ho || 0; tBonus.hr += linhagens[tempLn].hr || 0;
-            if(tempLn === "Barnum") { tBonus[i.selLinDF] += 0.10; tBonus[i.selLinRV] += 0.20; } else if(tempLn === "D.") { tBonus[i.selLin4] += 0.25; } else if(tempLn === "Gan") { tBonus[i.selLinDF] += 0.20; } else if(tempLn === "Kong") { tBonus[i.selLin4] += 0.20; } else if(tempLn === "Silvers") { tBonus[i.selLin4] += 0.15; } else if(tempLn === "Nico") { tBonus[i.selLinDF] += 0.10; tBonus[i.selLinRV] += 0.05; }
-        }
-        let habs = i.habilidadesExclusivas || [];
-        let hHas = (hab) => habs.includes(hab);
-        if(hHas("Arte da Esgrima")) { if(totalBase >= 15000) tBonus.d += 0.20; else if(totalBase >= 10000) tBonus.d += 0.15; else if(totalBase >= 5000) tBonus.d += 0.10; }
-        if(hHas("Batedor de Carteiras")) { if(totalBase >= 15000) tBonus.d += 0.25; else if(totalBase >= 10000) tBonus.d += 0.20; else if(totalBase >= 5000) tBonus.d += 0.15; }
-        if(hHas("Caminho do Atirador")) {
-            if(totalBase >= 15000) tBonus.d += 0.15; else if(totalBase >= 10000) tBonus.d += 0.10; else if(totalBase >= 5000) tBonus.d += 0.05;
-            if(i.habCaminhoAtiradorAtivo) { if(totalBase >= 15000) tBonus.d += 0.20; else if(totalBase >= 10000) tBonus.d += 0.15; else if(totalBase >= 5000) tBonus.d += 0.10; }
-        }
-        if(hHas("Constituição Única")) { tBonus.f += 0.10; tBonus.r += 0.15; }
-        if(hHas("Contração Muscular")) { if(totalBase >= 10000) { tBonus.f += 0.20; tBonus.r += 0.20; } else if(totalBase >= 5000) { tBonus.f += 0.10; tBonus.r += 0.10; } }
-        if(hHas("Favoritismo Armista")) {
-            if(totalBase >= 15000) {
-                if(i.habFavArmistaAtivo === "favorita") { tBonus.r += 0.15; tBonus.v += 0.15; }
-                else if(i.habFavArmistaAtivo === "criacao") { tBonus.r += 0.20; tBonus.v += 0.20; }
-                else if(i.habFavArmistaAtivo === "criacao_favorita") { tBonus.r += 0.25; tBonus.v += 0.25; }
-            } else if(totalBase >= 10000) {
-                if(i.habFavArmistaAtivo === "criacao" || i.habFavArmistaAtivo === "criacao_favorita") {
-                    tBonus.r += 0.10; tBonus.v += 0.10;
-                    if(i.habFavArmistaAttr === 'f') tBonus.f += 0.10; else tBonus.d += 0.10;
-                }
-            }
-        }
-        if(hHas("Filho do Mar")) { if(totalBase >= 15000) { tBonus.r += 0.15; } else if(totalBase >= 10000) { tBonus.r += 0.10; } else if(totalBase >= 5000) { tBonus.r += 0.05; } }
-        if(hHas("Flexibilidade")) { if(totalBase >= 10000) tBonus.v += 0.20; else if(totalBase >= 5000) tBonus.v += 0.10; }
-        if(hHas("Fúria Ardente")) { if(totalBase >= 15000) tBonus.f += 0.15; else if(totalBase >= 10000) tBonus.f += 0.10; else if(totalBase >= 5000) tBonus.f += 0.05; }
-        if(hHas("O Escolhido")) { if(totalBase >= 20000) { tBonus.ha += 0.15; tBonus.ho += 0.15; tBonus.hr += 0.15; } else if(totalBase >= 10000) { tBonus.ha += 0.10; tBonus.ho += 0.10; tBonus.hr += 0.10; } else if(totalBase >= 5000) { tBonus.ha += 0.05; tBonus.ho += 0.05; tBonus.hr += 0.05; } }
-        if(tempLn === "Beckman" && i.linhagemBeckmanArma) { tBonus.v += 0.05; }
-        if(hHas("Golpe de Retorno")) { let usos = i.habRetornoUso || 1; if(usos === 2) tBonus.r -= 0.10; else if(usos === 3) tBonus.r -= 0.20; }
-        let qEsp = parseInt(i.aliadosEspiritoContagiante) || 0;
-        if (qEsp > 0) { let bEsp = qEsp * 0.05; tBonus.d += bEsp; tBonus.f += bEsp; tBonus.r += bEsp; tBonus.v += bEsp; }
-        for (let key in tBonus) { if (tBonus[key] > 1.0) tBonus[key] = 1.0; }
-        if (i.exaustaoCompleta) { tBonus.d -= 0.20; tBonus.f -= 0.20; tBonus.r -= 0.20; tBonus.v -= 0.20; tBonus.esp -= 0.20; }
-        totalFinal = Math.round((D + tFlat.d) * (1 + tBonus.d)) +
-                     Math.round((F + tFlat.f) * (1 + tBonus.f)) +
-                     Math.round((R + tFlat.r) * (1 + tBonus.r)) +
-                     Math.round((V + tFlat.v) * (1 + tBonus.v));
-        finalHA = Math.round(((currentChar.substats.hArm || 0) + tFlat.ha) * (1 + tBonus.ha));
-        finalHO = Math.round(((currentChar.substats.hObs || 0) + tFlat.ho) * (1 + tBonus.ho));
-        finalHR = Math.round(((currentChar.substats.hRei || 0) + tFlat.hr) * (1 + tBonus.hr));
-    }
 
     let totalBaseDisplay = document.getElementById('totalBaseDisplay');
     if(totalBaseDisplay) {
@@ -2061,6 +2061,19 @@ function updateUI() {
     let isMink = (rc === "Mink" || (ln === "Charlotte" && rc2 === "Mink") || (isNPC && rc === 'Outra'));
     document.getElementById('box-estilo-mink').style.display = isMink ? "flex" : "none";
 
+    let isStyleAllowed = (styleName) => {
+        if (styleName === "Galaxy Combat") {
+            return totalFinal >= 15000 && finalHA >= 1 && finalHO >= 1;
+        }
+        if (styleName === "Hasshoken") {
+            if (ln === "Chinjao" && i.orgTipo === "Pirata") return true;
+            return totalFinal >= 8000;
+        }
+        if (styleName === "Rokushiki") return totalFinal >= 5000;
+        if (styleName === "Seimei Kikan") return totalFinal >= 10000;
+        return true;
+    };
+
     let baseClass = (i.classe || "Arqueólogo 1").split(" ")[0];
     let allowedEstilo1 = classStyles[baseClass] || ["Freestyle"];
     if (isNPC && i.raca === 'Outra') allowedEstilo1 = allStyles;
@@ -2068,6 +2081,7 @@ function updateUI() {
     if (elEst1) {
         let htmlE1 = '<option value="">-- Selecione --</option>';
         allowedEstilo1.forEach(e => {
+            if (!isStyleAllowed(e) && i.estilo1 !== e) return;
             let disabled = (e !== "Freestyle" && e !== "Nenhum" && e !== i.estilo1 && [i.estilo2, i.estilo3, i.estilo4].includes(e)) ? "disabled" : "";
             htmlE1 += `<option value="${e}" ${disabled}>${e}</option>`;
         });
@@ -2081,6 +2095,7 @@ function updateUI() {
             let htmlE = '<option value="">-- Selecione --</option>';
             let otherStyles = [1, 2, 3, 4].filter(x => x !== n).map(x => i['estilo'+x]);
             allStyles.forEach(e => {
+                if (!isStyleAllowed(e) && i['estilo'+n] !== e) return;
                 let disabled = (e !== "Freestyle" && e !== "Nenhum" && e !== i['estilo'+n] && otherStyles.includes(e)) ? "disabled" : "";
                 htmlE += `<option value="${e}" ${disabled}>${e}</option>`;
             });
