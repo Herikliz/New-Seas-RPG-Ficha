@@ -3314,23 +3314,34 @@ function updateUI() {
     if (!i.alcunhasList || i.alcunhasList.length === 0) {
         alcunhaOut = "🔒";
     } else if (i.alcunhaAtiva) {
-        alcunhaOut = i.alcunhaAtiva;
-        let ativa = i.alcunhasList.find(a => a.nome === i.alcunhaAtiva);
-        if (ativa && ativa.buffs && ativa.buffs.length > 0) {
-            let buffGroups = {};
-            let names = {tudo:"Todos os Atributos",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar"};
-            ativa.buffs.forEach(b => {
-                let key = (b.val >= 0 ? '+' : '') + b.val + (b.type === 'pct' ? '%' : '');
-                if(!buffGroups[key]) buffGroups[key] = [];
-                buffGroups[key].push(names[b.stat] || b.stat);
-            });
-            let buffStrings = [];
-            for (let k in buffGroups) {
-                let items = buffGroups[k];
-                let joined = items.length > 1 ? items.slice(0, -1).join(", ") + " e " + items[items.length - 1] : items[0];
-                buffStrings.push(`${k} em ${joined}`);
+        let formatAlcunha = (alcObj) => {
+            if (alcObj && alcObj.buffs && alcObj.buffs.length > 0) {
+                let buffGroups = {};
+                let names = {tudo:"Todos os Atributos",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar"};
+                alcObj.buffs.forEach(b => {
+                    let key = (b.val >= 0 ? '+' : '') + b.val + (b.type === 'pct' ? '%' : '');
+                    if(!buffGroups[key]) buffGroups[key] = [];
+                    buffGroups[key].push(names[b.stat] || b.stat);
+                });
+                let buffStrings = [];
+                for (let k in buffGroups) {
+                    let items = buffGroups[k];
+                    let joined = items.length > 1 ? items.slice(0, -1).join(", ") + " e " + items[items.length - 1] : items[0];
+                    buffStrings.push(`${k} em ${joined}`);
+                }
+                return `${alcObj.nome} [${buffStrings.join("; ")}]`;
             }
-            alcunhaOut = `${i.alcunhaAtiva} [${buffStrings.join("; ")}]`;
+            return alcObj ? alcObj.nome : "";
+        };
+
+        let ativa = i.alcunhasList.find(a => a.nome === i.alcunhaAtiva);
+        alcunhaOut = formatAlcunha(ativa);
+        
+        let reservas = i.alcunhasList.filter(a => a.nome !== i.alcunhaAtiva);
+        if (reservas.length > 0) {
+            reservas.sort((a, b) => a.nome.localeCompare(b.nome));
+            let title = reservas.length === 1 ? "𝐀ʟᴄᴜɴʜᴀ 𝐑ᴇsᴇʀᴠᴀ" : "𝐀ʟᴄᴜɴʜᴀs 𝐑ᴇsᴇʀᴠᴀs";
+            alcunhaOut += `\n\n  : ᓩ _${title}:_\n` + reservas.map(r => `> ${formatAlcunha(r)}`).join("\n");
         }
     }
 
