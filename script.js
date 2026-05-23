@@ -3615,6 +3615,100 @@ HP: ${i.hpAtual.toLocaleString("pt-BR")} / ${totalHP.toLocaleString("pt-BR")}
 
 ${attrOut}${tecnicasOut}`;
 
+    let formatAlcunhaManual = (alcObj) => {
+        if (alcObj && alcObj.buffs && alcObj.buffs.length > 0) {
+            let buffGroups = {};
+            let names = {tudo:"Todos os Atributos",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar"};
+            alcObj.buffs.forEach(b => {
+                let key = (b.val >= 0 ? '+' : '') + b.val + (b.type === 'pct' ? '%' : '');
+                if(!buffGroups[key]) buffGroups[key] = [];
+                buffGroups[key].push(names[b.stat] || b.stat);
+            });
+            let buffStrings = [];
+            for (let k in buffGroups) {
+                let items = buffGroups[k];
+                let joined = items.length > 1 ? items.slice(0, -1).join(", ") + " e " + items[items.length - 1] : items[0];
+                buffStrings.push(`${k} em ${joined}`);
+            }
+            return `${alcObj.nome} [${buffStrings.join("; ")}]`;
+        }
+        return alcObj ? alcObj.nome : "";
+    };
+
+    let manualAlcunhaOut = "";
+    let manualAlcunhaAtiva = i.alcunhasList && i.alcunhasList.length > 0 && i.alcunhaAtiva ? formatAlcunhaManual(i.alcunhasList.find(a => a.nome === i.alcunhaAtiva)) : "";
+    manualAlcunhaOut = manualAlcunhaAtiva;
+    let manualReservas = (i.alcunhasList || []).filter(a => a.nome !== i.alcunhaAtiva);
+    manualAlcunhaOut += `\n\n  : ᓩ _𝐀ʟᴄᴜɴʜᴀs 𝐑ᴇsᴇʀᴠᴀs:_`;
+    if (manualReservas.length > 0) {
+        manualReservas.sort((a, b) => a.nome.localeCompare(b.nome));
+        manualAlcunhaOut += `\n` + manualReservas.map(r => `> ${formatAlcunhaManual(r)}`).join("\n");
+    } else {
+        manualAlcunhaOut += `\n> `;
+    }
+
+    let manualHistPersOut = "";
+    manualHistPersOut += `\n  : ᓩ _𝐏ᴇʀsᴏɴᴀʟɪᴅᴀᴅᴇ:_\n${(i.personalidade && i.personalidade.trim() !== "") ? formatHistPers(i.personalidade) : "> "}\n`;
+    manualHistPersOut += `\n  : ᓩ _𝐇ɪsᴛᴏ́ʀɪᴀ:_\n${(i.historia && i.historia.trim() !== "") ? formatHistPers(i.historia) : "> "}\n`;
+
+    let manualTecnicasOut = "";
+    if (hasValidTecnica || trAcum > 0) {
+        manualTecnicasOut += "▬▬▬▬  [ 𝐓ᴇ́ᴄɴɪᴄᴀs ]  ▬▬▬▬\n\n";
+        manualTecnicasOut += `Treinos Acumulados: ${trAcum.toLocaleString("pt-BR")}\n\n`;
+
+        let tecnicasOrdenadas = [...currentChar.tecnicasList].filter(t => t.nome || t.desc || t.efeito);
+        if (i.ordemTecnicas !== "manual") {
+            tecnicasOrdenadas.sort((a, b) => { let nA = (a.nome || "").trim().toLowerCase(); let nB = (b.nome || "").trim().toLowerCase(); return nA.localeCompare(nB); });
+        }
+        
+        let agrupadoManual = {};
+        tecnicasOrdenadas.forEach(t => {
+            let stNome = "Sem Estilo";
+            if (t.estilo) {
+                if (availableStylesMap[t.estilo]) {
+                    stNome = availableStylesMap[t.estilo];
+                } else {
+                    let foundId = Object.keys(availableStylesMap).find(k => availableStylesMap[k] === t.estilo);
+                    if (foundId) {
+                        stNome = availableStylesMap[foundId];
+                        t.estilo = foundId;
+                    }
+                }
+            }
+            if (!agrupadoManual[stNome]) agrupadoManual[stNome] = [];
+            agrupadoManual[stNome].push(t);
+        });
+
+        let estilosKeysManual = Object.keys(agrupadoManual).sort((a, b) => {
+            if (a === "Sem Estilo") return 1;
+            if (b === "Sem Estilo") return -1;
+            return a.localeCompare(b);
+        });
+
+        estilosKeysManual.forEach(stKey => {
+            let stKeyContent = "";
+            agrupadoManual[stKey].forEach(t => {
+                let tContent = "";
+                let unt = t.naoTreinada ? "~" : "";
+                if (t.nome) tContent += `* ${unt}${t.nome}${unt}\n`;
+                if (t.desc) { t.desc.split('\n').forEach(line => { let trimLine = line.trim(); if(trimLine !== "") tContent += `> ${unt}${trimLine.replace(/^>\s*/, '')}${unt}\n`; }); }
+                if (t.efeito) { t.efeito.split('\n').forEach((line, idx) => { let trimLine = line.trim(); if(trimLine !== "") { if (idx === 0) tContent += `> ${unt}Efeito: ${trimLine.replace(/^>\s*/, '')}${unt}\n`; else tContent += `> ${unt}${trimLine.replace(/^>\s*/, '')}${unt}\n`; } }); }
+                
+                if (tContent !== "") {
+                    stKeyContent += tContent + "\n";
+                }
+            });
+
+            if (stKeyContent !== "") {
+                manualTecnicasOut += `« ${stKey} »\n` + stKeyContent;
+            }
+        });
+
+        manualTecnicasOut += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;
+    } else { 
+        manualTecnicasOut += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`; 
+    }
+
     let outManual = `*Nᴇᴡ sᴇᴀs*
 — ロールプレイングゲーム - 𝚁𝙿𝙶 [𝙾𝙽𝙴 𝙿𝙸𝙴𝙲𝙴]
      — 新しい海 - 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 ~*ɴꜱ*~
@@ -3624,33 +3718,33 @@ Iີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິ�
 > ${currentChar.name || ''}
 
   : ᓩ _𝐀ʟᴄᴜɴʜᴀ:_
-> ${alcunhaOut}
+> ${manualAlcunhaOut}
 ${recompensaOutText}
   : ᓩ _𝐀ʟᴛᴜʀᴀ:_
 > ${i.altura || ''}
 
   : ᓩ _𝐈ᴅᴀᴅᴇ:_
-> ${i.idade || '(Mínimo: 15)'}
+> ${i.idade || ''}
 
   : ᓩ _${(i.linhagem && i.linhagem !== "Nenhuma") ? "𝐑ᴀᴄ̧ᴀ | 𝐋ɪɴʜᴀɢᴇᴍ" : "𝐑ᴀᴄ̧ᴀ"}:_
 > ${(i.linhagem && i.linhagem !== "Nenhuma") ? racaOutput + " | " + displayLinhagem : racaOutput}
 
   : ᓩ _𝐒ᴇxᴏ:_
-> ${i.sexo || '🔒'}
+> ${i.sexo || ''}
 
   : ᓩ _𝐒ᴀɴɢᴜᴇ:_
 > ${i.sangue || ''}
-${histPersOut}
+${manualHistPersOut}
   : ᓩ _𝐀ᴘᴀʀᴇ̂ɴᴄɪᴀ:_
 > ${i.aparencia || ''}
 
   : ᓩ _𝐈ᴅ:_ ${currentDocId || ''}
 ${(parseInt(i.aliadosEspiritoContagiante) || 0) > 0 ? `\n  : ᓩ _𝐀ʟɪᴀᴅᴏs ᴄᴏᴍ 𝐄sᴘɪ́ʀɪᴛᴏ 𝐂ᴏɴᴛᴀɢɪᴀɴᴛᴇ:_\n> ${parseInt(i.aliadosEspiritoContagiante)}\n` : ''}
   : ᓩ _𝐍ᴀᴄɪᴏɴᴀʟɪᴅᴀᴅᴇ:_
-> ${i.nacionalidade || 'Desconhecida'}
+> ${i.nacionalidade || ''}
 
   : ᓩ _𝐋ᴏᴄᴀʟɪᴢᴀᴄ̧ᴀ̃ᴏ ᴀᴛᴜᴀʟ:_
-> ${i.localizacao || '(Local presente no mapa do RPG)'}
+> ${i.localizacao || ''}
 
 ▬▬▬▬▬▬▬▬▬▬▬▬
 
@@ -3669,7 +3763,7 @@ ${berriesOutText}${npcsOutText}
 ${inventarioFormatado}
 
 ${habilidadesOut}  : ᓩ _𝐀ᴋᴜᴍᴀ ɴᴏ ᴍɪ:_
-> ${i.akumaNome || '🔒'}
+> ${i.akumaNome || ''}
 
 ▬▬▬▬  [ 𝐒ᴛᴀᴛᴜs ]  ▬▬▬▬
 HP: ${i.hpAtual.toLocaleString("pt-BR")} / ${totalHP.toLocaleString("pt-BR")}
@@ -3678,7 +3772,7 @@ HP: ${i.hpAtual.toLocaleString("pt-BR")} / ${totalHP.toLocaleString("pt-BR")}
 * Base: ${totalBase.toLocaleString("pt-BR")}
 * Total: ${totalFinal.toLocaleString("pt-BR")}
 
-${manualAttrOut}${tecnicasOut}`;
+${manualAttrOut}${manualTecnicasOut}`;
 
     window.copyDataFichaManual = outManual.trim();
     window.copyDataAtributos = `▬▬▬▬  [ 𝐒ᴛᴀᴛᴜs ]  ▬▬▬▬\nHP: ${i.hpAtual.toLocaleString("pt-BR")} / ${totalHP.toLocaleString("pt-BR")}\n\n↠  *𝐀ᴛʀɪʙᴜᴛᴏs*\n* Base: ${totalBase.toLocaleString("pt-BR")}\n* Total: ${totalFinal.toLocaleString("pt-BR")}\n\n${attrOut}`.trim();
