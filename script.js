@@ -4260,3 +4260,147 @@ window.promoverCargo = async function() {
         await customAlert("Promoção realizada com sucesso!");
     }
 };
+
+window.processarImportacao = async function() {
+    if(isReadOnly) return;
+    let raw = document.getElementById('import-area').value;
+    if(!raw) return;
+
+    let remainingText = raw;
+    let i = currentChar.info;
+
+    let limparChave = (str) => {
+        const map = {
+            'ᴀ':'a', 'ʙ':'b', 'ᴄ':'c', 'ᴅ':'d', 'ᴇ':'e', 'ғ':'f', 'ɢ':'g', 'ʜ':'h', 'ɪ':'i', 'ᴊ':'j', 'ᴋ':'k', 'ʟ':'l', 'ᴍ':'m', 'ɴ':'n', 'ᴏ':'o', 'ᴘ':'p', 'ǫ':'q', 'ʀ':'r', 's':'s', 'ᴛ':'t', 'ᴜ':'u', 'ᴠ':'v', 'ᴡ':'w', 'x':'x', 'ʏ':'y', 'ᴢ':'z',
+            '𝐀':'A', '𝐁':'B', '𝐂':'C', '𝐃':'D', '𝐄':'E', '𝐅':'F', '𝐆':'G', '𝐇':'H', '𝐈':'I', '𝐉':'J', '𝐊':'K', '𝐋':'L', '𝐌':'M', '𝐍':'N', '𝐎':'O', '𝐏':'P', '𝐐':'Q', '𝐑':'R', '𝐒':'S', '𝐓':'T', '𝐔':'U', '𝐕':'V', '𝐖':'W', '𝐗':'X', '𝐘':'Y', '𝐙':'Z',
+            'ᴄ̧':'ç', 'ᴏ́':'ó', 'ᴀ̂':'â', 'ᴀ̃':'ã', 'ᴇ́':'é', 'ᴍɪ':'mi'
+        };
+        let res = str;
+        for(let k in map) res = res.split(k).join(map[k]);
+        return res.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    };
+
+    let match;
+
+    let chavesStatusStr = "For[çc]a|Destreza|Resist[eê]ncia|Velocidade|Esp[íi]rito|Akuma no mi";
+    let regexStatus = new RegExp(`(?:↠\\s*\\*(.+?)\\*|^[ \\t]*(${chavesStatusStr}))[\\s:]*\\n?[ \\t]*([\\d\\.\\+]+)`, 'gmi');
+    
+    while ((match = regexStatus.exec(remainingText)) !== null) {
+        let statName = limparChave(match[1] || match[2]);
+        let statVal = parseInt(match[3].replace(/\./g, ''));
+        let importou = false;
+
+        if(statName.includes("forca")) { currentChar.stats.f = statVal; importou = true; }
+        else if(statName.includes("destreza")) { currentChar.stats.d = statVal; importou = true; }
+        else if(statName.includes("resistencia")) { currentChar.stats.r = statVal; importou = true; }
+        else if(statName.includes("velocidade")) { currentChar.stats.v = statVal; importou = true; }
+        else if(statName.includes("espirito")) { currentChar.stats.esp = statVal; importou = true; }
+        else if(statName.includes("akuma no mi")) { currentChar.stats.ami = statVal; importou = true; }
+
+        if(importou) {
+            remainingText = remainingText.replace(match[0], '');
+            regexStatus.lastIndex = 0;
+        }
+    }
+
+    let chavesStr = "Nome|Idade|Altura|Sexo|Sangue|Nacionalidade|Localiza[çc][aã]o|Apar[eê]ncia|Hist[oó]ria|Personalidade|Invent[aá]rio|Akuma no mi|Ra[çc]a(?:\\s*\\|\\s*Linhagem)?|Organiza[çc][aã]o|Alcunhas?(?:\\s*Reservas?)?|Recompensa|Berries|Aliados.*|Classes?|Estilos?.*|ID";
+    let regexCampo = new RegExp(`(?:^[>:\\u14E9 \\t]*_([^_]+)_[\\s:]*\\n|^[ \\t]*(${chavesStr})[\\s:]*\\n)([\\s\\S]*?)(?=(?:^[>:\\u14E9 \\t]*_[^_]+_[\\s:]*\\n|^[ \\t]*(?:${chavesStr})[\\s:]*\\n|▬▬▬▬|$))`, 'gmi');
+
+    while ((match = regexCampo.exec(remainingText)) !== null) {
+        let chaveLimpa = limparChave(match[1] || match[2]);
+        let valorFull = match[3];
+        let linhas = valorFull.split('\n').map(l => l.replace(/^[ \t]*>[ \t]*/, '').trim()).filter(l => l !== '');
+        let valorLimpo = linhas[0] || "";
+        let importou = false;
+
+        if (chaveLimpa.includes("nome")) { currentChar.name = valorLimpo; importou = true; }
+        else if (chaveLimpa.includes("idade")) { i.idade = valorLimpo; importou = true; }
+        else if (chaveLimpa.includes("altura")) { i.altura = valorLimpo; importou = true; }
+        else if (chaveLimpa.includes("sexo")) { i.sexo = valorLimpo.replace('🔒', '').trim(); if(i.sexo) importou = true; }
+        else if (chaveLimpa.includes("sangue")) { i.sangue = valorLimpo; importou = true; }
+        else if (chaveLimpa.includes("nacionalidade")) { i.nacionalidade = valorLimpo; importou = true; }
+        else if (chaveLimpa.includes("localizacao")) { i.localizacao = valorLimpo; importou = true; }
+        else if (chaveLimpa.includes("aparencia")) { i.aparencia = valorLimpo; importou = true; }
+        else if (chaveLimpa.includes("historia")) { i.historia = valorFull.split('\n').map(l => l.replace(/^[ \t]*>[ \t]*/, '')).join('\n').trim(); importou = true; }
+        else if (chaveLimpa.includes("personalidade")) { i.personalidade = valorFull.split('\n').map(l => l.replace(/^[ \t]*>[ \t]*/, '')).join('\n').trim(); importou = true; }
+        else if (chaveLimpa.includes("inventario")) { i.inventario = valorFull.split('\n').map(l => l.replace(/^[ \t]*>[ \t]*/, '').replace(/^\*\s*/, '')).join('\n').trim(); importou = true; }
+        else if (chaveLimpa.includes("akuma no mi")) { i.akumaNome = valorLimpo.replace('🔒', '').trim(); importou = true; }
+        else if (chaveLimpa.includes("raca")) { 
+            let partes = valorLimpo.split('|').map(p => p.trim());
+            i.raca = partes[0] || ""; 
+            if(partes[1]) i.linhagem = partes[1]; 
+            importou = true; 
+        }
+        else if (chaveLimpa.includes("alcunha")) {
+            if (!chaveLimpa.includes("reserva")) {
+                let alcStr = valorLimpo.replace('🔒', '').trim();
+                if (alcStr) {
+                    let matchBuff = alcStr.match(/(.+) \[(.+)\]/);
+                    let nomeAlc = matchBuff ? matchBuff[1].trim() : alcStr;
+                    i.alcunhaAtiva = nomeAlc;
+                    if (!i.alcunhasList) i.alcunhasList = [];
+                    if (!i.alcunhasList.find(a => a.nome === nomeAlc)) i.alcunhasList.push({nome: nomeAlc, buffs: []});
+                    importou = true;
+                }
+            } else {
+                if (!i.alcunhasList) i.alcunhasList = [];
+                linhas.forEach(linha => {
+                    let alcStr = linha.replace('🔒', '').trim();
+                    if (alcStr) {
+                        let matchBuff = alcStr.match(/(.+) \[(.+)\]/);
+                        let nomeAlc = matchBuff ? matchBuff[1].trim() : alcStr;
+                        if (!i.alcunhasList.find(a => a.nome === nomeAlc)) i.alcunhasList.push({nome: nomeAlc, buffs: []});
+                    }
+                });
+                importou = true;
+            }
+        }
+        else if (chaveLimpa.includes("recompensa")) { i.recompensa = valorLimpo.replace(/[^\d]/g, ''); importou = true; }
+        else if (chaveLimpa.includes("berries")) { i.berries = valorLimpo.replace(/[^\d]/g, ''); importou = true; }
+        else if (chaveLimpa === "id" || chaveLimpa === "id:") { importou = true; }
+        else if (chaveLimpa.includes("aliados")) { importou = true; }
+        else if (chaveLimpa.includes("classe")) { importou = true; }
+        else if (chaveLimpa.includes("estilos")) { importou = true; }
+
+        if(importou) {
+            remainingText = remainingText.replace(match[0], '');
+            regexCampo.lastIndex = 0;
+        }
+    }
+
+    let textoParaChecagem = remainingText
+        .replace(/\*Nᴇᴡ sᴇᴀs\*/gi, '')
+        .replace(/— ロールプレイングゲーム - 𝚁𝙿𝙶 \[𝙾𝙽𝙴 𝙿𝙸𝙴𝙲𝙴\]/gi, '')
+        .replace(/— 新しい海 - 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 ~\*[ɴN][ꜱS]\*~/gi, '')
+        .replace(/ᖴIᑕᕼᗩ(?: ᗞᕮ ᘉᑭᑕ)?/gi, '')
+        .replace(/[Iີີ່້ິູຸ໌ຼ໋໊]+/g, '')
+        .replace(/▬▬▬▬+/g, '')
+        .replace(/\[ 𝐒ᴛᴀᴛᴜs \]/gi, '')
+        .replace(/\[ 𝐓ᴇ́ᴄɴɪᴄᴀs \]/gi, '')
+        .replace(/«\s*\[ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 \]\s*»/gi, '')
+        .replace(/HP:.*?\n/gi, '')
+        .replace(/↠\s*\*𝐀ᴛʀɪʙᴜᴛᴏs\*/gi, '')
+        .replace(/\*\s*Base:.*?\n/gi, '')
+        .replace(/\*\s*Total:.*?\n/gi, '')
+        .replace(/[ \t\n]/g, '');
+
+    if (textoParaChecagem === '') {
+        remainingText = '';
+    }
+
+    remainingText = remainingText.trim();
+    if (remainingText === '') {
+        document.getElementById('import-area').value = "";
+        document.getElementById('import-area').placeholder = "Importação concluída! Os campos reconhecidos foram preenchidos.";
+        setTimeout(() => { document.getElementById('import-area').placeholder = "Cole o texto da ficha aqui..."; }, 3500);
+    } else {
+        document.getElementById('import-area').value = remainingText;
+        document.getElementById('modal-importar').style.display = 'none';
+        await customAlert("Atenção: Algumas partes não puderam ser importadas automaticamente. Essas partes específicas que não puderem ser importadas ainda estão na caixa de texto, corrija-as.");
+        document.getElementById('modal-importar').style.display = 'flex';
+    }
+
+    saveData();
+    updateUI();
+    renderTabs();
+};
