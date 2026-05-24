@@ -4271,23 +4271,24 @@ window.processarImportacao = async function() {
 
     let limparChave = (str) => {
         const map = {
-            'ᴀ':'a', 'ʙ':'b', 'ᴄ':'c', 'ᴅ':'d', 'ᴇ':'e', 'ғ':'f', 'ɢ':'g', 'ʜ':'h', 'ɪ':'i', 'ᴊ':'j', 'ᴋ':'k', 'ʟ':'l', 'ᴍ':'m', 'ɴ':'n', 'ᴏ':'o', 'ᴘ':'p', 'ǫ':'q', 'ʀ':'r', 's':'s', 'ᴛ':'t', 'ᴜ':'u', 'ᴠ':'v', 'ᴡ':'w', 'x':'x', 'ʏ':'y', 'ᴢ':'z',
+            'ᴀ':'a', 'ʙ':'b', 'ᴄ':'c', 'ᴅ':'d', 'ᴇ':'e', 'ғ':'f', 'ɢ':'g', 'ʜ':'h', 'ɪ':'i', 'ᴊ':'j', 'ᴋ':'k', 'ʟ':'l', 'ᴍ':'m', 'ɴ':'n', 'ᴏ':'o', 'ᴘ':'p', 'ǫ':'q', 'ʀ':'r', 's':'s', 'ꜱ':'s', 'ᴛ':'t', 'ᴜ':'u', 'ᴠ':'v', 'ᴡ':'w', 'x':'x', 'ʏ':'y', 'ᴢ':'z',
             '𝐀':'A', '𝐁':'B', '𝐂':'C', '𝐃':'D', '𝐄':'E', '𝐅':'F', '𝐆':'G', '𝐇':'H', '𝐈':'I', '𝐉':'J', '𝐊':'K', '𝐋':'L', '𝐌':'M', '𝐍':'N', '𝐎':'O', '𝐏':'P', '𝐐':'Q', '𝐑':'R', '𝐒':'S', '𝐓':'T', '𝐔':'U', '𝐕':'V', '𝐖':'W', '𝐗':'X', '𝐘':'Y', '𝐙':'Z',
+            '𝐚':'a', '𝐛':'b', '𝐜':'c', '𝐝':'d', '𝐞':'e', '𝐟':'f', '𝐠':'g', '𝐡':'h', '𝐢':'i', '𝐣':'j', '𝐤':'k', '𝐥':'l', '𝐦':'m', '𝐧':'n', '𝐨':'o', '𝐩':'p', '𝐪':'q', '𝐫':'r', '𝐬':'s', '𝐭':'t', '𝐮':'u', '𝐯':'v', '𝐰':'w', '𝐱':'x', '𝐲':'y', '𝐳':'z',
             'ᴄ̧':'ç', 'ᴏ́':'ó', 'ᴀ̂':'â', 'ᴀ̃':'ã', 'ᴇ́':'é', 'ᴍɪ':'mi'
         };
         let res = str;
         for(let k in map) res = res.split(k).join(map[k]);
-        return res.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        return res.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").trim();
     };
 
     let match;
 
     let chavesStatusStr = "For[çc]a|Destreza|Resist[eê]ncia|Velocidade|Esp[íi]rito|Akuma no mi";
-    let regexStatus = new RegExp(`(?:↠\\s*\\*(.+?)\\*|^[ \\t]*(${chavesStatusStr}))[\\s:]*\\n?[ \\t]*([\\d\\.\\+]+)`, 'gmi');
+    let regexStatus = new RegExp(`(?:↠\\s*\\*(.+?)\\*|^[ \\t]*(${chavesStatusStr}))[\\s:]*\\s*([\\d\\.]+)`, 'gmi');
     
     while ((match = regexStatus.exec(remainingText)) !== null) {
         let statName = limparChave(match[1] || match[2]);
-        let statVal = parseInt(match[3].replace(/\./g, ''));
+        let statVal = parseInt(match[3].replace(/\D/g, ''));
         let importou = false;
 
         if(statName.includes("forca")) { currentChar.stats.f = statVal; importou = true; }
@@ -4303,7 +4304,7 @@ window.processarImportacao = async function() {
         }
     }
 
-    let chavesStr = "Nome|Idade|Altura|Sexo|Sangue|Nacionalidade|Localiza[çc][aã]o|Apar[eê]ncia|Hist[oó]ria|Personalidade|Invent[aá]rio|Akuma no mi|Ra[çc]a(?:\\s*\\|\\s*Linhagem)?|Organiza[çc][aã]o|Alcunhas?(?:\\s*Reservas?)?|Recompensa|Berries|Aliados.*|Classes?|Estilos?.*|ID";
+    let chavesStr = "Nome|Idade|Altura|Sexo|Sangue|Nacionalidade|Localiza[çc][aã]o|Apar[eê]ncia|Hist[oó]ria|Personalidade|Invent[aá]rio|Akuma no mi|Ra[çc]a(?:\\s*\\|\\s*Linhagem)?|Organiza[çc][aã]o|NPCs?.*|Alcunhas?(?:\\s*Reservas?)?|Recompensa|Berries|Aliados.*|Classes?|Estilos?.*|ID";
     let regexCampo = new RegExp(`(?:^[>:\\u14E9 \\t]*_([^_]+)_[\\s:]*\\n|^[ \\t]*(${chavesStr})[\\s:]*\\n)([\\s\\S]*?)(?=(?:^[>:\\u14E9 \\t]*_[^_]+_[\\s:]*\\n|^[ \\t]*(?:${chavesStr})[\\s:]*\\n|▬▬▬▬|(?![\\s\\S])))`, 'gmi');
 
     while ((match = regexCampo.exec(remainingText)) !== null) {
@@ -4313,10 +4314,11 @@ window.processarImportacao = async function() {
         let valorLimpo = linhas[0] || "";
         let importou = false;
 
-        if (chaveLimpa.includes("nome")) { currentChar.name = valorLimpo; importou = true; }
+        if (valorFull.includes('🔒')) { importou = true; }
+        else if (chaveLimpa.includes("nome")) { currentChar.name = valorLimpo; importou = true; }
         else if (chaveLimpa.includes("idade")) { i.idade = valorLimpo; importou = true; }
         else if (chaveLimpa.includes("altura")) { i.altura = valorLimpo; importou = true; }
-        else if (chaveLimpa.includes("sexo")) { i.sexo = valorLimpo.replace('🔒', '').trim(); if(i.sexo) importou = true; }
+        else if (chaveLimpa.includes("sexo")) { i.sexo = valorLimpo; importou = true; }
         else if (chaveLimpa.includes("sangue")) { i.sangue = valorLimpo; importou = true; }
         else if (chaveLimpa.includes("nacionalidade")) { i.nacionalidade = valorLimpo; importou = true; }
         else if (chaveLimpa.includes("localizacao")) { i.localizacao = valorLimpo; importou = true; }
@@ -4324,7 +4326,7 @@ window.processarImportacao = async function() {
         else if (chaveLimpa.includes("historia")) { i.historia = valorFull.split('\n').map(l => l.replace(/^[ \t]*>[ \t]*/, '')).join('\n').trim(); importou = true; }
         else if (chaveLimpa.includes("personalidade")) { i.personalidade = valorFull.split('\n').map(l => l.replace(/^[ \t]*>[ \t]*/, '')).join('\n').trim(); importou = true; }
         else if (chaveLimpa.includes("inventario")) { i.inventario = valorFull.split('\n').map(l => l.replace(/^[ \t]*>[ \t]*/, '').replace(/^\*\s*/, '')).join('\n').trim(); importou = true; }
-        else if (chaveLimpa.includes("akuma no mi")) { i.akumaNome = valorLimpo.replace('🔒', '').trim(); importou = true; }
+        else if (chaveLimpa.includes("akuma no mi")) { i.akumaNome = valorLimpo; importou = true; }
         else if (chaveLimpa.includes("raca")) { 
             let partes = valorLimpo.split('|').map(p => p.trim());
             i.raca = partes[0] || ""; 
@@ -4333,7 +4335,7 @@ window.processarImportacao = async function() {
         }
         else if (chaveLimpa.includes("alcunha")) {
             if (!chaveLimpa.includes("reserva")) {
-                let alcStr = valorLimpo.replace('🔒', '').trim();
+                let alcStr = valorLimpo;
                 if (alcStr) {
                     let matchBuff = alcStr.match(/(.+) \[(.+)\]/);
                     let nomeAlc = matchBuff ? matchBuff[1].trim() : alcStr;
@@ -4345,7 +4347,7 @@ window.processarImportacao = async function() {
             } else {
                 if (!i.alcunhasList) i.alcunhasList = [];
                 linhas.forEach(linha => {
-                    let alcStr = linha.replace('🔒', '').trim();
+                    let alcStr = linha;
                     if (alcStr) {
                         let matchBuff = alcStr.match(/(.+) \[(.+)\]/);
                         let nomeAlc = matchBuff ? matchBuff[1].trim() : alcStr;
@@ -4354,6 +4356,93 @@ window.processarImportacao = async function() {
                 });
                 importou = true;
             }
+        }
+        else if (chaveLimpa.includes("organizacao")) {
+            let partesOrg = valorFull.split('\n').map(l => l.replace(/^[ \t]*[*>-][ \t]*/, '').trim()).filter(l => l !== '');
+            i.orgTipo = partesOrg[0] || "";
+            if (i.orgTipo !== "Pirata" && i.orgTipo !== "Caçador de Recompensa") {
+                i.patente = partesOrg[1] || "";
+            } else {
+                i.tripulacao = partesOrg[1] || "";
+            }
+            importou = true;
+        }
+        else if (chaveLimpa.includes("npcs comun")) {
+            i.npcsComunsList = [];
+            let linhasNpcC = valorFull.split('\n').map(l => l.replace(/^[ \t]*[*>-][ \t]*/, '').trim()).filter(l => l !== '');
+            linhasNpcC.forEach(linha => {
+                if (linha === '🔒') return;
+                let matchNpcC = linha.match(/^(\d+[\.\d]*)\s+([a-zA-Záéíóúãõç]+)(?:\s+\[([\d.]+) pontos\])?/i);
+                if (matchNpcC) {
+                    let racaStr = matchNpcC[2].toLowerCase();
+                    if (racaStr === "humanos") racaStr = "Humano";
+                    else if (racaStr === "tritões" || racaStr === "tritoes") racaStr = "Tritão";
+                    else if (racaStr === "sereianos") racaStr = "Sereiano";
+                    else if (racaStr === "gigantes") racaStr = "Gigante";
+                    else if (racaStr === "minks") racaStr = "Mink";
+                    else if (racaStr === "bucaneiros") racaStr = "Bucaneiro";
+                    else if (racaStr === "lunarianos") racaStr = "Lunariano";
+                    else if (racaStr === "onis") racaStr = "Oni";
+                    else if (racaStr === "tontattas") racaStr = "Tontatta";
+                    else racaStr = racaStr.charAt(0).toUpperCase() + racaStr.slice(1);
+
+                    i.npcsComunsList.push({
+                        quantidade: matchNpcC[1].replace(/\D/g, ''),
+                        raca: racaStr,
+                        pontos: matchNpcC[3] ? matchNpcC[3].replace(/\D/g, '') : ""
+                    });
+                }
+            });
+            importou = true;
+        }
+        else if (chaveLimpa.includes("npcs especiai")) {
+            i.npcsEspeciaisList = [];
+            let origemAtual = "Evento";
+            let linhasNpcE = valorFull.split('\n').map(l => l.trim()).filter(l => l !== '');
+            linhasNpcE.forEach(linha => {
+                if (linha === '🔒') return;
+                let origemMatch = limparChave(linha);
+                if (origemMatch.includes("dominacao")) origemAtual = "Dominação";
+                else if (origemMatch.includes("extra-narrada") || origemMatch.includes("extranarrada")) origemAtual = "Extra-Narrada";
+                else if (origemMatch.includes("evento")) origemAtual = "Evento";
+                else {
+                    let regexNpcE = /^(?:\d+\.\s*)?([^\[]+)(?:\[(.*?)\])?$/;
+                    let matchNpcE = linha.match(regexNpcE);
+                    if (matchNpcE) {
+                        let nome = matchNpcE[1].replace(/^[>:\u14E9\s]+/, '').trim();
+                        let pontos = "";
+                        let c1 = "";
+                        if (matchNpcE[2]) {
+                            let ptsMatch = matchNpcE[2].match(/([\d.]+)\s*pontos/i);
+                            if (ptsMatch) pontos = ptsMatch[1].replace(/\D/g, '');
+                            let classeExtract = matchNpcE[2].replace(ptsMatch ? ptsMatch[0] : '', '').replace(/-/, '').trim();
+                            if (classeExtract) {
+                                let clp = limparChave(classeExtract);
+                                if (clp.includes("arqueolog") || clp.includes("historiador") || clp.includes("artefato") || clp.includes("guru")) c1 = "Arqueólogo 1";
+                                else if (clp.includes("artista") || clp.includes("ilustrador") || clp.includes("empresari") || clp.includes("estilista") || clp.includes("escultor") || clp.includes("patron")) c1 = "Artista 1";
+                                else if (clp.includes("atirador") || clp.includes("criador belico") || clp.includes("rambo")) c1 = "Atirador 1";
+                                else if (clp.includes("carpinteiro") || clp.includes("construtor") || clp.includes("engenheir") || clp.includes("obra")) c1 = "Carpinteiro 1";
+                                else if (clp.includes("cientista") || clp.includes("estudios") || clp.includes("biolog") || clp.includes("bioengenheir") || clp.includes("alquimist") || clp.includes("genio")) c1 = "Cientista 1";
+                                else if (clp.includes("combatente") || clp.includes("guerreiro") || clp.includes("discipulo") || clp.includes("colosso")) c1 = "Combatente 1";
+                                else if (clp.includes("cozinheiro") || clp.includes("chef") || clp.includes("garcom") || clp.includes("garconete") || clp.includes("especialista culinari") || clp.includes("nutricionist") || clp.includes("paladar")) c1 = "Cozinheiro 1";
+                                else if (clp.includes("ferreiro") || clp.includes("artesao") || clp.includes("artesa") || clp.includes("forjador") || clp.includes("laminas")) c1 = "Ferreiro 1";
+                                else if (clp.includes("inventor") || clp.includes("improvisador") || clp.includes("mecanico") || clp.includes("arquitetonic") || clp.includes("condutor") || clp.includes("artifice")) c1 = "Inventor 1";
+                                else if (clp.includes("medico") || clp.includes("clinico") || clp.includes("cirurgiao") || clp.includes("biomedic") || clp.includes("cura") || clp.includes("vida")) c1 = "Médico 1";
+                                else if (clp.includes("musicista") || clp.includes("sonante") || clp.includes("celebridade") || clp.includes("pop") || clp.includes("idolo") || clp.includes("imperador")) c1 = "Musicista 1";
+                                else if (clp.includes("navegador") || clp.includes("marujo") || clp.includes("maruja") || clp.includes("cartograf") || clp.includes("timoneir") || clp.includes("capita") || clp.includes("semipeixe")) c1 = "Navegador 1";
+                            }
+                        }
+                        i.npcsEspeciaisList.push({
+                            nome: nome,
+                            origem: origemAtual,
+                            sexo: "Masculino",
+                            pontos: pontos,
+                            classe: c1, classe2: "", classe3: "", classe4: "", classe5: ""
+                        });
+                    }
+                }
+            });
+            importou = true;
         }
         else if (chaveLimpa.includes("recompensa")) { i.recompensa = valorLimpo.replace(/[^\d]/g, ''); importou = true; }
         else if (chaveLimpa.includes("berries")) { i.berries = valorLimpo.replace(/[^\d]/g, ''); importou = true; }
