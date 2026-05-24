@@ -3197,32 +3197,32 @@ function updateUI() {
         outNpcsE = "> 🔒";
     }
 
+    let availableStylesMap = {};
+    let isMinkEstilo = (i.raca === "Mink" || (i.linhagem === "Charlotte" && i.raca2 === "Mink") || (currentChar.isNPC && i.raca === 'Outra'));
+    if (isMinkEstilo) availableStylesMap["Electro"] = "Electro";
+    if (i.akumaNome && i.akumaNome !== "nenhuma" && i.akumaNome.trim() !== "") availableStylesMap["Akuma"] = i.akumaNome;
+    [1, 2, 3, 4].forEach(n => {
+        let st = i['estilo'+n];
+        if (st && st !== "Nenhum") {
+            let dName = st;
+            if (st === "Freestyle") dName = (i['freestyle'+n] && i['freestyle'+n].trim() !== "") ? i['freestyle'+n] : "Freestyle";
+            availableStylesMap['estilo'+n] = dName;
+        }
+    });
+    
     let tecnicasOut = "";
     let hasValidTecnica = currentChar.tecnicasList && currentChar.tecnicasList.some(t => t.nome || t.desc || t.efeito);
     let trAcum = i.treinosAcumulados ? i.treinosAcumulados : 0;
-
+  
     if (hasValidTecnica || trAcum > 0) {
         tecnicasOut += "▬▬▬▬  [ 𝐓ᴇ́ᴄɴɪᴄᴀs ]  ▬▬▬▬\n\n";
         tecnicasOut += `Treinos Acumulados: ${trAcum.toLocaleString("pt-BR")}\n\n`;
-
+      
         let tecnicasOrdenadas = [...currentChar.tecnicasList].filter(t => t.nome || t.desc || t.efeito);
         if (i.ordemTecnicas !== "manual") {
             tecnicasOrdenadas.sort((a, b) => { let nA = (a.nome || "").trim().toLowerCase(); let nB = (b.nome || "").trim().toLowerCase(); return nA.localeCompare(nB); });
         }
-
-        let availableStylesMap = {};
-        let isMinkEstilo = (i.raca === "Mink" || (i.linhagem === "Charlotte" && i.raca2 === "Mink") || (currentChar.isNPC && i.raca === 'Outra'));
-        if (isMinkEstilo) availableStylesMap["Electro"] = "Electro";
-        if (i.akumaNome && i.akumaNome !== "nenhuma" && i.akumaNome.trim() !== "") availableStylesMap["Akuma"] = i.akumaNome;
-        [1, 2, 3, 4].forEach(n => {
-            let st = i['estilo'+n];
-            if (st && st !== "Nenhum") {
-                let dName = st;
-                if (st === "Freestyle") dName = (i['freestyle'+n] && i['freestyle'+n].trim() !== "") ? i['freestyle'+n] : "Freestyle";
-                availableStylesMap['estilo'+n] = dName;
-            }
-        });
-
+      
         let agrupado = {};
         tecnicasOrdenadas.forEach(t => {
             let stNome = "Sem Estilo";
