@@ -4274,6 +4274,8 @@ window.processarImportacao = async function() {
             'ᴀ':'a', 'ʙ':'b', 'ᴄ':'c', 'ᴅ':'d', 'ᴇ':'e', 'ғ':'f', 'ɢ':'g', 'ʜ':'h', 'ɪ':'i', 'ᴊ':'j', 'ᴋ':'k', 'ʟ':'l', 'ᴍ':'m', 'ɴ':'n', 'ᴏ':'o', 'ᴘ':'p', 'ǫ':'q', 'ʀ':'r', 's':'s', 'ꜱ':'s', 'ᴛ':'t', 'ᴜ':'u', 'ᴠ':'v', 'ᴡ':'w', 'x':'x', 'ʏ':'y', 'ᴢ':'z',
             '𝐀':'A', '𝐁':'B', '𝐂':'C', '𝐃':'D', '𝐄':'E', '𝐅':'F', '𝐆':'G', '𝐇':'H', '𝐈':'I', '𝐉':'J', '𝐊':'K', '𝐋':'L', '𝐌':'M', '𝐍':'N', '𝐎':'O', '𝐏':'P', '𝐐':'Q', '𝐑':'R', '𝐒':'S', '𝐓':'T', '𝐔':'U', '𝐕':'V', '𝐖':'W', '𝐗':'X', '𝐘':'Y', '𝐙':'Z',
             '𝐚':'a', '𝐛':'b', '𝐜':'c', '𝐝':'d', '𝐞':'e', '𝐟':'f', '𝐠':'g', '𝐡':'h', '𝐢':'i', '𝐣':'j', '𝐤':'k', '𝐥':'l', '𝐦':'m', '𝐧':'n', '𝐨':'o', '𝐩':'p', '𝐪':'q', '𝐫':'r', '𝐬':'s', '𝐭':'t', '𝐮':'u', '𝐯':'v', '𝐰':'w', '𝐱':'x', '𝐲':'y', '𝐳':'z',
+            '𝙰':'A', '𝙱':'B', '𝙲':'C', '𝙳':'D', '𝙴':'E', '𝙵':'F', '𝙶':'G', '𝙷':'H', '𝙸':'I', '𝙹':'J', '𝙺':'K', '𝙻':'L', '𝙼':'M', '𝙽':'N', '𝙾':'O', '𝙿':'P', '𝚀':'Q', '𝚁':'R', '𝚂':'S', '𝚃':'T', '𝚄':'U', '𝚅':'V', '𝚆':'W', '𝚇':'X', '𝚈':'Y', '𝚉':'Z',
+            '𝚊':'a', '𝚋':'b', '𝚌':'c', '𝚍':'d', '𝚎':'e', '𝚏':'f', '𝚐':'g', '𝚑':'h', '𝚒':'i', '𝚓':'j', '𝚔':'k', '𝚕':'l', '𝚖':'m', '𝚗':'n', '𝚘':'o', '𝚙':'p', '𝚚':'q', '𝚛':'r', '𝚜':'s', '𝚝':'t', '𝚞':'u', '𝚟':'v', '𝚠':'w', '𝚡':'x', '𝚢':'y', '𝚣':'z',
             'ᴄ̧':'ç', 'ᴏ́':'ó', 'ᴀ̂':'â', 'ᴀ̃':'ã', 'ᴇ́':'é', 'ᴍɪ':'mi'
         };
         let res = str;
@@ -4284,11 +4286,12 @@ window.processarImportacao = async function() {
     let match;
 
     let chavesStatusStr = "For[çc]a|Destreza|Resist[eê]ncia|Velocidade|Esp[íi]rito|Akuma no mi";
-    let regexStatus = new RegExp(`(?:↠\\s*\\*(.+?)\\*|^[ \\t]*(${chavesStatusStr}))[\\s:]*\\s*([\\d\\.]+)`, 'gmi');
+    let regexStatus = new RegExp(`(?:↠\\s*\\*(.+?)\\*|^[ \\t]*(${chavesStatusStr}))[\\s:]*\\s*([^\\n]+)`, 'gmi');
     
     while ((match = regexStatus.exec(remainingText)) !== null) {
         let statName = limparChave(match[1] || match[2]);
-        let statVal = parseInt(match[3].replace(/\D/g, ''));
+        let rawVal = match[3].split('+')[0].split('(')[0];
+        let statVal = parseInt(rawVal.replace(/\D/g, ''));
         let importou = false;
 
         if(statName.includes("forca")) { currentChar.stats.f = statVal; importou = true; }
@@ -4304,7 +4307,103 @@ window.processarImportacao = async function() {
         }
     }
 
-    let chavesStr = "Nome|Idade|Altura|Sexo|Sangue|Nacionalidade|Localiza[çc][aã]o|Apar[eê]ncia|Hist[oó]ria|Personalidade|Invent[aá]rio|Akuma no mi|Ra[çc]a(?:\\s*\\|\\s*Linhagem)?|Organiza[çc][aã]o|NPCs?.*|Alcunhas?(?:\\s*Reservas?)?|Recompensa|Berries|Aliados.*|Classes?|Estilos?.*|ID";
+    let regexSubStatus = /(?:>\s*_?([^_\n]+?)_?:\s*([\d\.]+)[^\n]*|-\s*([^\n✓✘]+?)(✓|✘))/gmi;
+    let regexSubStatusNew = /(?:^[ \t]*>\s*_?([^_\n]+?)_?:\s*([^\n]+)|^[ \t]*-\s*([^\n✓✘]+?)(✓|✘))/gmi;
+    let lastHakiSeen = "";
+    while ((match = regexSubStatusNew.exec(remainingText)) !== null) {
+        let subName = match[1] ? limparChave(match[1]) : "";
+        let rawVal = match[2] ? match[2].split('+')[0].split('(')[0] : "0";
+        let subVal = parseInt(rawVal.replace(/\D/g, '')) || 0;
+        let habName = match[3] ? limparChave(match[3]) : "";
+        let habUnlocked = match[4] === '✓';
+        let importou = false;
+        
+        if(subName.includes("reflexo") && !subName.includes("agua")) { currentChar.substats.refl = subVal; importou = true; }
+        else if(subName.includes("velocidade corporal") && !subName.includes("agua")) { currentChar.substats.vcorp = subVal; importou = true; }
+        else if(subName.includes("reflexo") && subName.includes("agua")) { currentChar.substats.reflAgua = subVal; importou = true; }
+        else if(subName.includes("velocidade corporal") && subName.includes("agua")) { currentChar.substats.vcorpAgua = subVal; importou = true; }
+        else if(subName.includes("estamina")) { i.estaminaAtual = subVal; importou = true; }
+        else if(subName.includes("armamento")) { currentChar.substats.hArm = subVal; lastHakiSeen = "HA"; importou = true; }
+        else if(subName.includes("observacao")) { currentChar.substats.hObs = subVal; lastHakiSeen = "HO"; importou = true; }
+        else if(subName.includes("rei")) { currentChar.substats.hRei = subVal; lastHakiSeen = "HR"; importou = true; }
+        else if(subName.includes("alcance")) { currentChar.substats.amiAlc = subVal; importou = true; }
+        else if(subName.includes("durabilidade")) { currentChar.substats.amiDur = subVal; importou = true; }
+        else if(subName.includes("potencia")) { currentChar.substats.amiPot = subVal; importou = true; }
+        else if(subName.includes("velocidade") && !subName.includes("corporal") && !subName.includes("agua")) { currentChar.substats.amiVel = subVal; importou = true; }
+        else if(subName.includes("despertar")) { currentChar.substats.amiDesp = subVal; importou = true; }
+        
+        else if(habName.includes("invisivel")) { i.unlockHA1 = habUnlocked; importou = true; }
+        else if(habName.includes("visivel")) { i.unlockHA2 = habUnlocked; importou = true; }
+        else if(habName.includes("imbuicao")) { i.unlockHA3 = habUnlocked; importou = true; }
+        else if(habName.includes("full body")) { i.unlockHA4 = habUnlocked; importou = true; }
+        else if(habName.includes("emissao")) { i.unlockHA5 = habUnlocked; importou = true; }
+        else if(habName.includes("avancado")) { 
+            if (lastHakiSeen === "HA") { i.unlockHA6 = habUnlocked; importou = true; }
+            else if (lastHakiSeen === "HO") { i.unlockHO4 = habUnlocked; importou = true; }
+        }
+        else if(habName.includes("intencao")) { i.unlockHO2 = habUnlocked; importou = true; }
+        else if(habName.includes("premonicao")) { i.unlockHO3 = habUnlocked; importou = true; }
+        else if(habName.includes("dominacao")) { i.unlockHR2 = habUnlocked; importou = true; }
+        else if(habName.includes("incapacitacao")) { i.unlockHR3 = habUnlocked; importou = true; }
+        else if(habName.includes("pressao")) { i.unlockHR4 = habUnlocked; importou = true; }
+        else if(habName.includes("assassinato de observacao")) { i.unlockHR5 = habUnlocked; importou = true; }
+        else if(habName.includes("infusao")) { i.unlockHR6 = habUnlocked; importou = true; }
+
+        if(importou) {
+            remainingText = remainingText.replace(match[0], '');
+            regexSubStatus.lastIndex = 0;
+        }
+    }
+
+    let tecIndex = remainingText.indexOf("▬▬▬▬  [ 𝐓ᴇ́ᴄɴɪᴄᴀs ]  ▬▬▬▬");
+    if (tecIndex !== -1) {
+        let tecText = remainingText.substring(tecIndex);
+        remainingText = remainingText.substring(0, tecIndex);
+        let matchTreinos = tecText.match(/Treinos Acumulados:\s*([\d\.]+)/i);
+        if (matchTreinos) { i.treinosAcumulados = matchTreinos[1].replace(/\D/g, ''); }
+        let currentStyle = "Sem Estilo";
+        i.ordemTecnicas = "manual";
+        currentChar.tecnicasList = [];
+        let currentTec = null;
+        let linhasTec = tecText.split('\n');
+        for (let j = 0; j < linhasTec.length; j++) {
+            let l = linhasTec[j].trim();
+            if (l === "" || l.includes('𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶') || l.includes('𝐓ᴇ́ᴄɴɪᴄᴀs') || l.includes('Treinos Acumulados:')) continue;
+            let matchStyle = l.match(/^«(.+)»$/);
+            if (matchStyle) { currentStyle = matchStyle[1].trim(); continue; }
+            if (l.startsWith('* ')) {
+                if (currentTec) currentChar.tecnicasList.push(currentTec);
+                let isNaoTreinada = false;
+                let tName = l.replace(/^\*\s*/, '').trim();
+                if (tName.startsWith('~') && tName.endsWith('~')) { isNaoTreinada = true; tName = tName.substring(1, tName.length - 1); }
+                let mappedStyle = "";
+                if (currentStyle !== "Sem Estilo") {
+                    if (currentStyle === "Electro") mappedStyle = "Electro";
+                    else if (currentStyle === i.akumaNome) mappedStyle = "Akuma";
+                    else if (currentStyle === i.estilo1 || currentStyle === (i.freestyle1 ? i.freestyle1 : "Freestyle")) mappedStyle = "estilo1";
+                    else if (currentStyle === i.estilo2 || currentStyle === (i.freestyle2 ? i.freestyle2 : "Freestyle")) mappedStyle = "estilo2";
+                    else if (currentStyle === i.estilo3 || currentStyle === (i.freestyle3 ? i.freestyle3 : "Freestyle")) mappedStyle = "estilo3";
+                    else if (currentStyle === i.estilo4 || currentStyle === (i.freestyle4 ? i.freestyle4 : "Freestyle")) mappedStyle = "estilo4";
+                }
+                currentTec = { nome: tName, desc: "", efeito: "", estilo: mappedStyle, naoTreinada: isNaoTreinada };
+            } else if (l.startsWith('> ')) {
+                let isNaoTreinada = false;
+                let content = l.replace(/^>\s*/, '').trim();
+                if (content.startsWith('~') && content.endsWith('~')) { isNaoTreinada = true; content = content.substring(1, content.length - 1); }
+                if (currentTec) {
+                    currentTec.naoTreinada = currentTec.naoTreinada || isNaoTreinada;
+                    if (content.startsWith('Efeito:')) { currentTec.efeito += (currentTec.efeito ? '\n' : '') + content.substring(7).trim(); }
+                    else {
+                        if (currentTec.efeito === "") { currentTec.desc += (currentTec.desc ? '\n' : '') + content; }
+                        else { currentTec.efeito += (currentTec.efeito ? '\n' : '') + content; }
+                    }
+                }
+            }
+        }
+        if (currentTec) currentChar.tecnicasList.push(currentTec);
+    }
+
+    let chavesStr = "Nome|Idade|Altura|Sexo|Sangue|Nacionalidade|Localiza[çc][aã]o|Apar[eê]ncia|Hist[oó]ria|Personalidade|Invent[aá]rio|Akuma no mi|Ra[çc]a(?:\\s*\\|\\s*Linhagem)?|Organiza[çc][aã]o|NPCs?.*|Alcunhas?(?:\\s*Reservas?)?|Recompensa|Berries|Aliados.*|Classes?|Estilos?.*|Habilidades?.*|ID";
     let regexCampo = new RegExp(`(?:^[>:\\u14E9 \\t]*_([^_]+)_[\\s:]*\\n|^[ \\t]*(${chavesStr})[\\s:]*\\n)([\\s\\S]*?)(?=(?:^[>:\\u14E9 \\t]*_[^_]+_[\\s:]*\\n|^[ \\t]*(?:${chavesStr})[\\s:]*\\n|▬▬▬▬|(?![\\s\\S])))`, 'gmi');
 
     while ((match = regexCampo.exec(remainingText)) !== null) {
@@ -4314,7 +4413,7 @@ window.processarImportacao = async function() {
         let valorLimpo = linhas[0] || "";
         let importou = false;
 
-        if (valorFull.includes('🔒')) { importou = true; }
+        if (valorFull.includes('🔒') && !chaveLimpa.includes("habilidade")) { importou = true; }
         else if (chaveLimpa.includes("nome")) { currentChar.name = valorLimpo; importou = true; }
         else if (chaveLimpa.includes("idade")) { i.idade = valorLimpo; importou = true; }
         else if (chaveLimpa.includes("altura")) { i.altura = valorLimpo; importou = true; }
@@ -4447,9 +4546,59 @@ window.processarImportacao = async function() {
         else if (chaveLimpa.includes("recompensa")) { i.recompensa = valorLimpo.replace(/[^\d]/g, ''); importou = true; }
         else if (chaveLimpa.includes("berries")) { i.berries = valorLimpo.replace(/[^\d]/g, ''); importou = true; }
         else if (chaveLimpa === "id" || chaveLimpa === "id:") { importou = true; }
-        else if (chaveLimpa.includes("aliados")) { importou = true; }
-        else if (chaveLimpa.includes("classe")) { importou = true; }
-        else if (chaveLimpa.includes("estilos")) { importou = true; }
+        else if (chaveLimpa.includes("aliados")) { i.aliadosEspiritoContagiante = valorLimpo.replace(/[^\d]/g, ''); importou = true; }
+        else if (chaveLimpa.includes("classe")) {
+            let linhasClasses = valorFull.split('\n').map(l => l.replace(/^[ \t]*\d+\.[ \t]*\*/, '').replace(/\*$/, '').trim()).filter(l => l !== '');
+            linhasClasses.forEach((linha, idx) => {
+                let slot = idx === 0 ? 'classe' : 'classe' + (idx + 1);
+                let found = "";
+                if(linha !== "Inicial" && linha !== "(Vazio)" && !linha.includes("Libera") && linha !== "") {
+                    for (let c of baseClassesList) {
+                        for (let lvl = 1; lvl <= 5; lvl++) {
+                            if (linha === getClassDisplayName(`${c} ${lvl}`, "Masculino") || linha === getClassDisplayName(`${c} ${lvl}`, "Feminino")) {
+                                found = `${c} ${lvl}`;
+                            }
+                        }
+                    }
+                }
+                i[slot] = found;
+            });
+            importou = true;
+        }
+        else if (chaveLimpa.includes("estilo")) {
+            let linhasEstilos = valorFull.split('\n').map(l => l.replace(/^[ \t]*\*[ \t]*/, '').trim()).filter(l => l !== '' && l !== 'Electro');
+            linhasEstilos.forEach((linha, idx) => {
+                if (idx < 4) {
+                    let slot = 'estilo' + (idx + 1);
+                    let freeSlot = 'freestyle' + (idx + 1);
+                    if(linha === "𝙲𝚕𝚊𝚜𝚜𝚎" || linha === "𝙸𝚗𝚒𝚌𝚒𝚊𝚕" || linha === "(Vazio)" || linha.includes("Libera") || linha.includes("Sem Estilo")) {
+                        i[slot] = "";
+                        i[freeSlot] = "";
+                    } else if(linha.startsWith("Freestyle:")) {
+                        i[slot] = "Freestyle";
+                        i[freeSlot] = linha.replace("Freestyle:", "").trim();
+                    } else {
+                        i[slot] = linha;
+                        i[freeSlot] = "";
+                    }
+                }
+            });
+            importou = true;
+        }
+        else if (chaveLimpa.includes("habilidade")) {
+            i.habilidadesExclusivas = [];
+            let linhasHab = valorFull.split('\n').map(l => l.replace(/^[ \t]*>[ \t]*/, '').trim()).filter(l => l !== '');
+            linhasHab.forEach(linha => {
+                let nomeHab = linha.split(':')[0].trim();
+                if (nomeHab === "Filha do Mar") nomeHab = "Filho do Mar";
+                else if (nomeHab === "A Escolhida") nomeHab = "O Escolhido";
+                else if (nomeHab === "Batedora de Carteiras") nomeHab = "Batedor de Carteiras";
+                if (nomeHab && !nomeHab.includes('🔒')) {
+                    i.habilidadesExclusivas.push(nomeHab);
+                }
+            });
+            importou = true;
+        }
 
         if(importou) {
             remainingText = remainingText.replace(match[0], '');
@@ -4471,6 +4620,7 @@ window.processarImportacao = async function() {
         .replace(/↠\s*\*𝐀ᴛʀɪʙᴜᴛᴏs\*/gi, '')
         .replace(/\*\s*Base:.*?\n/gi, '')
         .replace(/\*\s*Total:.*?\n/gi, '')
+        .replace(/>\s*_?𝙲𝚘𝚗𝚝𝚛ᴏ𝚕𝚎_?:.*?\n/gi, '')
         .replace(/[ \t\n]/g, '');
 
     if (textoParaChecagem === '') {
