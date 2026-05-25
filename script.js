@@ -3029,7 +3029,7 @@ function updateUI() {
         attrOut += `\n`;
     }
     
-    if (totalBase >= reqEsp && ESP > 0) {
+    if (totalFinal >= reqEsp && ESP > 0) {
         attrOut += `↠ *𝙴𝚜𝚙𝚒́𝚛𝚒𝚝𝚘:* ${strCalc(ESP, bonus.esp, flatBonus.esp)}\n`;
         if (HA > 0) {
             attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝙰𝚛𝚖𝚊𝚖𝚎𝚗𝚝𝚘:_ ${strCalc(HA, bonus.ha, flatBonus.ha)}\n`;
@@ -3298,8 +3298,8 @@ function updateUI() {
     let e1 = formatStyle(1); if (e1) estilosText += `* ${e1}\n`; else estilosText += `* 𝙲𝚕𝚊𝚜𝚜𝚎\n`;
     let e2 = formatStyle(2); if (e2) estilosText += `* ${e2}\n`; else estilosText += `* 𝙸𝚗𝚒𝚌𝚒𝚊𝚕\n`;
 
-    if (totalBase >= 5000) { let e3 = formatStyle(3); if (e3) estilosText += `* ${e3}\n`; else estilosText += `* (Vazio)\n`; } else { estilosText += `* 🔒 (Libera com 5.000)\n`; }
-    if (totalBase >= 10000) { let e4 = formatStyle(4); if (e4) estilosText += `* ${e4}\n`; else estilosText += `* (Vazio)\n`; } else { estilosText += `* 🔒 (Libera com 10.000)\n`; }
+    if (totalFinal >= 5000) { let e3 = formatStyle(3); if (e3) estilosText += `* ${e3}\n`; else estilosText += `* (Vazio)\n`; } else { estilosText += `* 🔒 (Libera com 5.000)\n`; }
+    if (totalFinal >= 10000) { let e4 = formatStyle(4); if (e4) estilosText += `* ${e4}\n`; else estilosText += `* (Vazio)\n`; } else { estilosText += `* 🔒 (Libera com 10.000)\n`; }
 
     let c1Out = i.classe ? getClassDisplayName(i.classe, i.sexo) : '𝙸𝚗𝚒𝚌𝚒𝚊𝚕';
     let c2Out = i.classe2 ? getClassDisplayName(i.classe2, i.sexo) : (isSp ? '𝙸𝚗𝚒𝚌𝚒𝚊𝚕' : '5.000');
