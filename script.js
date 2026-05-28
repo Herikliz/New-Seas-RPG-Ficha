@@ -739,10 +739,11 @@ function runFallbackChecks() {
           if (typeof c.info.boxLog === 'undefined') c.info.boxLog = c.info.logsColapsado || false;
           if (typeof c.info.boxRes === 'undefined') c.info.boxRes = c.info.resumoColapsado || false;
 
+
           const defInfo = { 
               classe: "", classe2: "", classe3: "", classe4: "", classe5: "", raca: "", raca2: "", animal: "", animal2: "", racaNomeCustom: "", customBuffF: "", customBuffD: "", customBuffR: "", customBuffV: "", racaNomeCustom2: "", customBuffF2: "", customBuffD2: "", customBuffR2: "", customBuffV2: "", 
               linhagem: "", selClasseDF: "d", selDF: "d", selRV: "r", selLinDF: "d", selLinRV: "r", selLin4: "d", selLinEspAmi: "esp", 
-              alcunha: "", alcunhasList: [], alcunhaAtiva: "", recompensa: "", altura: "", idade: "", sexo: "", sangue: "", nacionalidade: "", localizacao: "", 
+              alcunha: "", alcunhasList: [], alcunhaAtiva: "", recompensa: "", altura: "", idade: "", sexo: "", genero: "", hideSexo: false, hideGenero: false, sangue: "", nacionalidade: "", localizacao: "", 
               telefone: "", orgTipo: "", tripulacao: "", patente: "", salario: "", estilo1: "", freestyle1: "", estilo2: "", freestyle2: "", 
               estilo3: "", freestyle3: "", estilo4: "", freestyle4: "", berries: 5000000, npcsComunsList: [], npcsEspeciaisList: [], akumaNome: "", 
               personalidade: "", historia: "", aparencia: "", inventario: "", hasAmiAlc: true, hasAmiDur: true, hasAmiPot: true, hasAmiVel: true, hasAmiDesp: false,
@@ -1561,7 +1562,7 @@ function updateUI() {
     } else { anim2.style.display = "none"; }
 
     document.getElementById('pc-name').value = currentChar.name;
-    const textFields = ['selClasseDF', 'selDF', 'selRV', 'selLinDF', 'selLinRV', 'selLin4', 'selLinEspAmi', 'altura', 'idade', 'sexo', 'sangue', 'telefone', 'nacionalidade', 'localizacao', 'tripulacao', 'akumaNome', 'personalidade', 'historia', 'aparencia', 'inventario', 'animal', 'animal2', 'sceneType', 'sceneText', 'calcUseAmi', 'calcUseHaki', 'amiAlcMult', 'ordemTecnicas', 'estaminaHakiArm', 'estaminaHakiObs'];
+    const textFields = ['selClasseDF', 'selDF', 'selRV', 'selLinDF', 'selLinRV', 'selLin4', 'selLinEspAmi', 'altura', 'idade', 'sexo', 'genero', 'sangue', 'telefone', 'nacionalidade', 'localizacao', 'tripulacao', 'akumaNome', 'personalidade', 'historia', 'aparencia', 'inventario', 'animal', 'animal2', 'sceneType', 'sceneText', 'calcUseAmi', 'calcUseHaki', 'amiAlcMult', 'ordemTecnicas', 'estaminaHakiArm', 'estaminaHakiObs'];
     textFields.forEach(f => { let el = document.getElementById('info-'+f); if(el) el.value = i[f] || ""; });
 
     const checkFields = ['unlockHA1', 'unlockHA2', 'unlockHA3', 'unlockHA4', 'unlockHA5', 'unlockHA6', 'unlockHO2', 'unlockHO3', 'unlockHO4', 'unlockHR1', 'unlockHR2', 'unlockHR3', 'unlockHR4', 'unlockHR5', 'unlockHR6'];
@@ -1569,6 +1570,8 @@ function updateUI() {
     let elAliados = document.getElementById('info-aliadosEspiritoContagiante'); if (elAliados) elAliados.value = i.aliadosEspiritoContagiante || 0;
     let chkHideHist = document.getElementById('info-hideHistoria'); if (chkHideHist) chkHideHist.checked = i.hideHistoria || false;
     let chkHidePers = document.getElementById('hide-personality'); if (chkHidePers) chkHidePers.checked = i.hidePersonality || false;
+    let chkHideSexo = document.getElementById('info-hideSexo'); if (chkHideSexo) chkHideSexo.checked = i.hideSexo || false;
+    let chkHideGenero = document.getElementById('info-hideGenero'); if (chkHideGenero) chkHideGenero.checked = i.hideGenero || false;
     let chkExaustao = document.getElementById('info-exaustaoCompleta'); if (chkExaustao) chkExaustao.checked = i.exaustaoCompleta || false;
     
     let chkHideTecNome = document.getElementById('info-hideTecNome'); if (chkHideTecNome) chkHideTecNome.checked = i.hideTecNome || false;
@@ -2864,6 +2867,22 @@ function updateUI() {
     if(!i.hidePersonality && i.personalidade && i.personalidade.trim() !== "") { histPersOut += `\n  : ᓩ _𝐏ᴇʀsᴏɴᴀʟɪᴅᴀᴅᴇ:_\n${formatHistPers(i.personalidade)}\n`; }
     if(!i.hideHistoria && i.historia && i.historia.trim() !== "") { histPersOut += `\n  : ᓩ _𝐇ɪsᴛᴏ́ʀɪᴀ:_\n${formatHistPers(i.historia)}\n`; }
 
+    let sexoGeneroOut = "";
+    if (!i.hideSexo) {
+        sexoGeneroOut += `\n  : ᓩ _𝐒ᴇxᴏ:_\n> ${i.sexo || '🔒'}\n`;
+    }
+    if (!i.hideGenero) {
+        sexoGeneroOut += `\n  : ᓩ _𝐆ᴇ̂ɴᴇʀᴏ:_\n> ${i.genero || '🔒'}\n`;
+    }
+    
+    let sexoGeneroOutManual = "";
+    if (!i.hideSexo) {
+        sexoGeneroOutManual += `\n  : ᓩ _𝐒ᴇxᴏ:_\n> ${i.sexo || ''}\n`;
+    }
+    if (!i.hideGenero) {
+        sexoGeneroOutManual += `\n  : ᓩ _𝐆ᴇ̂ɴᴇʀᴏ:_\n> ${i.genero || ''}\n`;
+    }
+
     let attrOut = "";
     if (D > 0) attrOut += `↠ *𝙳𝚎𝚜𝚝𝚛𝚎𝚣𝚊:* ${strCalc(D, bonus.d, flatBonus.d)}\n\n`;
     if (F > 0) attrOut += `↠ *𝙵𝚘𝚛𝚌̧𝚊:* ${strCalc(F, bonus.f, flatBonus.f)}\n\n`;
@@ -3523,10 +3542,7 @@ ${recompensaOutText}
 
   : ᓩ _${(i.linhagem && i.linhagem !== "Nenhuma") ? "𝐑ᴀᴄ̧ᴀ | 𝐋ɪɴʜᴀɢᴇᴍ" : "𝐑ᴀᴄ̧ᴀ"}:_
 > ${(i.linhagem && i.linhagem !== "Nenhuma") ? racaOutput + " | " + displayLinhagem : racaOutput}
-
-  : ᓩ _𝐒ᴇxᴏ:_
-> ${i.sexo || '🔒'}
-
+${sexoGeneroOut}
   : ᓩ _𝐒ᴀɴɢᴜᴇ:_
 > ${i.sangue || ''}
 ${histPersOut}
@@ -4212,6 +4228,26 @@ window.promoverCargo = async function() {
         saveData();
         updateUI();
         await customAlert("Promoção realizada com sucesso!");
+    }
+};
+
+window.toggleHideSexoGenero = function(type, isChecked) {
+    if (isReadOnly) return;
+    
+    if (type === 'sexo') {
+        updateField('info', 'hideSexo', isChecked);
+        if (isChecked) {
+            let elGenero = document.getElementById('info-hideGenero');
+            if (elGenero) elGenero.checked = false;
+            updateField('info', 'hideGenero', false);
+        }
+    } else if (type === 'genero') {
+        updateField('info', 'hideGenero', isChecked);
+        if (isChecked) {
+            let elSexo = document.getElementById('info-hideSexo');
+            if (elSexo) elSexo.checked = false;
+            updateField('info', 'hideSexo', false);
+        }
     }
 };
 
