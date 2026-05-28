@@ -1764,124 +1764,64 @@ function updateUI() {
         const racasDesvantagem = ["Oni", "Lunariano", "Wotan", "Tritão", "Sereiano", "Tontatta", "Povo do Céu: Birkan", "Povo do Céu: Shandia", "Povo do Céu: Skypieano", "Mink", "Meio-Gigante", "Gigante", "Três-Olhos", "Pernas Longas", "Braços Longos"];
         if (racasDesvantagem.includes(i.raca) || racasDesvantagem.includes(i.raca2) || i.linhagem === "D.") modifier = 1.1;
 
-        let potentialPatente = "";
-        let meritReq = 0;
-        let canPromote = false;
+        if (orgTipo === "Marinha" && (!i.patente || i.patente === "")) i.patente = "Aprendiz";
+        if (orgTipo === "Governo Mundial" && (!i.patente || i.patente === "")) i.patente = "Agente Judicial";
+        if (orgTipo === "Vanguarda Popular Revolucionária" && (!i.patente || i.patente === "")) i.patente = "Iniciado";
 
         if (orgTipo === "Marinha") {
             if (i.linhagem === "Tenryūbito: Família Donquixote" || i.linhagem === "Tenryūbito: Família Figarland" || i.linhagem === "Sakazuki" || i.linhagem === "Kong" || i.linhagem === "Nefertari") modifier = 0.9;
-            
-            if (currentPts >= 50000 * modifier) {
-                potentialPatente = "Almirante-de-Frota";
-                meritReq = 0;
-            } else if (currentPts >= 45000 * modifier) {
-                potentialPatente = "Almirante";
-                meritReq = modifier === 0.9 ? 16 : (modifier === 1.1 ? 20 : 18);
-            } else if (currentPts >= 30000 * modifier) {
-                potentialPatente = "Vice-Almirante";
-                meritReq = modifier === 0.9 ? 8 : (modifier === 1.1 ? 12 : 10);
-            } else if (currentPts >= 25000 * modifier) potentialPatente = "Contra-Almirante";
-            else if (currentPts >= 20000 * modifier) potentialPatente = "Comodoro";
-            else if (currentPts >= 15000 * modifier) potentialPatente = "Capitão";
-            else if (currentPts >= 10000 * modifier) potentialPatente = "Comandante";
-            else if (currentPts >= 5000 * modifier) potentialPatente = "Tenente";
-            else if (currentPts >= 3000 * modifier) potentialPatente = "Sargento";
-            else if (currentPts >= 2000 * modifier) potentialPatente = "Cabo";
-            else if (currentPts >= 1000 * modifier) potentialPatente = "Recruta";
-            else potentialPatente = "Aprendiz";
         } else if (orgTipo === "Governo Mundial") {
             if (i.linhagem === "Nefertari") modifier = 1.1;
             if (i.linhagem === "Tenryūbito: Família Donquixote" || i.linhagem === "Tenryūbito: Família Figarland" || i.linhagem === "Sakazuki") modifier = 0.9;
-            
-            if (currentPts >= 50000 * modifier) {
-                potentialPatente = "CP-0";
-                meritReq = modifier === 0.9 ? 24 : (modifier === 1.1 ? Infinity : 26);
-            } else if (currentPts >= 40000 * modifier) {
-                potentialPatente = "CP-9";
-                meritReq = modifier === 0.9 ? 16 : (modifier === 1.1 ? 20 : 18);
-            } else if (currentPts >= 30000 * modifier) {
-                potentialPatente = "CP-8";
-                meritReq = modifier === 0.9 ? 8 : (modifier === 1.1 ? 12 : 10);
-            } else if (currentPts >= 25000 * modifier) potentialPatente = "CP-7";
-            else if (currentPts >= 20000 * modifier) potentialPatente = "CP-6";
-            else if (currentPts >= 15000 * modifier) potentialPatente = "CP-5";
-            else if (currentPts >= 10000 * modifier) potentialPatente = "CP-4";
-            else if (currentPts >= 7500 * modifier) potentialPatente = "CP-3";
-            else if (currentPts >= 5000 * modifier) potentialPatente = "CP-2";
-            else if (currentPts >= 2500 * modifier) potentialPatente = "CP-1";
-            else potentialPatente = "Agente Judicial";
-        } else if (orgTipo === "Vanguarda Popular Revolucionária") {
-            if (!i.patente || i.patente === "" || i.patente === "Iniciado") {
-                if (currentPts >= 15000) i.patente = "Coordenador De Operações";
-                else if (currentPts >= 10000) i.patente = "Coordenador De Operações";
-                else if (currentPts >= 5000) i.patente = "Soldado Revolucionário";
-                else if (currentPts >= 2500) i.patente = "Infiltrador";
-                else if (currentPts >= 1000) i.patente = "Operador";
-                else i.patente = "Iniciado";
-            }
-            if (i.patente === "Vice-Líder") {
-                potentialPatente = "Eixo";
-                meritReq = 0;
-            } else if (i.patente === "Pilar") {
-                potentialPatente = "Vice-Líder";
-                meritReq = 18;
-            } else if (currentPts >= 30000 && (i.patente.startsWith("Capitão Tático") || i.patente === "Pilar")) {
-                potentialPatente = "Pilar";
-                meritReq = 10;
-            } else if (currentPts >= 25000 && (i.patente.startsWith("Comandante Tático") || i.patente.startsWith("Capitão Tático"))) {
-                potentialPatente = "Capitão Tático";
-                meritReq = 6;
-            } else if (currentPts >= 20000 && (i.patente.startsWith("Esquadrão") || i.patente.startsWith("Comandante Tático"))) {
-                potentialPatente = "Comandante Tático";
-                meritReq = 0;
-            } else if (currentPts >= 15000) {
-                if (i.patente.startsWith("Esquadrão") || i.patente.startsWith("Comandante Tático") || i.patente.startsWith("Capitão Tático") || i.patente === "Pilar" || i.patente === "Vice-Líder" || i.patente === "Eixo" || i.patente === "Coordenador De Operações") {
-                    potentialPatente = i.patente === "Coordenador De Operações" ? "Esquadrão" : i.patente;
-                    if (i.patente === "Coordenador De Operações") meritReq = 0;
-                } else {
-                    potentialPatente = "Esquadrão";
-                    meritReq = 0;
-                }
-            } else if (currentPts >= 10000) potentialPatente = "Coordenador De Operações";
-            else if (currentPts >= 5000) potentialPatente = "Soldado Revolucionário";
-            else if (currentPts >= 2500) potentialPatente = "Infiltrador";
-            else if (currentPts >= 1000) potentialPatente = "Operador";
-            else potentialPatente = "Iniciado";
         }
 
-        const manualRanks = ["Vice-Almirante", "Almirante", "Almirante-de-Frota", "CP-8", "CP-9", "CP-0", "Esquadrão", "Comandante Tático", "Capitão Tático", "Pilar", "Vice-Líder", "Eixo"];
-        if (!manualRanks.includes(potentialPatente)) {
-            i.patente = potentialPatente;
-            document.getElementById('btn-promover').style.display = 'none';
-        } else {
-            const rankOrder = orgTipo === "Marinha" ? ["Aprendiz", "Recruta", "Cabo", "Sargento", "Tenente", "Comandante", "Capitão", "Comodoro", "Contra-Almirante", "Vice-Almirante", "Almirante", "Almirante-de-Frota"] : (orgTipo === "Governo Mundial" ? ["Agente Judicial", "CP-1", "CP-2", "CP-3", "CP-4", "CP-5", "CP-6", "CP-7", "CP-8", "CP-9", "CP-0"] : ["Iniciado", "Operador", "Infiltrador", "Soldado Revolucionário", "Coordenador De Operações", "Esquadrão de Combate", "Esquadrão de Operações", "Esquadrão de Inteligência", "Esquadrão de Defesa", "Comandante Tático de Combate", "Comandante Tático de Operações", "Comandante Tático de Inteligência", "Comandante Tático de Defesa", "Capitão Tático de Combate", "Capitão Tático de Operações", "Capitão Tático de Inteligência", "Capitão Tático de Defesa", "Pilar", "Vice-Líder", "Eixo"]);
-            let currentIdx = rankOrder.indexOf(i.patente);
-            let potentialIdx = rankOrder.indexOf(potentialPatente);
-            
-            if (potentialPatente === "Esquadrão" && currentIdx < rankOrder.indexOf("Esquadrão de Combate")) {
-                document.getElementById('btn-promover').style.display = 'inline-block';
-                document.getElementById('btn-promover').dataset.nextRank = potentialPatente;
-                document.getElementById('btn-promover').dataset.meritReq = meritReq;
-                document.getElementById('btn-promover').disabled = false;
-            } else if (potentialPatente === "Comandante Tático" && currentIdx >= rankOrder.indexOf("Esquadrão de Combate") && currentIdx <= rankOrder.indexOf("Esquadrão de Defesa")) {
-                document.getElementById('btn-promover').style.display = 'inline-block';
-                document.getElementById('btn-promover').dataset.nextRank = potentialPatente;
-                document.getElementById('btn-promover').dataset.meritReq = meritReq;
-                document.getElementById('btn-promover').disabled = false;
-            } else if (potentialPatente === "Capitão Tático" && currentIdx >= rankOrder.indexOf("Comandante Tático de Combate") && currentIdx <= rankOrder.indexOf("Comandante Tático de Defesa")) {
-                document.getElementById('btn-promover').style.display = 'inline-block';
-                document.getElementById('btn-promover').dataset.nextRank = potentialPatente;
-                document.getElementById('btn-promover').dataset.meritReq = meritReq;
-                document.getElementById('btn-promover').disabled = (i.merito < meritReq);
-            } else if (potentialIdx > currentIdx && !["Esquadrão", "Comandante Tático", "Capitão Tático"].includes(potentialPatente)) {
-                document.getElementById('btn-promover').style.display = 'inline-block';
-                document.getElementById('btn-promover').dataset.nextRank = potentialPatente;
-                document.getElementById('btn-promover').dataset.meritReq = meritReq;
-                document.getElementById('btn-promover').disabled = (i.merito < meritReq && potentialPatente !== "Almirante-de-Frota" && potentialPatente !== "Eixo");
-            } else {
-                document.getElementById('btn-promover').style.display = 'none';
+        const rankOrder = orgTipo === "Marinha" ? ["Aprendiz", "Recruta", "Cabo", "Sargento", "Tenente", "Comandante", "Capitão", "Comodoro", "Contra-Almirante", "Vice-Almirante", "Almirante", "Almirante-de-Frota"] : (orgTipo === "Governo Mundial" ? ["Agente Judicial", "CP-1", "CP-2", "CP-3", "CP-4", "CP-5", "CP-6", "CP-7", "CP-8", "CP-9", "CP-0"] : ["Iniciado", "Operador", "Infiltrador", "Soldado Revolucionário", "Coordenador De Operações", "Esquadrão", "Comandante Tático", "Capitão Tático", "Pilar", "Vice-Líder", "Eixo"]);
+
+        let baseCurrentPatente = i.patente;
+        if (orgTipo === "Vanguarda Popular Revolucionária") {
+            if (i.patente.startsWith("Esquadrão de ")) baseCurrentPatente = "Esquadrão";
+            else if (i.patente.startsWith("Comandante Tático de ")) baseCurrentPatente = "Comandante Tático";
+            else if (i.patente.startsWith("Capitão Tático de ")) baseCurrentPatente = "Capitão Tático";
+        }
+
+        let currentIdx = rankOrder.indexOf(baseCurrentPatente);
+        let nextRank = currentIdx !== -1 && currentIdx < rankOrder.length - 1 ? rankOrder[currentIdx + 1] : null;
+        
+        let ptsReq = 0;
+        let meritReq = 0;
+
+        if (nextRank) {
+            if (orgTipo === "Marinha") {
+                let reqs = {"Recruta":1000,"Cabo":2000,"Sargento":3000,"Tenente":5000,"Comandante":10000,"Capitão":15000,"Comodoro":20000,"Contra-Almirante":25000,"Vice-Almirante":30000,"Almirante":45000,"Almirante-de-Frota":50000};
+                ptsReq = reqs[nextRank] * modifier;
+                if (nextRank === "Vice-Almirante") meritReq = modifier === 0.9 ? 8 : (modifier === 1.1 ? 12 : 10);
+                if (nextRank === "Almirante") meritReq = modifier === 0.9 ? 16 : (modifier === 1.1 ? 20 : 18);
+                if (nextRank === "Almirante-de-Frota") meritReq = 0;
+            } else if (orgTipo === "Governo Mundial") {
+                let reqs = {"CP-1":2500,"CP-2":5000,"CP-3":7500,"CP-4":10000,"CP-5":15000,"CP-6":20000,"CP-7":25000,"CP-8":30000,"CP-9":40000,"CP-0":50000};
+                ptsReq = reqs[nextRank] * modifier;
+                if (nextRank === "CP-8") meritReq = modifier === 0.9 ? 8 : (modifier === 1.1 ? 12 : 10);
+                if (nextRank === "CP-9") meritReq = modifier === 0.9 ? 16 : (modifier === 1.1 ? 20 : 18);
+                if (nextRank === "CP-0") meritReq = modifier === 0.9 ? 24 : (modifier === 1.1 ? Infinity : 26);
+            } else if (orgTipo === "Vanguarda Popular Revolucionária") {
+                let reqs = {"Operador":1000,"Infiltrador":2500,"Soldado Revolucionário":5000,"Coordenador De Operações":10000,"Esquadrão":15000,"Comandante Tático":20000,"Capitão Tático":25000,"Pilar":30000,"Vice-Líder":30000,"Eixo":30000};
+                ptsReq = reqs[nextRank];
+                if (nextRank === "Capitão Tático") meritReq = 6;
+                if (nextRank === "Pilar") meritReq = 10;
+                if (nextRank === "Vice-Líder") meritReq = 18;
             }
         }
+
+        let btn = document.getElementById('btn-promover');
+        if (nextRank && currentPts >= ptsReq) {
+            btn.style.display = 'inline-block';
+            btn.dataset.nextRank = nextRank;
+            btn.dataset.meritReq = meritReq;
+            btn.disabled = (i.merito < meritReq && nextRank !== "Almirante-de-Frota" && nextRank !== "Eixo");
+        } else {
+            btn.style.display = 'none';
+        }
+
         document.getElementById('info-merito').value = i.merito || 0;
         
         i.salario = typeof salarios[i.patente] !== 'undefined' ? (salarios[i.patente] === 0 ? "0" : salarios[i.patente].toLocaleString("pt-BR")) : "";
