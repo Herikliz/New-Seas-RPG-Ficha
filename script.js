@@ -898,7 +898,7 @@ function addNpcEspecial() {
     let origem = "Evento";
     if (domCount < 3) origem = "Dominação";
     else if (extCount < 3) origem = "Extra-Narrada";
-    currentChar.info.npcsEspeciaisList.push({nome: "", origem: origem, sexo: "Masculino", pontos: "", classe: "", classe2: "", classe3: "", classe4: "", classe5: ""});
+    currentChar.info.npcsEspeciaisList.push({nome: "", origem: origem, sexo: "Masculino", pontos: "", classe: "", classe2: "", classe3: ""});
     saveData(); renderNpcsEspeciais(); updateUI(); toggleEditability();
 }
 function removeNpcEspecial(idx) {
@@ -949,7 +949,7 @@ function renderNpcsEspeciais() {
             });
             let html = `<select onchange="updateNpcEspecial(${idx}, '${slotId}', this.value)" style="flex:1; font-size:10px;"><option value="">-- Classe --</option>`;
             baseClassesList.forEach(c => {
-                if(counts[c] <= 5) {
+                if(counts[c] <= 3) {
                     html += `<option value="${c} ${counts[c]}" ${n[slotId] === c+' '+counts[c] ? 'selected' : ''}>${c} ${counts[c]}</option>`;
                 }
             });
@@ -978,8 +978,6 @@ function renderNpcsEspeciais() {
                     ${cHTML('classe', 0, [])}
                     ${cHTML('classe2', 5000, ['classe'])}
                     ${cHTML('classe3', 10000, ['classe', 'classe2'])}
-                    ${cHTML('classe4', 20000, ['classe', 'classe2', 'classe3'])}
-                    ${cHTML('classe5', 35000, ['classe', 'classe2', 'classe3', 'classe4'])}
                 </div>
             </div>
         `;
@@ -3114,7 +3112,7 @@ function updateUI() {
     if (listE.length > 0) {
         let getDisplayClasses = (n) => {
             let maxLvl = {};
-            [n.classe, n.classe2, n.classe3, n.classe4, n.classe5].forEach(c => {
+            [n.classe, n.classe2, n.classe3].forEach(c => {
                 if (c) {
                     let match = c.match(/(.+) (\d+)/);
                     if (match) {
@@ -4545,7 +4543,7 @@ window.processarImportacao = async function() {
                             origem: origemAtual,
                             sexo: "Masculino",
                             pontos: pontos,
-                            classe: c1, classe2: "", classe3: "", classe4: "", classe5: ""
+                            classe: c1, classe2: "", classe3: ""
                         });
                     }
                 }
