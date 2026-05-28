@@ -1786,6 +1786,7 @@ function updateUI() {
 
         let currentIdx = rankOrder.indexOf(baseCurrentPatente);
         let nextRank = currentIdx !== -1 && currentIdx < rankOrder.length - 1 ? rankOrder[currentIdx + 1] : null;
+        let prevRank = currentIdx > 0 ? rankOrder[currentIdx - 1] : null;
         
         let ptsReq = 0;
         let meritReq = 0;
@@ -1814,12 +1815,22 @@ function updateUI() {
 
         let btn = document.getElementById('btn-promover');
         if (nextRank && currentPts >= ptsReq) {
-            btn.style.display = 'inline-block';
+            btn.style.display = 'block';
             btn.dataset.nextRank = nextRank;
             btn.dataset.meritReq = meritReq;
             btn.disabled = (i.merito < meritReq && nextRank !== "Almirante-de-Frota" && nextRank !== "Eixo");
         } else {
             btn.style.display = 'none';
+        }
+
+        let btnRebaixar = document.getElementById('btn-rebaixar');
+        if (btnRebaixar) {
+            if (prevRank) {
+                btnRebaixar.style.display = 'block';
+                btnRebaixar.dataset.prevRank = prevRank;
+            } else {
+                btnRebaixar.style.display = 'none';
+            }
         }
 
         document.getElementById('info-merito').value = i.merito || 0;
@@ -4201,6 +4212,25 @@ window.promoverCargo = async function() {
         saveData();
         updateUI();
         await customAlert("Promoção realizada com sucesso!");
+    }
+};
+
+window.rebaixarCargo = async function() {
+    if (isReadOnly) return;
+    let btn = document.getElementById('btn-rebaixar');
+    if (!btn) return;
+    let prevRank = btn.dataset.prevRank;
+    
+    let gKey = currentChar.info.sexo === 'Feminino' ? 'f' : 'm';
+    let dName = patenteGender[prevRank] ? patenteGender[prevRank][gKey] : prevRank;
+    
+    let conf = await customPrompt(`Deseja realmente voltar para a patente ${dName}? Digite 'SIM' para confirmar:`);
+    
+    if (conf === "SIM" || conf === "sim") {
+        currentChar.info.patente = prevRank;
+        saveData();
+        updateUI();
+        await customAlert("Patente rebaixada com sucesso!");
     }
 };
 
