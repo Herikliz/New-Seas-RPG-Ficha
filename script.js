@@ -752,7 +752,7 @@ function runFallbackChecks() {
               boxInv: false, boxCalc: false, boxEstamina: false, estaminaAtual: -1, estaminaVelocidade: "", estaminaDano: "", estaminaBuffPct: "", estaminaHakiArm: "nao", estaminaHakiObs: "nao", boxScene: false, akumaId: "", selCharR1: "", selCharR2: "", treinosAcumulados: 0, ordemTecnicas: "alfabetica", hideHistoria: false, hidePersonality: false, hideTecNome: false, hideTecDesc: false, hideTecEfeito: false, hiddenStyles: [], exaustaoCompleta: false, habilidadesExclusivas: [], habCaminhoAtiradorAtivo: false, habFavArmistaAtivo: "nenhum", habFavArmistaAttr: "d", habQIAvancadoAtivo: false, linhagemBeckmanArma: false, habRetornoUso: 1, merito: 0, aliadosEspiritoContagiante: 0,
               unlockHA1: false, unlockHA2: false, unlockHA3: false, unlockHA4: false, unlockHA5: false, unlockHA6: false,
               unlockHO2: false, unlockHO3: false, unlockHO4: false,
-              unlockHR1: false, unlockHR2: false, unlockHR3: false, unlockHR4: false, unlockHR5: false, unlockHR6: false
+              unlockHR2: false, unlockHR3: false, unlockHR4: false, unlockHR5: false, unlockHR6: false
           };
           for(let k in defInfo) if (typeof c.info[k] === 'undefined') c.info[k] = defInfo[k];
           
@@ -1563,7 +1563,7 @@ function updateUI() {
     const textFields = ['selClasseDF', 'selDF', 'selRV', 'selLinDF', 'selLinRV', 'selLin4', 'selLinEspAmi', 'altura', 'idade', 'sexo', 'genero', 'sangue', 'telefone', 'nacionalidade', 'localizacao', 'tripulacao', 'akumaNome', 'personalidade', 'historia', 'aparencia', 'inventario', 'animal', 'animal2', 'sceneType', 'sceneText', 'calcUseAmi', 'calcUseHaki', 'amiAlcMult', 'ordemTecnicas', 'estaminaHakiArm', 'estaminaHakiObs'];
     textFields.forEach(f => { let el = document.getElementById('info-'+f); if(el) el.value = i[f] || ""; });
 
-    const checkFields = ['unlockHA1', 'unlockHA2', 'unlockHA3', 'unlockHA4', 'unlockHA5', 'unlockHA6', 'unlockHO2', 'unlockHO3', 'unlockHO4', 'unlockHR1', 'unlockHR2', 'unlockHR3', 'unlockHR4', 'unlockHR5', 'unlockHR6'];
+    const checkFields = ['unlockHA1', 'unlockHA2', 'unlockHA3', 'unlockHA4', 'unlockHA5', 'unlockHA6', 'unlockHO2', 'unlockHO3', 'unlockHO4', 'unlockHR2', 'unlockHR3', 'unlockHR4', 'unlockHR5', 'unlockHR6'];
     checkFields.forEach(f => { let el = document.getElementById('chk-'+f); if(el) el.checked = i[f] || false; });
     let elAliados = document.getElementById('info-aliadosEspiritoContagiante'); if (elAliados) elAliados.value = i.aliadosEspiritoContagiante || 0;
     let chkHideHist = document.getElementById('info-hideHistoria'); if (chkHideHist) chkHideHist.checked = i.hideHistoria || false;
@@ -2521,14 +2521,13 @@ function updateUI() {
     document.getElementById('cont-ha3').style.display = (haPts >= 3000 && i.unlockHA2) ? 'block' : 'none';
     document.getElementById('cont-ha4').style.display = (haPts >= 5000 && i.unlockHA2) ? 'block' : 'none';
     document.getElementById('cont-ha5').style.display = (haPts >= 7000 && i.unlockHA2) ? 'block' : 'none';
-    document.getElementById('cont-ha6').style.display = (haPts >= 8000 && i.unlockHA2) ? 'block' : 'none';
+    document.getElementById('cont-ha6').style.display = (haPts >= 8000 && i.unlockHA5) ? 'block' : 'none';
 
     document.getElementById('cont-ho2').style.display = (hoPts >= 3000) ? 'block' : 'none';
     document.getElementById('cont-ho3').style.display = (hoPts >= 5000 && i.unlockHO2) ? 'block' : 'none';
     document.getElementById('cont-ho4').style.display = (hoPts >= 8000 && i.unlockHO3) ? 'block' : 'none';
 
-    document.getElementById('cont-hr1').style.display = hrPts > 0 ? 'block' : 'none';
-    document.getElementById('cont-hr2').style.display = (hrPts >= 1000 && i.unlockHR1) ? 'block' : 'none';
+    document.getElementById('cont-hr2').style.display = (hrPts >= 1000) ? 'block' : 'none';
     document.getElementById('cont-hr3').style.display = (hrPts >= 3000 && i.unlockHR2) ? 'block' : 'none';
     document.getElementById('cont-hr4').style.display = (hrPts >= 5000 && i.unlockHR3) ? 'block' : 'none';
     document.getElementById('cont-hr5').style.display = (hrPts >= 7500 && i.unlockHR4 && hoPts >= 8000 && i.unlockHO4) ? 'block' : 'none';
