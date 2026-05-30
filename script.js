@@ -2530,8 +2530,8 @@ function updateUI() {
     document.getElementById('cont-hr2').style.display = (hrPts >= 1000) ? 'block' : 'none';
     document.getElementById('cont-hr3').style.display = (hrPts >= 3000 && i.unlockHR2) ? 'block' : 'none';
     document.getElementById('cont-hr4').style.display = (hrPts >= 5000 && i.unlockHR3) ? 'block' : 'none';
-    document.getElementById('cont-hr5').style.display = (hrPts >= 7500 && i.unlockHR4 && hoPts >= 8000 && i.unlockHO4) ? 'block' : 'none';
-    document.getElementById('cont-hr6').style.display = (hrPts >= 10000 && i.unlockHR4 && haPts >= 3000 && i.unlockHA3) ? 'block' : 'none';
+    document.getElementById('cont-hr5').style.display = (hrPts >= 7500 && hoPts >= 8000 && i.unlockHO4) ? 'block' : 'none';
+    document.getElementById('cont-hr6').style.display = (hrPts >= 10000 && i.unlockHA1 && i.unlockHA2 && i.unlockHA3 && i.unlockHA4 && i.unlockHA5 && i.unlockHO2 && i.unlockHO3 && i.unlockHR2 && i.unlockHR3 && i.unlockHR4) ? 'block' : 'none';
 
     ['amiAlc', 'amiDur', 'amiPot', 'amiVel', 'amiDesp'].forEach(f => {
         let chk = document.getElementById('chk-' + f); let inp = document.getElementById('sub-' + f); let key = 'has' + f.charAt(0).toUpperCase() + f.slice(1);
