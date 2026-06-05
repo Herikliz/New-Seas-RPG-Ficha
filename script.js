@@ -2023,7 +2023,7 @@ function updateUI() {
         }
         if (styleName === "Rokushiki") return totalFinal >= 5000;
         if (styleName === "Ryūsōken") {
-            return totalFinal >= 15000 && finalHA >= 1 && finalHO >= 1;
+            return totalFinal >= 15000 && finalHA >= 1;
         }
         if (styleName === "Seimei Kikan") return totalFinal >= 10000;
         return true;
