@@ -2567,7 +2567,7 @@ function updateUI() {
 
     let totalAmi = AMI; 
     document.getElementById('total-ami').innerText = "Total: " + totalAmi.toLocaleString("pt-BR");
-    document.getElementById('box-amiSub').style.display = AMI > 0 ? "block" : "none";
+    document.getElementById('box-amiSub').style.display = temFruta ? "block" : "none";
     if(AMI === 0) { currentChar.substats.amiAlc = 0; currentChar.substats.amiDur = 0; currentChar.substats.amiPot = 0; currentChar.substats.amiVel = 0; currentChar.substats.amiDesp = 0; }
     
     let activeAmiStats = baseAmiStats + (i.hasAmiDesp ? 1 : 0);
