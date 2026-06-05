@@ -64,7 +64,7 @@ const linhagemHabilidades = {
     "Dracule": ["Arte da Esgrima"], "Capone": ["Batedor de Carteiras"], "Augur": ["Caminho do Atirador"], "Drole": ["Constituição Única"], "Laufey": ["Constituição Única", "Vontade Inabalável"], "Mokomo": ["Vontade Inabalável"], "Newgate": ["Contração Muscular", "Espírito Contagiante"], "Kozuki": ["Favoritismo Armista"], "Neptune": ["Filho do Mar", "Flexibilidade"], "Boa": ["Flexibilidade"], "Sakazuki": ["Fúria Ardente"], "Silvers": ["O Escolhido", "Pensamento Acelerado"], "D.": ["Espírito Contagiante", "Vontade Inabalável"], "Gan": ["Treinamento de Cavaleiro"], "Beckman": ["QI Avançado"], "Família do Sol": ["Filho do Mar"]
 };
 
-const allStyles = ["Nenhum", "Armadilha de Cores", "Arsenal", "Arte do Tempo", "Artista Marcial", "Atirador", "Black Cat", "Boujutsu", "Boxe", "Combate Gigante", "Combate Tontatta", "Cortes Precisos", "Electro", "Escultura de Forma", "Fencing", "Freestyle", "Fúria das Marés", "Galaxy Combat", "Hasshoken", "Impacto Estrutural", "Instinto Animal", "Jao Kun Dō", "Karatê Homem-Peixe", "Kitsunebi-ryū", "Kozuki-Nitōryū", "Kung Fu", "Melodia Impactante", "Mutōryū", "Ninjutsu", "Okama Kenpō", "Paladino", "Perna Negra", "Punchstyle", "Punho Suave", "Ranger", "Rokushiki", "Rope Action", "Ryusoken", "Seimei Kikan", "Sinfonia Ilusória", "Stinstyle", "Sumô", "Swordstyle", "Tōryū", "Yaristyle"];
+const allStyles = ["Nenhum", "Armadilha de Cores", "Arsenal", "Arte do Tempo", "Artista Marcial", "Atirador", "Black Cat", "Boujutsu", "Boxe", "Combate Gigante", "Combate Tontatta", "Cortes Precisos", "Electro", "Escultura de Forma", "Fencing", "Freestyle", "Fúria das Marés", "Galaxy Combat", "Hasshoken", "Impacto Estrutural", "Instinto Animal", "Jao Kun Dō", "Karatê Homem-Peixe", "Kitsunebi-ryū", "Kozuki-Nitōryū", "Kung Fu", "Melodia Impactante", "Mutōryū", "Ninjutsu", "Okama Kenpō", "Paladino", "Perna Negra", "Punchstyle", "Punho Suave", "Ranger", "Rokushiki", "Rope Action", "Ryūsōken", "Seimei Kikan", "Sinfonia Ilusória", "Stinstyle", "Sumô", "Swordstyle", "Tōryū", "Yaristyle"];
 const classStyles = {"Arqueólogo":["Instinto Animal"],"Artista":["Armadilha de Cores","Escultura de Forma"],"Atirador":["Atirador"],"Carpinteiro":["Impacto Estrutural","Rope Action"],"Cientista":["Punho Suave"],"Combatente":["Freestyle"],"Cozinheiro":["Cortes Precisos","Perna Negra"],"Ferreiro":["Impacto Estrutural","Rope Action"],"Inventor":["Impacto Estrutural","Rope Action"],"Médico":["Punho Suave"],"Musicista":["Melodia Impactante","Sinfonia Ilusória"],"Navegador":["Arte do Tempo","Fúria das Marés"]};
 
 const patenteGender = {
@@ -2022,8 +2022,8 @@ function updateUI() {
             return totalFinal >= 8000;
         }
         if (styleName === "Rokushiki") return totalFinal >= 5000;
-        if (styleName === "Ryusoken") {
-            return totalFinal >= 25000 && finalHA >= 7500;
+        if (styleName === "Ryūsōken") {
+            return totalFinal >= 15000 && finalHA >= 1 && finalHO >= 1;
         }
         if (styleName === "Seimei Kikan") return totalFinal >= 10000;
         return true;
