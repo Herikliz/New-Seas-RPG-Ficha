@@ -50,7 +50,7 @@ const habilidadesExclusivasDict = {
     "Favoritismo Armista": "Aos 10.000: Ao empunhar criações: +10% R e V, e F ou D. Aos 15.000: Bônus massivos de R, V, Dano e Redução de Dano.",
     "Filho do Mar": "+5% em Reflexo e Resistência aos 5.000 (10% aos 10k, 15% aos 15k).",
     "Flexibilidade": "+10% em Velocidade aos 5.000 (20% aos 10k).",
-    "Fúria Ardente": "+5% em Força aos 5.000 (10% aos 10k, 15% aos 15k).",
+    "Fúria Ardente": "+5% em Força ou Destreza aos 5.000 (10% aos 10k, 15% aos 15k).",
     "Golpe de Retorno": "Reflete a dor/dano para o oponente (3x/dia). 1º uso: Normal. 2º uso: -10% de Resistência. 3º uso: -20% de Resistência.",
     "O Escolhido": "+5% em todos os tipos de Haki aos 5.000 (10% aos 10k, 15% aos 20k).",
     "Pensamento Acelerado": "+20% em Reflexo aos 5.000 (25% aos 10k).",
@@ -749,7 +749,7 @@ function runFallbackChecks() {
               personalidade: "", historia: "", aparencia: "", inventario: "", hasAmiAlc: true, hasAmiDur: true, hasAmiPot: true, hasAmiVel: true, hasAmiDesp: false,
               amiResPct: "", amiAlcMult: "1", calcUseAttr: "", calcInimigoRes: "", calcResIgnorada: "", calcBuffFlat: "", calcBuffPct: "", calcBuffDanoFinalPct: "", calcUseAmi: "sim", amiPotBuff: "", calcUseHaki: "nao", sceneType: "Treino Padrão", sceneText: "", hpAtual: -1,
               boxIden: false, boxMec: false, boxSoc: false, boxBase: false, boxEsp: false, boxAmi: false, boxHist: false, 
-              boxInv: false, boxCalc: false, boxEstamina: false, estaminaAtual: -1, estaminaVelocidade: "", estaminaDano: "", estaminaBuffPct: "", estaminaHakiArm: "nao", estaminaHakiObs: "nao", boxScene: false, akumaId: "", selCharR1: "", selCharR2: "", treinosAcumulados: 0, ordemTecnicas: "alfabetica", hideHistoria: false, hidePersonality: false, hideTecNome: false, hideTecDesc: false, hideTecEfeito: false, hiddenStyles: [], exaustaoCompleta: false, habilidadesExclusivas: [], habCaminhoAtiradorAtivo: false, habFavArmistaAtivo: "nenhum", habFavArmistaAttr: "d", habQIAvancadoAtivo: false, linhagemBeckmanArma: false, habRetornoUso: 1, merito: 0, aliadosEspiritoContagiante: 0,
+              boxInv: false, boxCalc: false, boxEstamina: false, estaminaAtual: -1, estaminaVelocidade: "", estaminaDano: "", estaminaBuffPct: "", estaminaHakiArm: "nao", estaminaHakiObs: "nao", boxScene: false, akumaId: "", selCharR1: "", selCharR2: "", treinosAcumulados: 0, ordemTecnicas: "alfabetica", hideHistoria: false, hidePersonality: false, hideTecNome: false, hideTecDesc: false, hideTecEfeito: false, hiddenStyles: [], exaustaoCompleta: false, habilidadesExclusivas: [], habCaminhoAtiradorAtivo: false, habFavArmistaAtivo: "nenhum", habFavArmistaAttr: "d", habFuriaArdenteAttr: "f", habQIAvancadoAtivo: false, linhagemBeckmanArma: false, habRetornoUso: 1, merito: 0, aliadosEspiritoContagiante: 0,
               unlockHA1: false, unlockHA2: false, unlockHA3: false, unlockHA4: false, unlockHA5: false, unlockHA6: false,
               unlockHO2: false, unlockHO3: false, unlockHO4: false,
               unlockHR2: false, unlockHR3: false, unlockHR4: false, unlockHR5: false, unlockHR6: false
@@ -834,6 +834,7 @@ window.removeHabilidade = function(hab) {
     
     if(hab === "Caminho do Atirador") currentChar.info.habCaminhoAtiradorAtivo = false;
     if(hab === "Favoritismo Armista") { currentChar.info.habFavArmistaAtivo = "nenhum"; currentChar.info.habFavArmistaAttr = "d"; }
+    if(hab === "Fúria Ardente") currentChar.info.habFuriaArdenteAttr = "f";
     if(hab === "QI Avançado") currentChar.info.habQIAvancadoAtivo = false;
     
     saveData(); updateUI();
@@ -1729,7 +1730,7 @@ function updateUI() {
         }
         if(hHas("Filho do Mar")) { if(totalBase >= 15000) { tBonus.r += 0.15; } else if(totalBase >= 10000) { tBonus.r += 0.10; } else if(totalBase >= 5000) { tBonus.r += 0.05; } }
         if(hHas("Flexibilidade")) { if(totalBase >= 10000) tBonus.v += 0.20; else if(totalBase >= 5000) tBonus.v += 0.10; }
-        if(hHas("Fúria Ardente")) { if(totalBase >= 15000) tBonus.f += 0.15; else if(totalBase >= 10000) tBonus.f += 0.10; else if(totalBase >= 5000) tBonus.f += 0.05; }
+        if(hHas("Fúria Ardente")) { let fA = i.habFuriaArdenteAttr || 'f'; if(totalBase >= 15000) tBonus[fA] += 0.15; else if(totalBase >= 10000) tBonus[fA] += 0.10; else if(totalBase >= 5000) tBonus[fA] += 0.05; }
         if(hHas("O Escolhido")) { if(totalBase >= 20000) { tBonus.ha += 0.15; tBonus.ho += 0.15; tBonus.hr += 0.15; } else if(totalBase >= 10000) { tBonus.ha += 0.10; tBonus.ho += 0.10; tBonus.hr += 0.10; } else if(totalBase >= 5000) { tBonus.ha += 0.05; tBonus.ho += 0.05; tBonus.hr += 0.05; } }
         if(tempLn === "Beckman" && i.linhagemBeckmanArma) { tBonus.v += 0.05; }
         if(hHas("Golpe de Retorno")) { let usos = i.habRetornoUso || 1; if(usos === 2) tBonus.r -= 0.10; else if(usos === 3) tBonus.r -= 0.20; }
@@ -2212,17 +2213,19 @@ function updateUI() {
         let hasHab = (hab) => i.habilidadesExclusivas.includes(hab);
         let hasAtirador = hasHab("Caminho do Atirador");
         let hasFavArm = hasHab("Favoritismo Armista");
+        let hasFuria = hasHab("Fúria Ardente");
         let hasQI = hasHab("QI Avançado");
         let hasRetorno = hasHab("Golpe de Retorno");
         let isBeckman = ln === "Beckman";
         
         let habAtivosContainer = document.getElementById('hab-ativos');
         if(habAtivosContainer) {
-            habAtivosContainer.style.display = (hasAtirador || hasFavArm || hasQI || isBeckman || hasRetorno) ? 'block' : 'none';
+            habAtivosContainer.style.display = (hasAtirador || hasFavArm || hasFuria || hasQI || isBeckman || hasRetorno) ? 'block' : 'none';
             let elAtirador = document.getElementById('hab-ativo-atirador'); if(elAtirador) { elAtirador.style.display = hasAtirador ? 'block' : 'none'; document.getElementById('chk-atirador').checked = i.habCaminhoAtiradorAtivo; }
             let elQI = document.getElementById('hab-ativo-qi'); if(elQI) { elQI.style.display = hasQI ? 'block' : 'none'; document.getElementById('chk-qi').checked = i.habQIAvancadoAtivo; }
             let elBeckman = document.getElementById('hab-ativo-beckman'); if(elBeckman) { elBeckman.style.display = isBeckman ? 'block' : 'none'; document.getElementById('chk-beckman').checked = i.linhagemBeckmanArma; }
             let elArmista = document.getElementById('hab-ativo-armista'); if(elArmista) { elArmista.style.display = hasFavArm ? 'flex' : 'none'; document.getElementById('sel-armista-ativo').value = i.habFavArmistaAtivo; document.getElementById('sel-armista-attr').value = i.habFavArmistaAttr; }
+            let elFuria = document.getElementById('hab-ativo-furia'); if(elFuria) { elFuria.style.display = hasFuria ? 'flex' : 'none'; document.getElementById('sel-furia-attr').value = i.habFuriaArdenteAttr || 'f'; }
             let elRetorno = document.getElementById('hab-ativo-retorno'); if(elRetorno) { elRetorno.style.display = hasRetorno ? 'flex' : 'none'; document.getElementById('sel-retorno-uso').value = i.habRetornoUso || 1; }
         }
 
@@ -2248,7 +2251,7 @@ function updateUI() {
         }
         if(hasHab("Filho do Mar")) { if(totalBase >= 15000) { bonus.refl += 0.15; bonus.r += 0.15; } else if(totalBase >= 10000) { bonus.refl += 0.10; bonus.r += 0.10; } else if(totalBase >= 5000) { bonus.refl += 0.05; bonus.r += 0.05; } }
         if(hasHab("Flexibilidade")) { if(totalBase >= 10000) bonus.v += 0.20; else if(totalBase >= 5000) bonus.v += 0.10; }
-        if(hasHab("Fúria Ardente")) { if(totalBase >= 15000) bonus.f += 0.15; else if(totalBase >= 10000) bonus.f += 0.10; else if(totalBase >= 5000) bonus.f += 0.05; }
+        if(hasHab("Fúria Ardente")) { let fA = i.habFuriaArdenteAttr || 'f'; if(totalBase >= 15000) bonus[fA] += 0.15; else if(totalBase >= 10000) bonus[fA] += 0.10; else if(totalBase >= 5000) bonus[fA] += 0.05; }
         if(hasHab("O Escolhido")) { if(totalBase >= 20000) { bonus.ha += 0.15; bonus.ho += 0.15; bonus.hr += 0.15; } else if(totalBase >= 10000) { bonus.ha += 0.10; bonus.ho += 0.10; bonus.hr += 0.10; } else if(totalBase >= 5000) { bonus.ha += 0.05; bonus.ho += 0.05; bonus.hr += 0.05; } }
         if(hasHab("Pensamento Acelerado")) { if(totalBase >= 10000) bonus.refl += 0.25; else if(totalBase >= 5000) bonus.refl += 0.20; }
         if(hasHab("QI Avançado")) { if(i.habQIAvancadoAtivo) bonus.refl += 0.05; }
@@ -3344,9 +3347,9 @@ function updateUI() {
             if (hab === "Espírito Contagiante") return "Aliados recebem +5% em todos os atributos.";
             if (hab === "Favoritismo Armista") { if (tb >= 15000) return "Bônus massivos em Resistência, Velocidade, Dano e Red. de Dano (Arma/Criações)."; if (tb >= 10000) return "+10% Resistência e Velocidade, +10% Força/Destreza (Criações)."; return ""; }
             if (hab === "Filho do Mar") { if (tb >= 15000) return "+15% Reflexo e Resistência."; if (tb >= 10000) return "+10% Reflexo e Resistência."; if (tb >= 5000) return "+5% Reflexo e Resistência."; return ""; }
-            if (hab === "Flexibilidade") { if (tb >= 10000) return "+20% Velocidade."; if (tb >= 5000) return "+10% Velocidade."; return ""; }
-            if (hab === "Fúria Ardente") { if (tb >= 15000) return "+15% Força."; if (tb >= 10000) return "+10% Força."; if (tb >= 5000) return "+5% Força."; return ""; }
-            if (hab === "Golpe de Retorno") return "Reflete o dano no oponente (Máx 3x/dia). 1º uso: Normal. 2º uso: -10% Resistência. 3º uso: -20% Resistência.";
+            if(hasHab("Flexibilidade")) { if(totalBase >= 10000) bonus.v += 0.20; else if(totalBase >= 5000) bonus.v += 0.10; }
+        if(hasHab("Fúria Ardente")) { let fA = i.habFuriaArdenteAttr || 'f'; if(totalBase >= 15000) bonus[fA] += 0.15; else if(totalBase >= 10000) bonus[fA] += 0.10; else if(totalBase >= 5000) bonus[fA] += 0.05; }
+        if(hasHab("O Escolhido")) { if(totalBase >= 20000) { bonus.ha += 0.15; bonus.ho += 0.15; bonus.hr += 0.15; } else if(totalBase >= 10000) { bonus.ha += 0.10; bonus.ho += 0.10; bonus.hr += 0.10; } else if(totalBase >= 5000) { bonus.ha += 0.05; bonus.ho += 0.05; bonus.hr += 0.05; } }
             if (hab === "O Escolhido") { if (tb >= 20000) return "+15% em todos os Hakis."; if (tb >= 10000) return "+10% em todos os Hakis."; if (tb >= 5000) return "+5% em todos os Hakis."; return ""; }
             if (hab === "Pensamento Acelerado") { if (tb >= 10000) return "+25% Reflexos."; if (tb >= 5000) return "+20% Reflexos."; return ""; }
             if (hab === "QI Avançado") return "-50% gasto de Estamina. +5% Reflexos se durar >3 turnos.";

@@ -328,6 +328,13 @@
                             <option value="f">Bônus em Força (se < 15k)</option>
                         </select>
                     </div>
+                    <div id="hab-ativo-furia" style="display:none; margin-top:5px; flex-direction:column; gap:5px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px;">
+                        <label style="font-size:10px; color:#aaa;">Fúria Ardente (Atributo a Buffar)</label>
+                        <select id="sel-furia-attr" onchange="updateField('info', 'habFuriaArdenteAttr', this.value)" style="font-size: 11px; background-color: #222; color: #fff; border: 1px solid #444;">
+                            <option value="f">Força</option>
+                            <option value="d">Destreza</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
