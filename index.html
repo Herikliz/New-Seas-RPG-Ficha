@@ -230,6 +230,21 @@
                       <input type="text" id="info-tripulacao" oninput="updateField('info', 'tripulacao', this.value)">
                   </div>
               </div>
+              <div class="input-group" id="box-pirataStatus" style="display: none;">
+                  <label>Status Pirata</label>
+                  <select id="info-pirataStatus" onchange="updateField('info', 'pirataStatus', this.value)">
+                      <option value="Normal">Normal</option>
+                      <option value="Supernova">Supernova</option>
+                      <option value="Shichibukai">Shichibukai</option>
+                      <option value="Yonkou">Yonkou</option>
+                  </select>
+              </div>
+              <div class="input-group" id="box-recompensaTravada" style="display: none; margin-top: 10px;">
+                  <label>Recompensa Travada</label>
+                  <div class="currency-input">
+                      <span>฿</span><input type="text" id="info-recompensaTravada" placeholder="Vazio = 🔒" oninput="formatCurrency('info', 'recompensaTravada', this)">
+                  </div>
+              </div>
               <div class="input-row" id="box-patente-salario" style="display: none; margin-top: -5px;">
                   <div class="input-group">
                       <label>Patente</label>

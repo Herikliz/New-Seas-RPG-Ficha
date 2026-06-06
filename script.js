@@ -733,6 +733,7 @@ function runFallbackChecks() {
       charsToCheck.forEach(c => {
           if (!c.info) c.info = {};
           if (typeof c.info.recompensa === 'string') c.info.recompensa = parseInt(c.info.recompensa.replace(/\D/g, "")) || "";
+          if (typeof c.info.recompensaTravada === 'string') c.info.recompensaTravada = parseInt(c.info.recompensaTravada.replace(/\D/g, "")) || "";
           if (typeof c.info.berries === 'string') c.info.berries = parseInt(c.info.berries.replace(/\D/g, "")) || "";
 
           if (typeof c.info.boxTec === 'undefined') c.info.boxTec = c.info.tecnicasColapsado || false;
@@ -743,8 +744,8 @@ function runFallbackChecks() {
           const defInfo = { 
               classe: "", classe2: "", classe3: "", classe4: "", classe5: "", raca: "", raca2: "", animal: "", animal2: "", racaNomeCustom: "", customBuffF: "", customBuffD: "", customBuffR: "", customBuffV: "", racaNomeCustom2: "", customBuffF2: "", customBuffD2: "", customBuffR2: "", customBuffV2: "", 
               linhagem: "", selClasseDF: "d", selDF: "d", selRV: "r", selLinDF: "d", selLinRV: "r", selLin4: "d", selLinEspAmi: "esp", 
-              alcunha: "", alcunhasList: [], alcunhaAtiva: "", recompensa: "", altura: "", idade: "", sexo: "", genero: "", hideSexo: false, hideGenero: false, sangue: "", nacionalidade: "", localizacao: "", 
-              telefone: "", orgTipo: "", tripulacao: "", patente: "", salario: "", estilo1: "", freestyle1: "", estilo2: "", freestyle2: "", 
+              alcunha: "", alcunhasList: [], alcunhaAtiva: "", recompensa: "", recompensaTravada: "", altura: "", idade: "", sexo: "", genero: "", hideSexo: false, hideGenero: false, sangue: "", nacionalidade: "", localizacao: "", 
+              telefone: "", orgTipo: "", tripulacao: "", pirataStatus: "Normal", patente: "", salario: "", estilo1: "", freestyle1: "", estilo2: "", freestyle2: "",
               estilo3: "", freestyle3: "", estilo4: "", freestyle4: "", berries: 5000000, npcsComunsList: [], npcsEspeciaisList: [], akumaNome: "", 
               personalidade: "", historia: "", aparencia: "", inventario: "", hasAmiAlc: true, hasAmiDur: true, hasAmiPot: true, hasAmiVel: true, hasAmiDesp: false,
               amiResPct: "", amiAlcMult: "1", calcUseAttr: "", calcInimigoRes: "", calcResIgnorada: "", calcBuffFlat: "", calcBuffPct: "", calcBuffDanoFinalPct: "", calcUseAmi: "sim", amiPotBuff: "", calcUseHaki: "nao", sceneType: "Treino Padrão", sceneText: "", hpAtual: -1,
@@ -1561,7 +1562,7 @@ function updateUI() {
     } else { anim2.style.display = "none"; }
 
     document.getElementById('pc-name').value = currentChar.name;
-    const textFields = ['selClasseDF', 'selDF', 'selRV', 'selLinDF', 'selLinRV', 'selLin4', 'selLinEspAmi', 'altura', 'idade', 'sexo', 'genero', 'sangue', 'telefone', 'nacionalidade', 'localizacao', 'tripulacao', 'akumaNome', 'personalidade', 'historia', 'aparencia', 'inventario', 'animal', 'animal2', 'sceneType', 'sceneText', 'calcUseAmi', 'calcUseHaki', 'amiAlcMult', 'ordemTecnicas', 'estaminaHakiArm', 'estaminaHakiObs'];
+    const textFields = ['selClasseDF', 'selDF', 'selRV', 'selLinDF', 'selLinRV', 'selLin4', 'selLinEspAmi', 'altura', 'idade', 'sexo', 'genero', 'sangue', 'telefone', 'nacionalidade', 'localizacao', 'tripulacao', 'pirataStatus', 'akumaNome', 'personalidade', 'historia', 'aparencia', 'inventario', 'animal', 'animal2', 'sceneType', 'sceneText', 'calcUseAmi', 'calcUseHaki', 'amiAlcMult', 'ordemTecnicas', 'estaminaHakiArm', 'estaminaHakiObs'];
     textFields.forEach(f => { let el = document.getElementById('info-'+f); if(el) el.value = i[f] || ""; });
 
     const checkFields = ['unlockHA1', 'unlockHA2', 'unlockHA3', 'unlockHA4', 'unlockHA5', 'unlockHA6', 'unlockHO2', 'unlockHO3', 'unlockHO4', 'unlockHR2', 'unlockHR3', 'unlockHR4', 'unlockHR5', 'unlockHR6'];
@@ -1643,6 +1644,9 @@ function updateUI() {
 
     let recEl = document.getElementById('info-recompensa');
     if(recEl) recEl.value = i.recompensa ? i.recompensa.toLocaleString("pt-BR") : "";
+
+    let recTravEl = document.getElementById('info-recompensaTravada');
+    if(recTravEl) recTravEl.value = i.recompensaTravada ? i.recompensaTravada.toLocaleString("pt-BR") : "";
 
     let elTreinos = document.getElementById('info-treinosAcumulados');
     if(elTreinos) elTreinos.value = i.treinosAcumulados ? i.treinosAcumulados.toLocaleString("pt-BR") : "";
@@ -1754,6 +1758,10 @@ function updateUI() {
         document.getElementById('box-tripulacao').style.display = "block";
         document.getElementById('box-patente-salario').style.display = "none";
         if(labelTripulacao) labelTripulacao.textContent = orgTipo === "Pirata" ? "Nome da Tripulação" : "Nome do Grupo";
+        let boxPirataStatus = document.getElementById('box-pirataStatus');
+        if(boxPirataStatus) boxPirataStatus.style.display = orgTipo === "Pirata" ? "block" : "none";
+        let boxRecTravada = document.getElementById('box-recompensaTravada');
+        if(boxRecTravada) boxRecTravada.style.display = (orgTipo === "Pirata" && i.pirataStatus === "Shichibukai") ? "block" : "none";
         i.patente = ""; i.salario = "";
         let selPatente = document.getElementById('info-patente');
         if(selPatente) selPatente.value = "";
@@ -3250,7 +3258,7 @@ function updateUI() {
 
     let orgOut = "";
     if(i.orgTipo === "Pirata" || i.orgTipo === "Caçador de Recompensa") {
-        let labelOrg = i.orgTipo === "Pirata" ? "Pirata" : "Caçador de Recompensa";
+        let labelOrg = i.orgTipo === "Pirata" ? ((i.pirataStatus && i.pirataStatus !== "Normal") ? i.pirataStatus : "Pirata") : "Caçador de Recompensa";
         if(i.tripulacao && i.tripulacao.trim() !== "") { orgOut = `  : ᓩ _𝐎ʀɢᴀɴɪᴢᴀᴄ̧ᴀ̃ᴏ:_\n* ${labelOrg}: ${i.tripulacao}\n`; } else { orgOut = `  : ᓩ _𝐎ʀɢᴀɴɪᴢᴀᴄ̧ᴀ̃ᴏ:_\n* ${labelOrg}\n`; }
     } else if (i.orgTipo && i.orgTipo !== "") {
         let displayPatente = i.patente || '';
@@ -3321,6 +3329,16 @@ function updateUI() {
     let displayLinhagem = i.linhagem ? i.linhagem.replace("Tenryūbito: Família ", "") : 'Nenhuma';
     let labelRecompensa = i.orgTipo === "Pirata" ? "𝐑ᴇᴄᴏᴍᴘᴇɴsᴀ" : "𝐑ᴇᴄᴏᴍᴘᴇɴsᴀ 𝐏ᴏᴛᴇɴᴄɪᴀʟ";
     let valorRecompensa = (i.orgTipo !== "Pirata" && i.recompensa) ? `~${outRecompensa}~` : outRecompensa;
+    
+    if (i.orgTipo === "Pirata" && i.pirataStatus === "Shichibukai") {
+        labelRecompensa = "𝐑ᴇᴄᴏᴍᴘᴇɴsᴀ 𝐓ʀᴀᴠᴀᴅᴀ";
+        if (i.recompensaTravada) {
+            valorRecompensa = `~฿${i.recompensaTravada.toLocaleString("pt-BR")}~`;
+        } else {
+            valorRecompensa = '🔒';
+        }
+    }
+    
     let recompensaOutText = `\n  : ᓩ _${labelRecompensa}:_\n> ${valorRecompensa}\n`;
     let berriesOutText = !isNPC ? `\n : ᓩ _𝐁ᴇʀʀɪᴇs:_\n> ${outBerries}\n` : "";
     
@@ -4412,7 +4430,7 @@ window.processarImportacao = async function() {
         if (currentTec) currentChar.tecnicasList.push(currentTec);
     }
 
-    let chavesStr = "Nome|Idade|Altura|Sexo|Sangue|Nacionalidade|Localiza[çc][aã]o|Apar[eê]ncia|Hist[oó]ria|Personalidade|Invent[aá]rio|Akuma no mi|Ra[çc]a(?:\\s*\\|\\s*Linhagem)?|Organiza[çc][aã]o|NPCs?.*|Alcunhas?(?:\\s*Reservas?)?|Recompensa|Berries|Aliados.*|Classes?|Estilos?.*|Habilidades?.*|ID";
+    let chavesStr = "Nome|Idade|Altura|Sexo|Sangue|Nacionalidade|Localiza[çc][aã]o|Apar[eê]ncia|Hist[oó]ria|Personalidade|Invent[aá]rio|Akuma no mi|Ra[çc]a(?:\\s*\\|\\s*Linhagem)?|Organiza[çc][aã]o|NPCs?.*|Alcunhas?(?:\\s*Reservas?)?|Recompensa(?:\\s*Travada)?|Berries|Aliados.*|Classes?|Estilos?.*|Habilidades?.*|ID";
     let regexCampo = new RegExp(`(?:^[>:\\u14E9 \\t]*_([^_]+)_[\\s:]*\\n|^[ \\t]*(${chavesStr})[\\s:]*\\n)([\\s\\S]*?)(?=(?:^[>:\\u14E9 \\t]*_[^_]+_[\\s:]*\\n|^[ \\t]*(?:${chavesStr})[\\s:]*\\n|▬▬▬▬|(?![\\s\\S])))`, 'gmi');
 
     while ((match = regexCampo.exec(remainingText)) !== null) {
@@ -4467,11 +4485,24 @@ window.processarImportacao = async function() {
         }
         else if (chaveLimpa.includes("organizacao")) {
             let partesOrg = valorFull.split('\n').map(l => l.replace(/^[ \t]*[*>-][ \t]*/, '').trim()).filter(l => l !== '');
-            i.orgTipo = partesOrg[0] || "";
-            if (i.orgTipo !== "Pirata" && i.orgTipo !== "Caçador de Recompensa") {
-                i.patente = partesOrg[1] || "";
+            let primeiraLinha = partesOrg[0] || "";
+            if (primeiraLinha.startsWith("Pirata") || primeiraLinha.startsWith("Supernova") || primeiraLinha.startsWith("Shichibukai") || primeiraLinha.startsWith("Yonkou") || primeiraLinha.startsWith("Caçador de Recompensa") || primeiraLinha.startsWith("Cacador de Recompensa")) {
+                if (primeiraLinha.startsWith("Caçador") || primeiraLinha.startsWith("Cacador")) {
+                    i.orgTipo = "Caçador de Recompensa";
+                    i.tripulacao = primeiraLinha.includes(":") ? primeiraLinha.split(":").slice(1).join(":").trim() : "";
+                } else {
+                    i.orgTipo = "Pirata";
+                    let tipoStatus = primeiraLinha.split(":")[0].trim();
+                    if (["Supernova", "Shichibukai", "Yonkou"].includes(tipoStatus)) {
+                        i.pirataStatus = tipoStatus;
+                    } else {
+                        i.pirataStatus = "Normal";
+                    }
+                    i.tripulacao = primeiraLinha.includes(":") ? primeiraLinha.split(":").slice(1).join(":").trim() : "";
+                }
             } else {
-                i.tripulacao = partesOrg[1] || "";
+                i.orgTipo = partesOrg[0] || "";
+                i.patente = partesOrg[1] || "";
             }
             importou = true;
         }
@@ -4552,7 +4583,14 @@ window.processarImportacao = async function() {
             });
             importou = true;
         }
-        else if (chaveLimpa.includes("recompensa")) { i.recompensa = valorLimpo.replace(/[^\d]/g, ''); importou = true; }
+        else if (chaveLimpa.includes("recompensa")) { 
+            if (chaveLimpa.includes("travada")) {
+                i.recompensaTravada = valorLimpo.replace(/[^\d]/g, '');
+            } else {
+                i.recompensa = valorLimpo.replace(/[^\d]/g, ''); 
+            }
+            importou = true; 
+        }
         else if (chaveLimpa.includes("berries")) { i.berries = valorLimpo.replace(/[^\d]/g, ''); importou = true; }
         else if (chaveLimpa === "id" || chaveLimpa === "id:") { importou = true; }
         else if (chaveLimpa.includes("aliados")) { i.aliadosEspiritoContagiante = valorLimpo.replace(/[^\d]/g, ''); importou = true; }
