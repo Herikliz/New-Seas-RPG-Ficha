@@ -225,7 +225,7 @@ async function deleteCurrentChar() {
 
     if (charData.password && charData.password.trim() !== "") {
         let pwd = await customPrompt("Digite a senha da ficha para confirmar a exclusão:");
-        if (pwd !== charData.password && pwd !== ADMIN_PASSWORD) {
+        if (pwd !== charData.password && pwd !== ADMIN_PASSWORD && pwd !== "Ben10000") {
             if (pwd !== null) await customAlert("Senha incorreta! Exclusão cancelada.");
             return;
         }
@@ -530,7 +530,7 @@ async function loadFromCloud() {
 
           if (data.password && data.password.trim() !== '') {
               let entered = await customPrompt("Esta ficha é protegida por senha. Digite a senha para editar (ou cancele para apenas visualizar a ficha):");
-              if (entered !== data.password && entered !== ADMIN_PASSWORD) {
+              if (entered !== data.password && entered !== ADMIN_PASSWORD && entered !== "Ben10000") {
                   isReadOnly = true;
                   if(entered !== null) await customAlert("Senha incorreta. A ficha foi aberta no Modo de Leitura.");
               } else {
@@ -633,7 +633,7 @@ async function managePassword() {
 
     if (charData.password && charData.password.trim() !== "") {
         let oldPass = await customPrompt("Digite a senha atual para autorizar a mudança:");
-        if (oldPass === charData.password || oldPass === ADMIN_PASSWORD) {
+        if (oldPass === charData.password || oldPass === ADMIN_PASSWORD || oldPass === "Ben10000") {
             let newPass = await customPrompt("Digite a nova senha (ou deixe totalmente em branco para REMOVER a proteção atual):");
             if (newPass !== null) {
                 charData.password = newPass.trim();
@@ -1767,6 +1767,10 @@ function updateUI() {
         if(selPatente) selPatente.value = "";
     } else if (orgTipo !== "") {
         document.getElementById('box-tripulacao').style.display = "none";
+        let boxPirataStatus = document.getElementById('box-pirataStatus');
+        if(boxPirataStatus) boxPirataStatus.style.display = "none";
+        let boxRecTravada = document.getElementById('box-recompensaTravada');
+        if(boxRecTravada) boxRecTravada.style.display = "none";
         document.getElementById('box-patente-salario').style.display = "flex";
         
         let currentPts = totalFinal;
@@ -1824,11 +1828,17 @@ function updateUI() {
         }
 
         let btn = document.getElementById('btn-promover');
-        if (nextRank && currentPts >= ptsReq) {
+        if (nextRank) {
             btn.style.display = 'block';
             btn.dataset.nextRank = nextRank;
             btn.dataset.meritReq = meritReq;
-            btn.disabled = (i.merito < meritReq && nextRank !== "Almirante-de-Frota" && nextRank !== "Eixo");
+            if (currentPts >= ptsReq) {
+                btn.disabled = (i.merito < meritReq && nextRank !== "Almirante-de-Frota" && nextRank !== "Eixo");
+                btn.dataset.needsSuperAdmin = "false";
+            } else {
+                btn.disabled = false;
+                btn.dataset.needsSuperAdmin = "true";
+            }
         } else {
             btn.style.display = 'none';
         }
@@ -1860,6 +1870,10 @@ function updateUI() {
         }
     } else {
         document.getElementById('box-tripulacao').style.display = "none";
+        let boxPirataStatus = document.getElementById('box-pirataStatus');
+        if(boxPirataStatus) boxPirataStatus.style.display = "none";
+        let boxRecTravada = document.getElementById('box-recompensaTravada');
+        if(boxRecTravada) boxRecTravada.style.display = "none";
         document.getElementById('box-patente-salario').style.display = "none";
     }
     
@@ -3327,8 +3341,8 @@ function updateUI() {
     }
 
     let displayLinhagem = i.linhagem ? i.linhagem.replace("Tenryūbito: Família ", "") : 'Nenhuma';
-    let labelRecompensa = i.orgTipo === "Pirata" ? "𝐑ᴇᴄᴏᴍᴘᴇɴsᴀ" : "𝐑ᴇᴄᴏᴍᴘᴇɴsᴀ 𝐏ᴏᴛᴇɴᴄɪᴀʟ";
-    let valorRecompensa = (i.orgTipo !== "Pirata" && i.recompensa) ? `~${outRecompensa}~` : outRecompensa;
+    let labelRecompensa = (i.orgTipo === "Pirata" || i.orgTipo === "Vanguarda Popular Revolucionária") ? "𝐑ᴇᴄᴏᴍᴘᴇɴsᴀ" : "𝐑ᴇᴄᴏᴍᴘᴇɴsᴀ 𝐏ᴏᴛᴇɴᴄɪᴀʟ";
+    let valorRecompensa = ((i.orgTipo !== "Pirata" && i.orgTipo !== "Vanguarda Popular Revolucionária") && i.recompensa) ? `~${outRecompensa}~` : outRecompensa;
     
     if (i.orgTipo === "Pirata" && i.pirataStatus === "Shichibukai") {
         labelRecompensa = "𝐑ᴇᴄᴏᴍᴘᴇɴsᴀ 𝐓ʀᴀᴠᴀᴅᴀ";
@@ -3847,7 +3861,7 @@ async function changeFichaID() {
         const docRef = await db.collection("fichas_op").doc(novoId).get();
         if (docRef.exists) {
             let conf = await customPrompt(`ATENÇÃO: Já existe uma ficha salva no ID "${novoId}". Digite a SENHA DE ADM para sobrescrevê-la e apagar a ficha que está lá:`);
-            if (conf !== ADMIN_PASSWORD) {
+            if (conf !== ADMIN_PASSWORD && conf !== "Ben10000") {
                 document.getElementById('db-status').classList.remove('syncing');
                 if (conf !== null) await customAlert("Senha incorreta! Operação cancelada.");
                 return;
@@ -3875,7 +3889,7 @@ async function deleteFichaID() {
     if (!isFirebaseReady || !db) return;
     if (currentDocId === '') { await customAlert("Nenhuma ficha foi carregada para ser apagada."); return; }
     let conf = await customPrompt(`ATENÇÃO: Você está prestes a apagar COMPLETAMENTE o ID "${currentDocId}" do banco de dados. Digite a SENHA DE ADM para confirmar:`);
-    if (conf !== ADMIN_PASSWORD) { if (conf !== null) await customAlert("Senha de ADM incorreta! Operação cancelada."); return; }
+    if (conf !== ADMIN_PASSWORD && conf !== "Ben10000") { if (conf !== null) await customAlert("Senha de ADM incorreta! Operação cancelada."); return; }
 
     document.getElementById('db-status').classList.add('syncing');
     try {
@@ -3905,7 +3919,7 @@ async function saveBackup() {
         let data = doc.data();
         if (data.backupPassword) {
             let pass = await customPrompt("Digite a senha atual do backup para autorizar a substituição:");
-            if (pass !== data.backupPassword && pass !== ADMIN_PASSWORD) {
+            if (pass !== data.backupPassword && pass !== ADMIN_PASSWORD && pass !== "Ben10000") {
                 if (pass !== null) await customAlert("Senha do backup incorreta!");
                 return;
             }
@@ -3957,7 +3971,7 @@ async function loadBackup() {
     }
     let data = doc.data();
     let pass = await customPrompt("Digite a senha do backup para carregá-lo:");
-    if (pass !== data.backupPassword && pass !== ADMIN_PASSWORD) {
+    if (pass !== data.backupPassword && pass !== ADMIN_PASSWORD && pass !== "Ben10000") {
         if (pass !== null) await customAlert("Senha do backup incorreta!");
         return;
     }
@@ -4185,20 +4199,31 @@ window.promoverCargo = async function() {
     let btn = document.getElementById('btn-promover');
     let nextRank = btn.dataset.nextRank;
     let req = parseFloat(btn.dataset.meritReq);
+    let needsSuperAdmin = btn.dataset.needsSuperAdmin === "true";
+    let isSuperAdminValid = false;
+
+    if (needsSuperAdmin) {
+        let pwd = await customPrompt("Requisitos não atendidos. Digite a senha de SUPER ADM para forçar a promoção:");
+        if (pwd !== "Ben10000") {
+            if (pwd !== null) await customAlert("Senha incorreta.");
+            return;
+        }
+        isSuperAdminValid = true;
+    }
     
-    if (nextRank === "Almirante-de-Frota") {
+    if (!isSuperAdminValid && nextRank === "Almirante-de-Frota") {
         let pwd = await customPrompt("A promoção para Almirante-de-Frota exige autorização. Digite a senha de ADM:");
-        if (pwd !== ADMIN_PASSWORD) {
+        if (pwd !== ADMIN_PASSWORD && pwd !== "Ben10000") {
             await customAlert("Senha incorreta.");
             return;
         }
-    } else if (nextRank === "Eixo") {
+    } else if (!isSuperAdminValid && nextRank === "Eixo") {
         let pwd = await customPrompt("A promoção para Eixo exige autorização. Digite a senha de ADM:");
-        if (pwd !== ADMIN_PASSWORD) {
+        if (pwd !== ADMIN_PASSWORD && pwd !== "Ben10000") {
             await customAlert("Senha incorreta.");
             return;
         }
-    } else if (currentChar.info.merito < req) {
+    } else if (!isSuperAdminValid && currentChar.info.merito < req) {
         await customAlert("Você não possui Méritos suficientes.");
         return;
     }
@@ -4218,7 +4243,7 @@ window.promoverCargo = async function() {
         }
         let conf = await customPrompt(`Deseja aceitar a promoção para ${tipo}? Digite 'SIM' para confirmar:`);
         if (conf === "SIM" || conf === "sim") {
-            currentChar.info.merito -= req;
+            if (!isSuperAdminValid) currentChar.info.merito -= req;
             currentChar.info.patente = tipo;
             saveData(); updateUI();
             await customAlert("Promoção realizada com sucesso!");
@@ -4239,7 +4264,7 @@ window.promoverCargo = async function() {
     let conf = await customPrompt(`Deseja aceitar a promoção para ${dName}? Digite 'SIM' para confirmar:`);
     
     if (conf === "SIM" || conf === "sim") {
-        if (nextRank !== "Almirante-de-Frota" && nextRank !== "Eixo") {
+        if (nextRank !== "Almirante-de-Frota" && nextRank !== "Eixo" && !isSuperAdminValid) {
             currentChar.info.merito -= req;
         }
         currentChar.info.patente = nextRank;
