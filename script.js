@@ -766,7 +766,7 @@ function runFallbackChecks() {
               alcunha: "", alcunhasList: [], alcunhaAtiva: "", recompensa: "", recompensaTravada: "", altura: "", idade: "", sexo: "", genero: "", hideSexo: false, hideGenero: false, sangue: "", nacionalidade: "", localizacao: "", 
               telefone: "", orgTipo: "", tripulacao: "", pirataStatus: "Normal", patente: "", salario: "", estilo1: "", freestyle1: "", estilo2: "", freestyle2: "",
               estilo3: "", freestyle3: "", estilo4: "", freestyle4: "", berries: 5000000, npcsComunsList: [], npcsEspeciaisList: [], akumaNome: "", 
-              personalidade: "", historia: "", aparencia: "", inventario: "", hasAmiAlc: true, hasAmiDur: true, hasAmiPot: true, hasAmiVel: true, hasAmiDesp: false,
+              personalidade: "", historia: "", aparencia: "", inventario: "", armasEquipadasList: [], hasAmiAlc: true, hasAmiDur: true, hasAmiPot: true, hasAmiVel: true, hasAmiDesp: false,
               amiResPct: "", amiAlcMult: "1", calcUseAttr: "", calcInimigoRes: "", calcResIgnorada: "", calcBuffFlat: "", calcBuffPct: "", calcBuffDanoFinalPct: "", calcUseAmi: "sim", amiPotBuff: "", calcUseHaki: "nao", sceneType: "Treino Padrão", sceneText: "", hpAtual: -1,
               boxIden: false, boxMec: false, boxSoc: false, boxBase: false, boxEsp: false, boxAmi: false, boxHist: false, 
               boxInv: false, boxCalc: false, boxEstamina: false, estaminaAtual: -1, estaminaVelocidade: "", estaminaDano: "", estaminaBuffPct: "", estaminaHakiArm: "nao", estaminaHakiObs: "nao", boxScene: false, akumaId: "", selCharR1: "", selCharR2: "", treinosAcumulados: 0, ordemTecnicas: "alfabetica", hideHistoria: false, hidePersonality: false, hideTecNome: false, hideTecDesc: false, hideTecEfeito: false, hiddenStyles: [], exaustaoCompleta: false, habilidadesExclusivas: [], habCaminhoAtiradorAtivo: false, habFavArmistaAtivo: "nenhum", habFavArmistaAttr: "d", habFuriaArdenteAttr: "f", habQIAvancadoAtivo: false, linhagemBeckmanArma: false, habRetornoUso: 1, merito: 0, aliadosEspiritoContagiante: 0,
@@ -883,7 +883,64 @@ function formatNpcNumber(el) {
     try { el.setSelectionRange(cursor + (newLength - oldLength), cursor + (newLength - oldLength)); } catch(e){}
     return num;
 }
+window.addArmaEquipada = function() {
+    if(isReadOnly) return;
+    if (!currentChar.info.armasEquipadasList) currentChar.info.armasEquipadasList = [];
+    currentChar.info.armasEquipadasList.push({nome: "", stat: "d", type: "pct", val: "", ativo: false});
+    saveData(); updateUI(); renderArmasEquipadas(); toggleEditability();
+};
+window.removeArmaEquipada = function(idx) {
+    if(isReadOnly) return;
+    currentChar.info.armasEquipadasList.splice(idx, 1);
+    saveData(); updateUI(); renderArmasEquipadas(); toggleEditability();
+};
+window.updateArmaEquipada = function(idx, field, val) {
+    if(isReadOnly) return;
+    currentChar.info.armasEquipadasList[idx][field] = val;
+    if(field === 'val') {
+        let clean = val.replace(/\D/g, "");
+        currentChar.info.armasEquipadasList[idx][field] = clean ? parseInt(clean, 10) : "";
+    }
+    saveData(); updateUI();
+    if(field !== 'nome' && field !== 'val') renderArmasEquipadas();
+};
+window.toggleArmaAtiva = function(idx) {
+    if(isReadOnly) return;
+    currentChar.info.armasEquipadasList[idx].ativo = !currentChar.info.armasEquipadasList[idx].ativo;
+    saveData(); updateUI(); renderArmasEquipadas();
+};
+function renderArmasEquipadas() {
+    const container = document.getElementById('armas-equipadas-container');
+    if(!container) return;
+    let finalHtml = '';
+    (currentChar.info.armasEquipadasList || []).forEach((a, idx) => {
+        let valFmt = a.val ? a.val.toLocaleString('pt-BR') : '';
+        let btnCor = a.ativo ? 'var(--success)' : '#444';
+        let btnTxt = a.ativo ? 'ON' : 'OFF';
+        finalHtml += `
+            <div style="background: rgba(0,0,0,0.3); padding: 5px; border: 1px dashed ${btnCor}; border-radius: 6px; margin-bottom: 5px; display: flex; gap: 5px; align-items: center; transition: 0.2s;">
+                <input type="text" placeholder="Nome do Item/Arma" value="${a.nome || ''}" oninput="updateArmaEquipada(${idx}, 'nome', this.value)" style="flex: 2; padding: 6px;">
+                <select onchange="updateArmaEquipada(${idx}, 'stat', this.value)" style="flex: 1; padding: 6px; width: auto; font-size: 11px;">
+                    <option value="d" ${a.stat === 'd' ? 'selected' : ''}>Destreza</option>
+                    <option value="f" ${a.stat === 'f' ? 'selected' : ''}>Força</option>
+                    <option value="r" ${a.stat === 'r' ? 'selected' : ''}>Resistência</option>
+                    <option value="v" ${a.stat === 'v' ? 'selected' : ''}>Velocidade</option>
+                </select>
+                <select onchange="updateArmaEquipada(${idx}, 'type', this.value)" style="width: 70px; padding: 6px; font-size: 11px;">
+                    <option value="pct" ${a.type === 'pct' ? 'selected' : ''}>%</option>
+                    <option value="flat" ${a.type === 'flat' ? 'selected' : ''}>Pts</option>
+                </select>
+                <input type="text" class="no-sum" placeholder="Valor" value="${valFmt}" oninput="let cursor = this.selectionStart; let oldLen = this.value.length; updateArmaEquipada(${idx}, 'val', this.value); this.value = currentChar.info.armasEquipadasList[${idx}].val ? currentChar.info.armasEquipadasList[${idx}].val.toLocaleString('pt-BR') : ''; let newLen = this.value.length; try { this.setSelectionRange(cursor + (newLen - oldLen), cursor + (newLen - oldLen)); } catch(e){}" style="width: 70px; padding: 6px; text-align: center;">
+                <button type="button" class="btn btn-outline" style="padding: 4px 8px; font-size: 11px; margin: 0; color: ${btnCor}; border-color: ${btnCor}; min-width: 40px;" onclick="toggleArmaAtiva(${idx})">${btnTxt}</button>
+                <button type="button" class="btn btn-outline btn-danger" style="padding: 4px 8px; font-size: 11px; margin: 0;" onclick="removeArmaEquipada(${idx})">X</button>
+            </div>
+        `;
+    });
+    container.innerHTML = finalHtml;
+}
+
 function renderNpcsComuns() {
+    if (typeof renderArmasEquipadas === 'function') renderArmasEquipadas();
     const container = document.getElementById('npcs-comuns-container');
     if(!container) return;
     let finalHtml = '';
@@ -1213,8 +1270,8 @@ function addAlcunhaBuffRow() {
             <optgroup label="Akuma no Mi"><option value="amiAlc">Alcance</option><option value="amiDur">Durabilidade</option><option value="amiPot">Potência</option><option value="amiVel">Velocidade</option><option value="amiDesp">Despertar</option></optgroup>
         </select>
         <select class="buff-type" style="flex:1; font-size:11px; padding:4px; background:#2a2a2a; border:1px solid #444; color:#fff; border-radius:4px;">
-            <option value="flat">Pts (+X)</option>
             <option value="pct">% (+X%)</option>
+            <option value="flat">Pts (+X)</option>
         </select>
         <input type="number" class="buff-val" placeholder="Qtd" style="flex:1; font-size:11px; padding:4px; background:#2a2a2a; border:1px solid #444; color:#fff; border-radius:4px;">
         <button class="btn btn-outline btn-danger" style="padding:2px 6px; font-size:10px; margin:0;" onclick="this.parentElement.remove()">X</button>
@@ -1375,13 +1432,23 @@ function formatPhone(el) {
     saveData();
 }
 
-function strCalc(base, bonus, flat = 0) {
-    if(bonus === 0 && flat === 0) return base.toLocaleString("pt-BR");
-    let total = Math.round((base + flat) * (1 + bonus)); 
+function strCalc(base, bonus, flat = 0, itemBonus = 0, itemFlat = 0) {
+    let passive = Math.round((base + flat) * (1 + bonus)); 
     let parts = [base.toLocaleString("pt-BR")];
     if (flat !== 0) parts.push(`${flat >= 0 ? "+" : ""}${flat.toLocaleString("pt-BR")}`);
     if (bonus !== 0) parts.push(`${bonus >= 0 ? "+" : ""}${(bonus * 100).toFixed(0)}%`);
-    return `${parts.join("")} = ${total.toLocaleString("pt-BR")}`;
+    
+    if (itemBonus === 0 && itemFlat === 0) {
+        if(bonus === 0 && flat === 0) return base.toLocaleString("pt-BR");
+        return `${parts.join("")} = ${passive.toLocaleString("pt-BR")}`;
+    }
+
+    let activeStr = `${parts.join("")} = ${passive.toLocaleString("pt-BR")}`;
+    let active = Math.round((passive + itemFlat) * (1 + itemBonus));
+    if (itemFlat !== 0) activeStr += `${itemFlat >= 0 ? "+" : ""}${itemFlat.toLocaleString("pt-BR")}`;
+    if (itemBonus !== 0) activeStr += `${itemBonus >= 0 ? "+" : ""}${(itemBonus * 100).toFixed(0)}%`;
+    activeStr += ` = ${active.toLocaleString("pt-BR")}`;
+    return activeStr;
 }
 
 function formatRaceStr(rName, aName, isFem) {
@@ -1708,6 +1775,7 @@ function updateUI() {
                 });
             }
         }
+        
         if(tComb > 0 && i.selClasseDF) { tBonus[i.selClasseDF] += tComb * 0.05; }
         if(tempLn !== "Charlotte") {
             if(racas[tempRc]) { tBonus.d += racas[tempRc].d || 0; tBonus.f += racas[tempRc].f || 0; tBonus.r += racas[tempRc].r || 0; tBonus.v += racas[tempRc].v || 0; }
@@ -2169,6 +2237,24 @@ function updateUI() {
         }
     }
 
+    let itemBonus = {d:0, f:0, r:0, v:0};
+    let itemFlat = {d:0, f:0, r:0, v:0};
+    if (i.armasEquipadasList) {
+        i.armasEquipadasList.forEach(a => {
+            if (a.ativo && a.stat) {
+                let val = parseInt(a.val) || 0;
+                if (val > 0) {
+                    if (a.type === "pct") {
+                        if (typeof itemBonus[a.stat] !== 'undefined') itemBonus[a.stat] += (val / 100);
+                    } else {
+                        if (typeof itemFlat[a.stat] !== 'undefined') itemFlat[a.stat] += val;
+                    }
+                }
+            }
+        });
+    }
+    for (let k in itemBonus) { if (itemBonus[k] > 1.0) itemBonus[k] = 1.0; }
+
     if(combatenteLevel > 0) { bonus[i.selClasseDF] += combatenteLevel * 0.05; }
 
     if(ln !== "Charlotte") {
@@ -2330,9 +2416,23 @@ function updateUI() {
         bonus.d -= 0.20; bonus.f -= 0.20; bonus.r -= 0.20; bonus.v -= 0.20; bonus.esp -= 0.20; bonus.ami -= 0.20;
     }
 
-    let totalD = Math.round((D + flatBonus.d) * (1 + bonus.d)); document.getElementById('total-d').innerText = "Total: " + totalD.toLocaleString("pt-BR");
-    let totalF = Math.round((F + flatBonus.f) * (1 + bonus.f)); document.getElementById('total-f').innerText = "Total: " + totalF.toLocaleString("pt-BR");
-    let totalR = Math.round((R + flatBonus.r) * (1 + bonus.r)); document.getElementById('total-r').innerText = "Total: " + totalR.toLocaleString("pt-BR");
+    let passiveD = Math.round((D + flatBonus.d) * (1 + bonus.d));
+    let totalD = Math.round((passiveD + itemFlat.d) * (1 + itemBonus.d));
+    let elTotalD = document.getElementById('total-d');
+    elTotalD.innerText = "Total: " + totalD.toLocaleString("pt-BR");
+    elTotalD.dataset.passive = passiveD; elTotalD.dataset.active = totalD;
+
+    let passiveF = Math.round((F + flatBonus.f) * (1 + bonus.f));
+    let totalF = Math.round((passiveF + itemFlat.f) * (1 + itemBonus.f));
+    let elTotalF = document.getElementById('total-f');
+    elTotalF.innerText = "Total: " + totalF.toLocaleString("pt-BR");
+    elTotalF.dataset.passive = passiveF; elTotalF.dataset.active = totalF;
+
+    let passiveR = Math.round((R + flatBonus.r) * (1 + bonus.r));
+    let totalR = Math.round((passiveR + itemFlat.r) * (1 + itemBonus.r));
+    let elTotalR = document.getElementById('total-r');
+    elTotalR.innerText = "Total: " + totalR.toLocaleString("pt-BR");
+    elTotalR.dataset.passive = passiveR; elTotalR.dataset.active = totalR;
     
     let waterBuffV = 0;
     if(ln !== "Charlotte") {
@@ -2361,7 +2461,11 @@ function updateUI() {
         currentChar.substats.exaustaoVelSaved = false;
     }
 
-    let totalV = Math.round((V + flatBonus.v) * (1 + bonus.v)); document.getElementById('total-v').innerText = "Total: " + totalV.toLocaleString("pt-BR");
+    let passiveV = Math.round((V + flatBonus.v) * (1 + bonus.v));
+    let totalV = Math.round((passiveV + itemFlat.v) * (1 + itemBonus.v));
+    let elTotalV = document.getElementById('total-v');
+    elTotalV.innerText = "Total: " + totalV.toLocaleString("pt-BR");
+    elTotalV.dataset.passive = passiveV; elTotalV.dataset.active = totalV;
     document.getElementById('container-boxVel').style.display = totalV > 0 ? "block" : "none";
     
     if(totalV === 0) { currentChar.substats.refl = 0; currentChar.substats.vcorp = 0; }
@@ -2930,9 +3034,9 @@ function updateUI() {
     }
 
     let attrOut = "";
-    if (D > 0) attrOut += `↠ *𝙳𝚎𝚜𝚝𝚛𝚎𝚣𝚊:* ${strCalc(D, bonus.d, flatBonus.d)}\n\n`;
-    if (F > 0) attrOut += `↠ *𝙵𝚘𝚛𝚌̧𝚊:* ${strCalc(F, bonus.f, flatBonus.f)}\n\n`;
-    if (R > 0) { attrOut += `↠ *𝚁𝚎𝚜𝚒𝚜𝚝𝚎̂𝚗𝚌𝚒𝚊:* ${strCalc(R, bonus.r, flatBonus.r)}\n> 𝙴𝚜𝚝𝚊𝚖𝚒𝚗𝚊: ${i.estaminaAtual.toLocaleString("pt-BR")} / ${estTotalVal.toLocaleString("pt-BR")}\n\n`; }
+    if (D > 0) attrOut += `↠ *𝙳𝚎𝚜𝚝𝚛𝚎𝚣𝚊:* ${strCalc(D, bonus.d, flatBonus.d, itemBonus.d, itemFlat.d)}\n\n`;
+    if (F > 0) attrOut += `↠ *𝙵𝚘𝚛𝚌̧𝚊:* ${strCalc(F, bonus.f, flatBonus.f, itemBonus.f, itemFlat.f)}\n\n`;
+    if (R > 0) { attrOut += `↠ *𝚁𝚎𝚜𝚒𝚜𝚝𝚎̂𝚗𝚌𝚒𝚊:* ${strCalc(R, bonus.r, flatBonus.r, itemBonus.r, itemFlat.r)}\n> 𝙴𝚜𝚝𝚊𝚖𝚒𝚗𝚊: ${i.estaminaAtual.toLocaleString("pt-BR")} / ${estTotalVal.toLocaleString("pt-BR")}\n\n`; }
     let aVelOut = currentChar.substats.amiVel || 0;
     let calcAVelFinal = Math.round((aVelOut + flatBonus.amiVel) * (1 + bonus.amiVel));
     let finalAkumaVel = 0;
@@ -2947,9 +3051,9 @@ function updateUI() {
     }
 
     if (V > 0) {
-        let velNormalStr = strCalc(V, bonus.v, flatBonus.v);
+        let velNormalStr = strCalc(V, bonus.v, flatBonus.v, itemBonus.v, itemFlat.v);
         if (i.amiVelAtivo && finalAkumaVel > 0) {
-            let totalVBase = Math.round((V + flatBonus.v) * (1 + bonus.v));
+            let totalVBase = Math.round((Math.round((V + flatBonus.v) * (1 + bonus.v)) + itemFlat.v) * (1 + itemBonus.v));
             velNormalStr += `+${finalAkumaVel.toLocaleString("pt-BR")} (Akuma no Mi) = ${(totalVBase + finalAkumaVel).toLocaleString("pt-BR")}`;
         }
         let hasWaterDiff = (waterBuffV !== 0 || bonus.vAgua !== 0 || flatBonus.vAgua !== 0 || bonus.reflAgua !== 0 || flatBonus.reflAgua !== 0 || bonus.vcorpAgua !== 0 || flatBonus.vcorpAgua !== 0);
@@ -2957,9 +3061,9 @@ function updateUI() {
         if (hasWaterDiff) {
             let totalBonusVAgua = bonus.v + waterBuffV + bonus.vAgua;
             let totalFlatBonusVAgua = flatBonus.v + flatBonus.vAgua;
-            let strTotalAgua = strCalc(V, totalBonusVAgua, totalFlatBonusVAgua);
+            let strTotalAgua = strCalc(V, totalBonusVAgua, totalFlatBonusVAgua, itemBonus.v, itemFlat.v);
             if (i.amiVelAtivo && finalAkumaVel > 0) {
-                let totalVAguaBase = Math.round((V + totalFlatBonusVAgua) * (1 + totalBonusVAgua));
+                let totalVAguaBase = Math.round((Math.round((V + totalFlatBonusVAgua) * (1 + totalBonusVAgua)) + itemFlat.v) * (1 + itemBonus.v));
                 strTotalAgua += `+${finalAkumaVel.toLocaleString("pt-BR")} (Akuma no Mi) = ${(totalVAguaBase + finalAkumaVel).toLocaleString("pt-BR")}`;
             }
             attrOut += `↠ *𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:* ${velNormalStr} | ${strTotalAgua} (dentro d'água)\n`;
@@ -3441,13 +3545,13 @@ function updateUI() {
     inventarioFormatado = invLines.join('\n');
 
     let manualAttrOut = "";
-    manualAttrOut += `↠ *𝙳𝚎𝚜𝚝𝚛𝚎𝚣𝚊:* ${strCalc(D, bonus.d, flatBonus.d)}\n\n`;
-    manualAttrOut += `↠ *𝙵𝚘𝚛𝚌̧𝚊:* ${strCalc(F, bonus.f, flatBonus.f)}\n\n`;
-    manualAttrOut += `↠ *𝚁𝚎𝚜𝚒𝚜𝚝𝚎̂𝚗𝚌𝚒𝚊:* ${strCalc(R, bonus.r, flatBonus.r)}\n> 𝙴𝚜𝚝𝚊𝚖𝚒𝚗𝚊: ${i.estaminaAtual.toLocaleString("pt-BR")} / ${estTotalVal.toLocaleString("pt-BR")}\n\n`;
+    manualAttrOut += `↠ *𝙳𝚎𝚜𝚝𝚛𝚎𝚣𝚊:* ${strCalc(D, bonus.d, flatBonus.d, itemBonus.d, itemFlat.d)}\n\n`;
+    manualAttrOut += `↠ *𝙵𝚘𝚛𝚌̧𝚊:* ${strCalc(F, bonus.f, flatBonus.f, itemBonus.f, itemFlat.f)}\n\n`;
+    manualAttrOut += `↠ *𝚁𝚎𝚜𝚒𝚜𝚝𝚎̂𝚗𝚌𝚒𝚊:* ${strCalc(R, bonus.r, flatBonus.r, itemBonus.r, itemFlat.r)}\n> 𝙴𝚜𝚝𝚊𝚖𝚒𝚗𝚊: ${i.estaminaAtual.toLocaleString("pt-BR")} / ${estTotalVal.toLocaleString("pt-BR")}\n\n`;
 
-    let velNormalStrMan = strCalc(V, bonus.v, flatBonus.v);
+    let velNormalStrMan = strCalc(V, bonus.v, flatBonus.v, itemBonus.v, itemFlat.v);
     if (i.amiVelAtivo && finalAkumaVel > 0) {
-        let totalVBase = Math.round((V + flatBonus.v) * (1 + bonus.v));
+        let totalVBase = Math.round((Math.round((V + flatBonus.v) * (1 + bonus.v)) + itemFlat.v) * (1 + itemBonus.v));
         velNormalStrMan += `+${finalAkumaVel.toLocaleString("pt-BR")} (Akuma no Mi) = ${(totalVBase + finalAkumaVel).toLocaleString("pt-BR")}`;
     }
     
@@ -3458,9 +3562,9 @@ function updateUI() {
     if (hasWaterDiffMan) {
         let totalBonusVAgua = bonus.v + waterBuffV + bonus.vAgua;
         let totalFlatBonusVAgua = flatBonus.v + flatBonus.vAgua;
-        let strTotalAgua = strCalc(V, totalBonusVAgua, totalFlatBonusVAgua);
+        let strTotalAgua = strCalc(V, totalBonusVAgua, totalFlatBonusVAgua, itemBonus.v, itemFlat.v);
         if (i.amiVelAtivo && finalAkumaVel > 0) {
-            let totalVAguaBase = Math.round((V + totalFlatBonusVAgua) * (1 + totalBonusVAgua));
+            let totalVAguaBase = Math.round((Math.round((V + totalFlatBonusVAgua) * (1 + totalBonusVAgua)) + itemFlat.v) * (1 + itemBonus.v));
             strTotalAgua += `+${finalAkumaVel.toLocaleString("pt-BR")} (Akuma no Mi) = ${(totalVAguaBase + finalAkumaVel).toLocaleString("pt-BR")}`;
         }
         manualAttrOut += `↠ *𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:* ${velNormalStrMan} | ${strTotalAgua} (dentro d'água)\n`;
@@ -4030,36 +4134,69 @@ window.onload = () => {
     init();
 };
 
-window.puxarVelocidade = function() {
+window.puxarVelocidade = async function() {
     if(isReadOnly) return;
-    let val = currentChar.substats.vcorp || 0;
+    let el = document.getElementById('total-v');
+    let passivo = parseInt(el.dataset.passive) || 0;
+    let ativo = parseInt(el.dataset.active) || 0;
+    let baseRefl = currentChar.substats.refl || 0;
+    let baseVcorp = currentChar.substats.vcorp || 0;
+    let proporcao = passivo > 0 ? (baseVcorp / passivo) : 0;
+    let val = baseVcorp;
+    
+    if (ativo !== passivo && ativo > 0) {
+        let resp = await customPrompt(`Este atributo possui um buff de item ativo. Deseja puxar a V. Corporal baseada no valor passivo (${val.toLocaleString("pt-BR")}) ou ativo (${Math.floor(ativo * proporcao).toLocaleString("pt-BR")})? Digite 1 para Passivo ou 2 para Ativo:`, true);
+        if (resp === "2") val = Math.floor(ativo * proporcao);
+        else if (resp !== "1") return;
+    }
     document.getElementById('info-estaminaVelocidade').value = val.toLocaleString("pt-BR");
     currentChar.info.estaminaVelocidade = val;
     saveData(); updateUI();
 };
 
-window.puxarDestrezaDano = function() {
+window.puxarDestrezaDano = async function() {
     if(isReadOnly) return;
-    let valStr = document.getElementById('total-d').textContent;
-    let val = parseInt(valStr.replace(/\D/g, '')) || 0;
+    let el = document.getElementById('total-d');
+    let passivo = parseInt(el.dataset.passive) || 0;
+    let ativo = parseInt(el.dataset.active) || 0;
+    let val = passivo;
+    if (ativo !== passivo) {
+        let resp = await customPrompt(`Este atributo possui um buff de item ativo. Deseja puxar o valor passivo (${passivo.toLocaleString("pt-BR")}) ou ativo (${ativo.toLocaleString("pt-BR")})? Digite 1 para Passivo ou 2 para Ativo:`, true);
+        if (resp === "2") val = ativo;
+        else if (resp !== "1") return;
+    }
     document.getElementById('info-calcUseAttr').value = val.toLocaleString("pt-BR");
     currentChar.info.calcUseAttr = val;
     saveData(); updateUI();
 };
 
-window.puxarForcaDano = function() {
+window.puxarForcaDano = async function() {
     if(isReadOnly) return;
-    let valStr = document.getElementById('total-f').textContent;
-    let val = parseInt(valStr.replace(/\D/g, '')) || 0;
+    let el = document.getElementById('total-f');
+    let passivo = parseInt(el.dataset.passive) || 0;
+    let ativo = parseInt(el.dataset.active) || 0;
+    let val = passivo;
+    if (ativo !== passivo) {
+        let resp = await customPrompt(`Este atributo possui um buff de item ativo. Deseja puxar o valor passivo (${passivo.toLocaleString("pt-BR")}) ou ativo (${ativo.toLocaleString("pt-BR")})? Digite 1 para Passivo ou 2 para Ativo:`, true);
+        if (resp === "2") val = ativo;
+        else if (resp !== "1") return;
+    }
     document.getElementById('info-calcUseAttr').value = val.toLocaleString("pt-BR");
     currentChar.info.calcUseAttr = val;
     saveData(); updateUI();
 };
 
-window.puxarResistenciaDano = function() {
+window.puxarResistenciaDano = async function() {
     if(isReadOnly) return;
-    let valStr = document.getElementById('total-r').textContent;
-    let val = parseInt(valStr.replace(/\D/g, '')) || 0;
+    let el = document.getElementById('total-r');
+    let passivo = parseInt(el.dataset.passive) || 0;
+    let ativo = parseInt(el.dataset.active) || 0;
+    let val = passivo;
+    if (ativo !== passivo) {
+        let resp = await customPrompt(`Este atributo possui um buff de item ativo. Deseja puxar o valor passivo (${passivo.toLocaleString("pt-BR")}) ou ativo (${ativo.toLocaleString("pt-BR")})? Digite 1 para Passivo ou 2 para Ativo:`, true);
+        if (resp === "2") val = ativo;
+        else if (resp !== "1") return;
+    }
     document.getElementById('info-calcInimigoRes').value = val.toLocaleString("pt-BR");
     currentChar.info.calcInimigoRes = val;
     saveData(); updateUI();

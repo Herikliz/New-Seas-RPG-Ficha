@@ -784,6 +784,13 @@
                     <label>Inventário</label>
                     <textarea id="info-inventario" placeholder="* Item 1&#10;* Item 2" style="min-height: 120px;" oninput="updateField('info', 'inventario', this.value)"></textarea>
                 </div>
+                <div class="input-group" style="margin-top: 10px; border-top: 1px dashed #444; padding-top: 10px;">
+                    <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #b3b3b3; margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
+                        Itens e Armas Equipadas (Buffs Ativos)
+                        <button type="button" class="btn btn-outline btn-success" style="font-size: 14px; padding: 4px 12px;" onclick="addArmaEquipada()">+</button>
+                    </div>
+                    <div id="armas-equipadas-container"></div>
+                </div>
             </div>
         </div>
 
