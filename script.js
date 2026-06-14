@@ -3429,7 +3429,13 @@ function updateUI() {
         habilidadesOut += `\n`;
     }
     let showNpcs = !isNPC || (i.npcsComunsList && i.npcsComunsList.length > 0) || (i.npcsEspeciaisList && i.npcsEspeciaisList.length > 0);
-    let npcsOutText = showNpcs ? `\n  : ᓩ _𝐍𝐏𝐂s ᴄᴏᴍᴜɴꜱ:_\n${outNpcsC}\n\n  : ᓩ _𝐍𝐏𝐂s ᴇꜱᴘᴇᴄɪᴀɪꜱ:_\n${outNpcsE}\n` : "";
+    let npcsOutText = "";
+    if (showNpcs) {
+        npcsOutText += `\n  : ᓩ _𝐍𝐏𝐂s ᴄᴏᴍᴜɴꜱ:_\n${outNpcsC}\n`;
+        if (i.npcsEspeciaisList && i.npcsEspeciaisList.length > 0) {
+            npcsOutText += `\n  : ᓩ _𝐍𝐏𝐂s ᴇꜱᴘᴇᴄɪᴀɪꜱ:_\n${outNpcsE}\n`;
+        }
+    }
 
     let inventarioFormatado = "";
     let invLines = [];
