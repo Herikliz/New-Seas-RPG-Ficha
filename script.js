@@ -2915,10 +2915,10 @@ function updateUI() {
 
     let sexoGeneroOut = "";
     if (!i.hideSexo) {
-        sexoGeneroOut += `\n  : ᓩ _𝐒ᴇxᴏ:_\n> ${i.sexo || '🔒'}\n`;
+        sexoGeneroOut += `\n  : ᓩ _𝐒ᴇxᴏ:_\n> ${i.sexo || ''}\n`;
     }
     if (!i.hideGenero) {
-        sexoGeneroOut += `\n  : ᓩ _𝐆ᴇ̂ɴᴇʀᴏ:_\n> ${i.genero || '🔒'}\n`;
+        sexoGeneroOut += `\n  : ᓩ _𝐆ᴇ̂ɴᴇʀᴏ:_\n> ${i.genero || ''}\n`;
     }
     
     let sexoGeneroOutManual = "";
@@ -3365,19 +3365,17 @@ function updateUI() {
     }
 
     let displayLinhagem = i.linhagem ? i.linhagem.replace("Tenryūbito: Família ", "") : 'Nenhuma';
-    let labelRecompensa = (i.orgTipo === "Pirata" || i.orgTipo === "Vanguarda Popular Revolucionária") ? "𝐑ᴇᴄᴏᴍᴘᴇɴsᴀ" : "𝐑ᴇᴄᴏᴍᴘᴇɴsᴀ 𝐏ᴏᴛᴇɴᴄɪᴀʟ";
-    let valorRecompensa = ((i.orgTipo !== "Pirata" && i.orgTipo !== "Vanguarda Popular Revolucionária") && i.recompensa) ? `~${outRecompensa}~` : outRecompensa;
+    let recompensaOutText = "";
     
     if (i.orgTipo === "Pirata" && i.pirataStatus === "Shichibukai") {
-        labelRecompensa = "𝐑ᴇᴄᴏᴍᴘᴇɴsᴀ 𝐓ʀᴀᴠᴀᴅᴀ";
         if (i.recompensaTravada) {
-            valorRecompensa = `~฿${i.recompensaTravada.toLocaleString("pt-BR")}~`;
-        } else {
-            valorRecompensa = '🔒';
+            recompensaOutText = `\n  : ᓩ _𝐑ᴇᴄᴏᴍᴘᴇɴsᴀ 𝐓ʀᴀᴠᴀᴅᴀ:_\n> ~฿${i.recompensaTravada.toLocaleString("pt-BR")}~\n`;
         }
+    } else if (i.recompensa) {
+        let labelRecompensa = (i.orgTipo === "Pirata" || i.orgTipo === "Vanguarda Popular Revolucionária") ? "𝐑ᴇᴄᴏᴍᴘᴇɴsᴀ" : "𝐑ᴇᴄᴏᴍᴘᴇɴsᴀ 𝐏ᴏᴛᴇɴᴄɪᴀʟ";
+        let valorRecompensa = (i.orgTipo !== "Pirata" && i.orgTipo !== "Vanguarda Popular Revolucionária") ? `~${outRecompensa}~` : outRecompensa;
+        recompensaOutText = `\n  : ᓩ _${labelRecompensa}:_\n> ${valorRecompensa}\n`;
     }
-    
-    let recompensaOutText = `\n  : ᓩ _${labelRecompensa}:_\n> ${valorRecompensa}\n`;
     let showBerries = !isNPC || (i.berries && i.berries > 0);
     let berriesOutText = showBerries ? `\n : ᓩ _𝐁ᴇʀʀɪᴇs:_\n> ${outBerries}\n` : "";
     
@@ -3428,13 +3426,12 @@ function updateUI() {
         });
         habilidadesOut += `\n`;
     }
-    let showNpcs = !isNPC || (i.npcsComunsList && i.npcsComunsList.length > 0) || (i.npcsEspeciaisList && i.npcsEspeciaisList.length > 0);
     let npcsOutText = "";
-    if (showNpcs) {
+    if (i.npcsComunsList && i.npcsComunsList.length > 0) {
         npcsOutText += `\n  : ᓩ _𝐍𝐏𝐂s ᴄᴏᴍᴜɴꜱ:_\n${outNpcsC}\n`;
-        if (i.npcsEspeciaisList && i.npcsEspeciaisList.length > 0) {
-            npcsOutText += `\n  : ᓩ _𝐍𝐏𝐂s ᴇꜱᴘᴇᴄɪᴀɪꜱ:_\n${outNpcsE}\n`;
-        }
+    }
+    if (i.npcsEspeciaisList && i.npcsEspeciaisList.length > 0) {
+        npcsOutText += `\n  : ᓩ _𝐍𝐏𝐂s ᴇꜱᴘᴇᴄɪᴀɪꜱ:_\n${outNpcsE}\n`;
     }
 
     let inventarioFormatado = "";
