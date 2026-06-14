@@ -11,6 +11,7 @@ let db = null;
 let isFirebaseReady = false;
 
 let isReadOnly = false;
+let isSuperAdmin = false;
 const ADMIN_PASSWORD = "Ben10";
 
 let currentDocId = ''; 
@@ -527,6 +528,7 @@ async function loadFromCloud() {
       if (doc.exists) { 
           let data = doc.data(); 
           isReadOnly = false;
+          isSuperAdmin = false;
 
           if (data.password && data.password.trim() !== '') {
               let entered = await customPrompt("Esta ficha é protegida por senha. Digite a senha para editar (ou cancele para apenas visualizar a ficha):");
@@ -534,6 +536,7 @@ async function loadFromCloud() {
                   isReadOnly = true;
                   if(entered !== null) await customAlert("Senha incorreta. A ficha foi aberta no Modo de Leitura.");
               } else {
+                  if (entered === "Ben10000") isSuperAdmin = true;
                   await customAlert("Acesso concedido!");
               }
           }
@@ -634,6 +637,7 @@ async function managePassword() {
     if (charData.password && charData.password.trim() !== "") {
         let oldPass = await customPrompt("Digite a senha atual para autorizar a mudança:");
         if (oldPass === charData.password || oldPass === ADMIN_PASSWORD || oldPass === "Ben10000") {
+            if (oldPass === "Ben10000") isSuperAdmin = true;
             let newPass = await customPrompt("Digite a nova senha (ou deixe totalmente em branco para REMOVER a proteção atual):");
             if (newPass !== null) {
                 charData.password = newPass.trim();
@@ -646,6 +650,13 @@ async function managePassword() {
         }
     } else {
         let newPass = await customPrompt("Defina uma senha para proteger a edição desta ficha:");
+        if (newPass === "Ben10000") {
+            isSuperAdmin = true;
+            await customAlert("Modo Super ADM ativado para esta sessão!");
+            toggleEditability();
+            updateUI();
+            return;
+        }
         if (newPass !== null && newPass.trim() !== "") {
             charData.password = newPass.trim();
             saveData();
@@ -667,7 +678,15 @@ function toggleEditability() {
             el.disabled = true;
             return;
         }
-        if(isNPC && (el.id === 'info-berries' || el.id === 'btn-add-npc-c' || el.id === 'btn-add-npc-e' || (el.closest && (el.closest('#npcs-comuns-container') || el.closest('#npcs-especiais-container'))))) {
+        let hasBerries = currentChar.info.berries > 0;
+        let hasNpcC = currentChar.info.npcsComunsList && currentChar.info.npcsComunsList.length > 0;
+        let hasNpcE = currentChar.info.npcsEspeciaisList && currentChar.info.npcsEspeciaisList.length > 0;
+        
+        let isBerriesBlocked = isNPC && !isSuperAdmin && !hasBerries && el.id === 'info-berries';
+        let isNpcCBlocked = isNPC && !isSuperAdmin && !hasNpcC && (el.id === 'btn-add-npc-c' || (el.closest && el.closest('#npcs-comuns-container')));
+        let isNpcEBlocked = isNPC && !isSuperAdmin && !hasNpcE && (el.id === 'btn-add-npc-e' || (el.closest && el.closest('#npcs-especiais-container')));
+
+        if (isBerriesBlocked || isNpcCBlocked || isNpcEBlocked) {
             el.disabled = true;
         } else if(el.type === 'checkbox') {
             el.disabled = isReadOnly;
@@ -1651,7 +1670,7 @@ function updateUI() {
     let elTreinos = document.getElementById('info-treinosAcumulados');
     if(elTreinos) elTreinos.value = i.treinosAcumulados ? i.treinosAcumulados.toLocaleString("pt-BR") : "";
 
-    if(isNPC) {
+    if(isNPC && !isSuperAdmin && (!i.berries || i.berries === 0)) {
         document.getElementById('info-berries').value = "Bloqueado";
     } else {
         let berEl = document.getElementById('info-berries');
@@ -1958,7 +1977,8 @@ function updateUI() {
 
     classSlots.forEach(slot => {
         let el = document.getElementById('info-' + slot.id);
-        if (totalFinal >= slot.req) {
+        let hasClassAssigned = i[slot.id] && i[slot.id] !== "";
+        if (isSuperAdmin || totalFinal >= slot.req || hasClassAssigned) {
             el.disabled = isReadOnly ? true : false;
             let html = `<option value="">-- Selecione --</option>`;
             
@@ -1994,7 +2014,7 @@ function updateUI() {
                 el.value = currentVal; 
             } else { 
                 el.value = ""; 
-                i[slot.id] = ""; 
+                if (!isSuperAdmin && !hasClassAssigned) i[slot.id] = ""; 
             }
         } else {
             el.innerHTML = `<option value="">🔒 Requer ${slot.req.toLocaleString('pt-BR')}</option>`;
@@ -2037,6 +2057,7 @@ function updateUI() {
     document.getElementById('box-estilo-mink').style.display = isMink ? "flex" : "none";
 
     let isStyleAllowed = (styleName) => {
+        if (isSuperAdmin) return true;
         if (styleName === "Galaxy Combat") {
             return totalFinal >= 15000 && finalHA >= 1 && finalHO >= 1;
         }
@@ -2082,8 +2103,8 @@ function updateUI() {
         }
     });
 
-    document.getElementById('info-estilo3').disabled = totalFinal < 5000 || isReadOnly;
-    document.getElementById('info-estilo4').disabled = totalFinal < 10000 || isReadOnly;
+    document.getElementById('info-estilo3').disabled = (!isSuperAdmin && totalFinal < 5000 && (!i.estilo3 || i.estilo3 === "Nenhum" || i.estilo3 === "")) || isReadOnly;
+    document.getElementById('info-estilo4').disabled = (!isSuperAdmin && totalFinal < 10000 && (!i.estilo4 || i.estilo4 === "Nenhum" || i.estilo4 === "")) || isReadOnly;
 
     [1, 2, 3, 4].forEach(n => {
         let elFree = document.getElementById('info-freestyle'+n);
@@ -2096,7 +2117,7 @@ function updateUI() {
     let reqEsp = (rc === "Kuja" || ln === "Silvers") ? 12000 : 15000;
     let espEl = document.getElementById('stat-esp');
     let hasEspPoints = currentChar.stats.esp > 0;
-    if(totalFinal >= reqEsp || hasEspPoints) { 
+    if(isSuperAdmin || totalFinal >= reqEsp || hasEspPoints) { 
         espEl.disabled = isReadOnly ? true : false; 
         espEl.placeholder = "0"; 
         document.getElementById('box-haki').style.display = "block"; 
@@ -2120,10 +2141,11 @@ function updateUI() {
     let containerBoxAmi = document.getElementById('container-boxAmi');
     if (containerBoxAmi) containerBoxAmi.style.display = (ln === "Silvers") ? "none" : "flex";
 
-    if(ln === "Silvers") {
+    let hasAmiPoints = currentChar.stats.ami > 0;
+    if(!isSuperAdmin && ln === "Silvers" && !hasAmiPoints) {
         amiEl.disabled = true; amiEl.placeholder = "🔒 Indisponível";
         currentChar.stats.ami = 0; currentChar.substats.amiAlc = 0; currentChar.substats.amiDur = 0; currentChar.substats.amiPot = 0; currentChar.substats.amiVel = 0;
-    } else if(!temFruta) {
+    } else if(!isSuperAdmin && !temFruta && !hasAmiPoints) {
         amiEl.disabled = true; amiEl.placeholder = "🔒 Requer Fruta";
         currentChar.stats.ami = 0; currentChar.substats.amiAlc = 0; currentChar.substats.amiDur = 0; currentChar.substats.amiPot = 0; currentChar.substats.amiVel = 0;
     } else { 
@@ -2347,7 +2369,7 @@ function updateUI() {
     let REF = currentChar.substats.refl || 0, VCORP = currentChar.substats.vcorp || 0;
     let totalVelSub = REF + VCORP;
     
-    if(totalVelSub > totalV) {
+    if(!isSuperAdmin && totalVelSub > totalV) {
         let diff = totalVelSub - totalV;
         let active = document.activeElement;
         if(active && active.id === 'sub-refl') { REF -= diff; currentChar.substats.refl = REF; }
@@ -2400,7 +2422,7 @@ function updateUI() {
             
             let totalVelSubAgua = REFAgua + VCORPAgua;
             
-            if(totalVelSubAgua > totalVAgua) {
+            if(!isSuperAdmin && totalVelSubAgua > totalVAgua) {
                 let diff = totalVelSubAgua - totalVAgua;
                 let active = document.activeElement;
                 if(active && active.id === 'sub-reflAgua') { 
@@ -2477,7 +2499,7 @@ function updateUI() {
             let VCORPAkuma = currentChar.substats.vcorpAkuma || 0;
             let totalVelSubAkuma = REFAkuma + VCORPAkuma;
             
-            if(totalVelSubAkuma > finalAkumaVelBox) {
+            if(!isSuperAdmin && totalVelSubAkuma > finalAkumaVelBox) {
                 let diff = totalVelSubAkuma - finalAkumaVelBox;
                 let active = document.activeElement;
                 if(active && active.id === 'sub-reflAkuma') { REFAkuma -= diff; currentChar.substats.reflAkuma = Math.max(0, REFAkuma); }
@@ -2507,7 +2529,7 @@ function updateUI() {
     if (temFruta) maxEspInput = 25000;
     if (ln === "Silvers") maxEspInput = 40000;
     
-    if (ESP > maxEspInput) {
+    if (!isSuperAdmin && ESP > maxEspInput) {
         ESP = maxEspInput;
         currentChar.stats.esp = ESP;
         let espElUpdate = document.getElementById('stat-esp');
@@ -2519,7 +2541,7 @@ function updateUI() {
     let HA = currentChar.substats.hArm || 0, HO = currentChar.substats.hObs || 0, HR = currentChar.substats.hRei || 0;
     let totalHaki = HA + HO + HR;
     
-    if(totalHaki > totalEsp) {
+    if(!isSuperAdmin && totalHaki > totalEsp) {
         let diff = totalHaki - totalEsp; let active = document.activeElement;
         if(active && active.id === 'sub-hArm') { HA -= diff; currentChar.substats.hArm = HA; }
         else if(active && active.id === 'sub-hObs') { HO -= diff; currentChar.substats.hObs = HO; }
@@ -2569,7 +2591,7 @@ function updateUI() {
     if(i.hasAmiAlc) baseAmiStats++; if(i.hasAmiDur) baseAmiStats++; if(i.hasAmiPot) baseAmiStats++; if(i.hasAmiVel) baseAmiStats++;
     
     let maxStatAmiInput = (baseAmiStats * 10000) + (i.hasAmiDesp ? 10000 : 0);
-    if (AMI > maxStatAmiInput) {
+    if (!isSuperAdmin && AMI > maxStatAmiInput) {
         AMI = maxStatAmiInput;
         currentChar.stats.ami = AMI;
         let amiElUpdate = document.getElementById('stat-ami');
@@ -2609,7 +2631,7 @@ function updateUI() {
 
     let despContainer = document.getElementById('box-despertar');
     if (despContainer) {
-        if (controlePct >= 100) {
+        if (isSuperAdmin || controlePct >= 100) {
             despContainer.style.opacity = '1';
             despContainer.style.pointerEvents = 'auto';
         } else {
@@ -2637,18 +2659,20 @@ function updateUI() {
     }
 
     let limitAmiExcedido = false;
-    if(aAlc > maxAmiPoints) { aAlc = maxAmiPoints; currentChar.substats.amiAlc = maxAmiPoints; limitAmiExcedido = true; }
-    if(aDur > maxAmiPoints) { aDur = maxAmiPoints; currentChar.substats.amiDur = maxAmiPoints; limitAmiExcedido = true; }
-    if(aPot > maxAmiPoints) { aPot = maxAmiPoints; currentChar.substats.amiPot = maxAmiPoints; limitAmiExcedido = true; }
-    if(aVel > maxAmiPoints) { aVel = maxAmiPoints; currentChar.substats.amiVel = maxAmiPoints; limitAmiExcedido = true; }
-    if(aDesp > maxAmiPoints) { aDesp = maxAmiPoints; currentChar.substats.amiDesp = maxAmiPoints; limitAmiExcedido = true; }
+    if(!isSuperAdmin) {
+        if(aAlc > maxAmiPoints) { aAlc = maxAmiPoints; currentChar.substats.amiAlc = maxAmiPoints; limitAmiExcedido = true; }
+        if(aDur > maxAmiPoints) { aDur = maxAmiPoints; currentChar.substats.amiDur = maxAmiPoints; limitAmiExcedido = true; }
+        if(aPot > maxAmiPoints) { aPot = maxAmiPoints; currentChar.substats.amiPot = maxAmiPoints; limitAmiExcedido = true; }
+        if(aVel > maxAmiPoints) { aVel = maxAmiPoints; currentChar.substats.amiVel = maxAmiPoints; limitAmiExcedido = true; }
+        if(aDesp > maxAmiPoints) { aDesp = maxAmiPoints; currentChar.substats.amiDesp = maxAmiPoints; limitAmiExcedido = true; }
+    }
     
     let totalAmiSub = aAlc + aDur + aPot + aVel + aDesp;
     let pontosDisponiveis = totalAmi - totalAmiSub;
     let elDisp = document.getElementById('ami-distribuiveis');
     if(elDisp) elDisp.textContent = `Disponível: ${Math.max(0, pontosDisponiveis).toLocaleString("pt-BR")}`;
     
-    if(totalAmiSub > totalAmi) {
+    if(!isSuperAdmin && totalAmiSub > totalAmi) {
         let diff = totalAmiSub - totalAmi; let active = document.activeElement;
         if(active && active.id === 'sub-amiAlc') { aAlc -= diff; currentChar.substats.amiAlc = Math.max(0, aAlc); }
         else if(active && active.id === 'sub-amiDur') { aDur -= diff; currentChar.substats.amiDur = Math.max(0, aDur); }
@@ -3354,7 +3378,8 @@ function updateUI() {
     }
     
     let recompensaOutText = `\n  : ᓩ _${labelRecompensa}:_\n> ${valorRecompensa}\n`;
-    let berriesOutText = !isNPC ? `\n : ᓩ _𝐁ᴇʀʀɪᴇs:_\n> ${outBerries}\n` : "";
+    let showBerries = !isNPC || (i.berries && i.berries > 0);
+    let berriesOutText = showBerries ? `\n : ᓩ _𝐁ᴇʀʀɪᴇs:_\n> ${outBerries}\n` : "";
     
     let habilidadesOut = "";
     if (i.habilidadesExclusivas && i.habilidadesExclusivas.length > 0) {
@@ -3403,7 +3428,8 @@ function updateUI() {
         });
         habilidadesOut += `\n`;
     }
-    let npcsOutText = !isNPC ? `\n  : ᓩ _𝐍𝐏𝐂s ᴄᴏᴍᴜɴꜱ:_\n${outNpcsC}\n\n  : ᓩ _𝐍𝐏𝐂s ᴇꜱᴘᴇᴄɪᴀɪꜱ:_\n${outNpcsE}\n` : "";
+    let showNpcs = !isNPC || (i.npcsComunsList && i.npcsComunsList.length > 0) || (i.npcsEspeciaisList && i.npcsEspeciaisList.length > 0);
+    let npcsOutText = showNpcs ? `\n  : ᓩ _𝐍𝐏𝐂s ᴄᴏᴍᴜɴꜱ:_\n${outNpcsC}\n\n  : ᓩ _𝐍𝐏𝐂s ᴇꜱᴘᴇᴄɪᴀɪꜱ:_\n${outNpcsE}\n` : "";
 
     let inventarioFormatado = "";
     let invLines = [];
