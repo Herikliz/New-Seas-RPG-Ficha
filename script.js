@@ -899,7 +899,12 @@ window.updateArmaEquipada = function(idx, field, val) {
     currentChar.info.armasEquipadasList[idx][field] = val;
     if(field === 'val') {
         let clean = val.replace(/\D/g, "");
-        currentChar.info.armasEquipadasList[idx][field] = clean ? parseInt(clean, 10) : "";
+        let num = clean ? parseInt(clean, 10) : "";
+        if (currentChar.info.armasEquipadasList[idx].type === "pct" && num > 100) num = 100;
+        currentChar.info.armasEquipadasList[idx][field] = num;
+    } else if (field === 'type' && val === "pct") {
+        let currentVal = currentChar.info.armasEquipadasList[idx].val;
+        if (currentVal > 100) currentChar.info.armasEquipadasList[idx].val = 100;
     }
     saveData(); updateUI();
     if(field !== 'nome' && field !== 'val') renderArmasEquipadas();
@@ -921,10 +926,33 @@ function renderArmasEquipadas() {
             <div style="background: rgba(0,0,0,0.3); padding: 5px; border: 1px dashed ${btnCor}; border-radius: 6px; margin-bottom: 5px; display: flex; gap: 5px; align-items: center; transition: 0.2s;">
                 <input type="text" placeholder="Nome do Item/Arma" value="${a.nome || ''}" oninput="updateArmaEquipada(${idx}, 'nome', this.value)" style="flex: 2; padding: 6px;">
                 <select onchange="updateArmaEquipada(${idx}, 'stat', this.value)" style="flex: 1; padding: 6px; width: auto; font-size: 11px;">
-                    <option value="d" ${a.stat === 'd' ? 'selected' : ''}>Destreza</option>
-                    <option value="f" ${a.stat === 'f' ? 'selected' : ''}>Força</option>
-                    <option value="r" ${a.stat === 'r' ? 'selected' : ''}>Resistência</option>
-                    <option value="v" ${a.stat === 'v' ? 'selected' : ''}>Velocidade</option>
+                    <optgroup label="Atributos">
+                        <option value="tudoAttr" ${a.stat === 'tudoAttr' ? 'selected' : ''}>Todos os Atributos</option>
+                        <option value="d" ${a.stat === 'd' ? 'selected' : ''}>Destreza</option>
+                        <option value="f" ${a.stat === 'f' ? 'selected' : ''}>Força</option>
+                        <option value="r" ${a.stat === 'r' ? 'selected' : ''}>Resistência</option>
+                        <option value="v" ${a.stat === 'v' ? 'selected' : ''}>Velocidade</option>
+                        <option value="refl" ${a.stat === 'refl' ? 'selected' : ''}>Reflexo</option>
+                        <option value="vcorp" ${a.stat === 'vcorp' ? 'selected' : ''}>Vel. Corporal</option>
+                        <option value="vAgua" ${a.stat === 'vAgua' ? 'selected' : ''}>Velocidade (Água)</option>
+                        <option value="reflAgua" ${a.stat === 'reflAgua' ? 'selected' : ''}>Reflexo (Água)</option>
+                        <option value="vcorpAgua" ${a.stat === 'vcorpAgua' ? 'selected' : ''}>Vel. Corporal (Água)</option>
+                    </optgroup>
+                    <optgroup label="Espírito">
+                        <option value="tudoEsp" ${a.stat === 'tudoEsp' ? 'selected' : ''}>Todo o Espírito</option>
+                        <option value="esp" ${a.stat === 'esp' ? 'selected' : ''}>Espírito</option>
+                        <option value="ha" ${a.stat === 'ha' ? 'selected' : ''}>Armamento</option>
+                        <option value="ho" ${a.stat === 'ho' ? 'selected' : ''}>Observação</option>
+                        <option value="hr" ${a.stat === 'hr' ? 'selected' : ''}>Rei</option>
+                    </optgroup>
+                    <optgroup label="Akuma no Mi">
+                        <option value="tudoAmi" ${a.stat === 'tudoAmi' ? 'selected' : ''}>Toda a Akuma</option>
+                        <option value="amiAlc" ${a.stat === 'amiAlc' ? 'selected' : ''}>Alcance</option>
+                        <option value="amiDur" ${a.stat === 'amiDur' ? 'selected' : ''}>Durabilidade</option>
+                        <option value="amiPot" ${a.stat === 'amiPot' ? 'selected' : ''}>Potência</option>
+                        <option value="amiVel" ${a.stat === 'amiVel' ? 'selected' : ''}>Velocidade</option>
+                        <option value="amiDesp" ${a.stat === 'amiDesp' ? 'selected' : ''}>Despertar</option>
+                    </optgroup>
                 </select>
                 <select onchange="updateArmaEquipada(${idx}, 'type', this.value)" style="width: 70px; padding: 6px; font-size: 11px;">
                     <option value="pct" ${a.type === 'pct' ? 'selected' : ''}>%</option>
@@ -1264,16 +1292,15 @@ function addAlcunhaBuffRow() {
     row.style.display = 'flex'; row.style.gap = '5px'; row.style.marginBottom = '5px';
     row.innerHTML = `
         <select class="buff-stat" style="flex:2; font-size:11px; padding:4px; background:#2a2a2a; border:1px solid #444; color:#fff; border-radius:4px;">
-            <optgroup label="Tudo"><option value="tudo">Todos os Atributos</option></optgroup>
-            <optgroup label="Atributos"><option value="d">Destreza</option><option value="f">Força</option><option value="r">Resistência</option><option value="v">Velocidade</option><option value="refl">Reflexo</option><option value="vcorp">Vel. Corporal</option><option value="vAgua">Velocidade (Água)</option><option value="reflAgua">Reflexo (Água)</option><option value="vcorpAgua">Vel. Corporal (Água)</option></optgroup>
-            <optgroup label="Espírito"><option value="esp">Espírito</option><option value="ha">Armamento</option><option value="ho">Observação</option><option value="hr">Rei</option></optgroup>
-            <optgroup label="Akuma no Mi"><option value="amiAlc">Alcance</option><option value="amiDur">Durabilidade</option><option value="amiPot">Potência</option><option value="amiVel">Velocidade</option><option value="amiDesp">Despertar</option></optgroup>
+            <optgroup label="Atributos"><option value="tudoAttr">Todos os Atributos</option><option value="d">Destreza</option><option value="f">Força</option><option value="r">Resistência</option><option value="v">Velocidade</option><option value="refl">Reflexo</option><option value="vcorp">Vel. Corporal</option><option value="vAgua">Velocidade (Água)</option><option value="reflAgua">Reflexo (Água)</option><option value="vcorpAgua">Vel. Corporal (Água)</option></optgroup>
+            <optgroup label="Espírito"><option value="tudoEsp">Todo o Espírito</option><option value="esp">Espírito</option><option value="ha">Armamento</option><option value="ho">Observação</option><option value="hr">Rei</option></optgroup>
+            <optgroup label="Akuma no Mi"><option value="tudoAmi">Toda a Akuma</option><option value="amiAlc">Alcance</option><option value="amiDur">Durabilidade</option><option value="amiPot">Potência</option><option value="amiVel">Velocidade</option><option value="amiDesp">Despertar</option></optgroup>
         </select>
         <select class="buff-type" style="flex:1; font-size:11px; padding:4px; background:#2a2a2a; border:1px solid #444; color:#fff; border-radius:4px;">
             <option value="pct">% (+X%)</option>
             <option value="flat">Pts (+X)</option>
         </select>
-        <input type="number" class="buff-val" placeholder="Qtd" style="flex:1; font-size:11px; padding:4px; background:#2a2a2a; border:1px solid #444; color:#fff; border-radius:4px;">
+        <input type="number" class="buff-val" placeholder="Qtd" style="flex:1; font-size:11px; padding:4px; background:#2a2a2a; border:1px solid #444; color:#fff; border-radius:4px;" oninput="if(this.parentElement.querySelector('.buff-type').value === 'pct' && this.value > 100) this.value = 100;">
         <button class="btn btn-outline btn-danger" style="padding:2px 6px; font-size:10px; margin:0;" onclick="this.parentElement.remove()">X</button>
     `;
     list.appendChild(row);
@@ -1289,6 +1316,7 @@ function saveAlcunha() {
             let stat = row.querySelector('.buff-stat').value;
             let type = row.querySelector('.buff-type').value;
             let val = parseInt(row.querySelector('.buff-val').value) || 0;
+            if (type === 'pct' && val > 100) val = 100;
             if(val !== 0) buffs.push({stat, type, val});
         });
     }
@@ -1443,11 +1471,18 @@ function strCalc(base, bonus, flat = 0, itemBonus = 0, itemFlat = 0) {
         return `${parts.join("")} = ${passive.toLocaleString("pt-BR")}`;
     }
 
-    let activeStr = `${parts.join("")} = ${passive.toLocaleString("pt-BR")}`;
     let active = Math.round((passive + itemFlat) * (1 + itemBonus));
+    let activeStr = "";
+    if (bonus === 0 && flat === 0) {
+        activeStr = base.toLocaleString("pt-BR");
+    } else {
+        activeStr = `${parts.join("")} = ${passive.toLocaleString("pt-BR")}`;
+    }
+    
     if (itemFlat !== 0) activeStr += `${itemFlat >= 0 ? "+" : ""}${itemFlat.toLocaleString("pt-BR")}`;
     if (itemBonus !== 0) activeStr += `${itemBonus >= 0 ? "+" : ""}${(itemBonus * 100).toFixed(0)}%`;
     activeStr += ` = ${active.toLocaleString("pt-BR")}`;
+    
     return activeStr;
 }
 
@@ -1765,7 +1800,11 @@ function updateUI() {
             let ativa = i.alcunhasList.find(a => a.nome === i.alcunhaAtiva);
             if (ativa && ativa.buffs) {
                 ativa.buffs.forEach(b => {
-                    let targets = b.stat === "tudo" ? ["d","f","r","v"] : [b.stat];
+                    let targets = [b.stat];
+                    if (b.stat === "tudo" || b.stat === "tudoAttr") targets = ["d","f","r","v","refl","vcorp"];
+                    else if (b.stat === "tudoEsp") targets = ["esp","ha","ho","hr"];
+                    else if (b.stat === "tudoAmi") targets = ["amiAlc","amiDur","amiPot","amiVel","amiDesp"];
+                    
                     targets.forEach(t => {
                         if(tBonus[t] !== undefined) {
                             if (b.type === "pct") tBonus[t] += (b.val / 100);
@@ -2228,7 +2267,11 @@ function updateUI() {
         let ativa = i.alcunhasList.find(a => a.nome === i.alcunhaAtiva);
         if (ativa && ativa.buffs) {
             ativa.buffs.forEach(b => {
-                let targets = b.stat === "tudo" ? ["d","f","r","v"] : [b.stat];
+                let targets = [b.stat];
+                if (b.stat === "tudo" || b.stat === "tudoAttr") targets = ["d","f","r","v","refl","vcorp"];
+                else if (b.stat === "tudoEsp") targets = ["esp","ha","ho","hr"];
+                else if (b.stat === "tudoAmi") targets = ["amiAlc","amiDur","amiPot","amiVel","amiDesp"];
+                
                 targets.forEach(t => {
                     if (b.type === "pct") { if(typeof bonus[t] !== 'undefined') bonus[t] += (b.val / 100); }
                     else { if(typeof flatBonus[t] !== 'undefined') flatBonus[t] += b.val; }
@@ -2237,23 +2280,33 @@ function updateUI() {
         }
     }
 
-    let itemBonus = {d:0, f:0, r:0, v:0};
-    let itemFlat = {d:0, f:0, r:0, v:0};
+    let itemBonus = {d:0, f:0, r:0, v:0, refl:0, vcorp:0, vAgua:0, reflAgua:0, vcorpAgua:0, esp:0, ha:0, ho:0, hr:0, ami:0, amiAlc:0, amiDur:0, amiPot:0, amiVel:0, amiDesp:0};
+    let itemFlat = {d:0, f:0, r:0, v:0, refl:0, vcorp:0, vAgua:0, reflAgua:0, vcorpAgua:0, esp:0, ha:0, ho:0, hr:0, ami:0, amiAlc:0, amiDur:0, amiPot:0, amiVel:0, amiDesp:0};
     if (i.armasEquipadasList) {
         i.armasEquipadasList.forEach(a => {
             if (a.ativo && a.stat) {
                 let val = parseInt(a.val) || 0;
-                if (val > 0) {
-                    if (a.type === "pct") {
-                        if (typeof itemBonus[a.stat] !== 'undefined') itemBonus[a.stat] += (val / 100);
-                    } else {
-                        if (typeof itemFlat[a.stat] !== 'undefined') itemFlat[a.stat] += val;
-                    }
+                if (val !== 0) {
+                    let targets = [a.stat];
+                    if (a.stat === "tudo" || a.stat === "tudoAttr") targets = ["d","f","r","v","refl","vcorp"];
+                    else if (a.stat === "tudoEsp") targets = ["esp","ha","ho","hr"];
+                    else if (a.stat === "tudoAmi") targets = ["amiAlc","amiDur","amiPot","amiVel","amiDesp"];
+                    
+                    targets.forEach(t => {
+                        if (a.type === "pct") {
+                            if (typeof itemBonus[t] !== 'undefined') itemBonus[t] += (val / 100);
+                        } else {
+                            if (typeof itemFlat[t] !== 'undefined') itemFlat[t] += val;
+                        }
+                    });
                 }
             }
         });
     }
     for (let k in itemBonus) { if (itemBonus[k] > 1.0) itemBonus[k] = 1.0; }
+
+    itemBonus.amiAlc += itemBonus.ami; itemBonus.amiDur += itemBonus.ami; itemBonus.amiPot += itemBonus.ami; itemBonus.amiVel += itemBonus.ami; itemBonus.amiDesp += itemBonus.ami; itemBonus.ami = 0;
+    itemFlat.amiAlc += itemFlat.ami; itemFlat.amiDur += itemFlat.ami; itemFlat.amiPot += itemFlat.ami; itemFlat.amiVel += itemFlat.ami; itemFlat.amiDesp += itemFlat.ami; itemFlat.ami = 0;
 
     if(combatenteLevel > 0) { bonus[i.selClasseDF] += combatenteLevel * 0.05; }
 
@@ -2640,7 +2693,9 @@ function updateUI() {
         if (espElUpdate) espElUpdate.value = ESP.toLocaleString("pt-BR");
     }
     
-    let totalEsp = Math.round((ESP + flatBonus.esp) * (1 + bonus.esp)); document.getElementById('total-esp').innerText = "Total: " + totalEsp.toLocaleString("pt-BR");
+    let passiveEsp = Math.round((ESP + flatBonus.esp) * (1 + bonus.esp));
+    let totalEsp = Math.round((passiveEsp + itemFlat.esp) * (1 + itemBonus.esp));
+    document.getElementById('total-esp').innerText = "Total: " + totalEsp.toLocaleString("pt-BR");
     
     let HA = currentChar.substats.hArm || 0, HO = currentChar.substats.hObs || 0, HR = currentChar.substats.hRei || 0;
     let totalHaki = HA + HO + HR;
@@ -3080,20 +3135,26 @@ function updateUI() {
             if (REF > 0 || REFAgua > 0 || REFAkuma > 0) {
                 let refNormStr = "";
                 if (REF > 0 || REFAkuma > 0) {
-                    let totalBaseRef = Math.round((REF + flatBonus.refl) * (1 + bonus.refl));
-                    if (bonus.refl === 0 && flatBonus.refl === 0) refNormStr = (totalBaseRef + REFAkuma).toLocaleString("pt-BR");
+                    let totalBaseRef = Math.round((Math.round((REF + flatBonus.refl) * (1 + bonus.refl)) + itemFlat.refl) * (1 + itemBonus.refl));
+                    if (bonus.refl === 0 && flatBonus.refl === 0 && itemBonus.refl === 0 && itemFlat.refl === 0) refNormStr = (totalBaseRef + REFAkuma).toLocaleString("pt-BR");
                     else {
-                        refNormStr = strCalc(REF, bonus.refl, flatBonus.refl);
-                        if (REFAkuma > 0) refNormStr = refNormStr.split(" = ")[0] + `+${REFAkuma.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseRef + REFAkuma).toLocaleString("pt-BR")}`;
+                        refNormStr = strCalc(REF, bonus.refl, flatBonus.refl, itemBonus.refl, itemFlat.refl);
+                        if (REFAkuma > 0) {
+                            let ptsStr = refNormStr.includes("=") ? refNormStr.substring(0, refNormStr.lastIndexOf(" = ")) : refNormStr;
+                            refNormStr = ptsStr + `+${REFAkuma.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseRef + REFAkuma).toLocaleString("pt-BR")}`;
+                        }
                     }
                 }
                 let refWaterStr = "";
                 if (REFAgua > 0 || REFAkuma > 0) {
-                    let totalBaseRefAgua = Math.round((REFAgua + totalFlatBonusReflAgua) * (1 + totalBonusReflAgua));
-                    if (totalBonusReflAgua === 0 && totalFlatBonusReflAgua === 0) refWaterStr = (totalBaseRefAgua + REFAkuma).toLocaleString("pt-BR");
+                    let totalBaseRefAgua = Math.round((Math.round((REFAgua + totalFlatBonusReflAgua) * (1 + totalBonusReflAgua)) + itemFlat.reflAgua) * (1 + itemBonus.reflAgua));
+                    if (totalBonusReflAgua === 0 && totalFlatBonusReflAgua === 0 && itemBonus.reflAgua === 0 && itemFlat.reflAgua === 0) refWaterStr = (totalBaseRefAgua + REFAkuma).toLocaleString("pt-BR");
                     else {
-                        refWaterStr = strCalc(REFAgua, totalBonusReflAgua, totalFlatBonusReflAgua);
-                        if (REFAkuma > 0) refWaterStr = refWaterStr.split(" = ")[0] + `+${REFAkuma.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseRefAgua + REFAkuma).toLocaleString("pt-BR")}`;
+                        refWaterStr = strCalc(REFAgua, totalBonusReflAgua, totalFlatBonusReflAgua, itemBonus.reflAgua, itemFlat.reflAgua);
+                        if (REFAkuma > 0) {
+                            let ptsStr = refWaterStr.includes("=") ? refWaterStr.substring(0, refWaterStr.lastIndexOf(" = ")) : refWaterStr;
+                            refWaterStr = ptsStr + `+${REFAkuma.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseRefAgua + REFAkuma).toLocaleString("pt-BR")}`;
+                        }
                     }
                 }
                 if ((REF > 0 || REFAkuma > 0) && (REFAgua > 0 || REFAkuma > 0)) attrOut += `> _𝚁𝚎𝚏𝚕𝚎𝚡𝚘:_ ${refNormStr} | ${refWaterStr} (dentro d'água)\n`;
@@ -3103,20 +3164,26 @@ function updateUI() {
             if (VCORP > 0 || VCORPAgua > 0 || VCORPAkuma > 0) {
                 let vcorpNormStr = "";
                 if (VCORP > 0 || VCORPAkuma > 0) {
-                    let totalBaseVcorp = Math.round((VCORP + flatBonus.vcorp) * (1 + bonus.vcorp));
-                    if (bonus.vcorp === 0 && flatBonus.vcorp === 0) vcorpNormStr = (totalBaseVcorp + VCORPAkuma).toLocaleString("pt-BR");
+                    let totalBaseVcorp = Math.round((Math.round((VCORP + flatBonus.vcorp) * (1 + bonus.vcorp)) + itemFlat.vcorp) * (1 + itemBonus.vcorp));
+                    if (bonus.vcorp === 0 && flatBonus.vcorp === 0 && itemBonus.vcorp === 0 && itemFlat.vcorp === 0) vcorpNormStr = (totalBaseVcorp + VCORPAkuma).toLocaleString("pt-BR");
                     else {
-                        vcorpNormStr = strCalc(VCORP, bonus.vcorp, flatBonus.vcorp);
-                        if (VCORPAkuma > 0) vcorpNormStr = vcorpNormStr.split(" = ")[0] + `+${VCORPAkuma.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseVcorp + VCORPAkuma).toLocaleString("pt-BR")}`;
+                        vcorpNormStr = strCalc(VCORP, bonus.vcorp, flatBonus.vcorp, itemBonus.vcorp, itemFlat.vcorp);
+                        if (VCORPAkuma > 0) {
+                            let ptsStr = vcorpNormStr.includes("=") ? vcorpNormStr.substring(0, vcorpNormStr.lastIndexOf(" = ")) : vcorpNormStr;
+                            vcorpNormStr = ptsStr + `+${VCORPAkuma.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseVcorp + VCORPAkuma).toLocaleString("pt-BR")}`;
+                        }
                     }
                 }
                 let vcorpWaterStr = "";
                 if (VCORPAgua > 0 || VCORPAkuma > 0) {
-                    let totalBaseVcorpAgua = Math.round((VCORPAgua + totalFlatBonusVcorpAgua) * (1 + totalBonusVcorpAgua));
-                    if (totalBonusVcorpAgua === 0 && totalFlatBonusVcorpAgua === 0) vcorpWaterStr = (totalBaseVcorpAgua + VCORPAkuma).toLocaleString("pt-BR");
+                    let totalBaseVcorpAgua = Math.round((Math.round((VCORPAgua + totalFlatBonusVcorpAgua) * (1 + totalBonusVcorpAgua)) + itemFlat.vcorpAgua) * (1 + itemBonus.vcorpAgua));
+                    if (totalBonusVcorpAgua === 0 && totalFlatBonusVcorpAgua === 0 && itemBonus.vcorpAgua === 0 && itemFlat.vcorpAgua === 0) vcorpWaterStr = (totalBaseVcorpAgua + VCORPAkuma).toLocaleString("pt-BR");
                     else {
-                        vcorpWaterStr = strCalc(VCORPAgua, totalBonusVcorpAgua, totalFlatBonusVcorpAgua);
-                        if (VCORPAkuma > 0) vcorpWaterStr = vcorpWaterStr.split(" = ")[0] + `+${VCORPAkuma.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseVcorpAgua + VCORPAkuma).toLocaleString("pt-BR")}`;
+                        vcorpWaterStr = strCalc(VCORPAgua, totalBonusVcorpAgua, totalFlatBonusVcorpAgua, itemBonus.vcorpAgua, itemFlat.vcorpAgua);
+                        if (VCORPAkuma > 0) {
+                            let ptsStr = vcorpWaterStr.includes("=") ? vcorpWaterStr.substring(0, vcorpWaterStr.lastIndexOf(" = ")) : vcorpWaterStr;
+                            vcorpWaterStr = ptsStr + `+${VCORPAkuma.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseVcorpAgua + VCORPAkuma).toLocaleString("pt-BR")}`;
+                        }
                     }
                 }
                 if ((VCORP > 0 || VCORPAkuma > 0) && (VCORPAgua > 0 || VCORPAkuma > 0)) attrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎 𝙲𝚘𝚛𝚙𝚘𝚛𝚊𝚕:_ ${vcorpNormStr} | ${vcorpWaterStr} (dentro d'água)\n`;
@@ -3128,20 +3195,26 @@ function updateUI() {
             let REFAkuma = (i.amiVelAtivo) ? (currentChar.substats.reflAkuma || 0) : 0;
             let VCORPAkuma = (i.amiVelAtivo) ? (currentChar.substats.vcorpAkuma || 0) : 0;
             if (REF > 0 || REFAkuma > 0) {
-                let totalBaseRef = Math.round((REF + flatBonus.refl) * (1 + bonus.refl));
-                if (bonus.refl === 0 && flatBonus.refl === 0) attrOut += `> _𝚁𝚎𝚏𝚕𝚎𝚡𝚘:_ ${(totalBaseRef + REFAkuma).toLocaleString("pt-BR")}\n`;
+                let totalBaseRef = Math.round((Math.round((REF + flatBonus.refl) * (1 + bonus.refl)) + itemFlat.refl) * (1 + itemBonus.refl));
+                if (bonus.refl === 0 && flatBonus.refl === 0 && itemBonus.refl === 0 && itemFlat.refl === 0) attrOut += `> _𝚁𝚎𝚏𝚕𝚎𝚡𝚘:_ ${(totalBaseRef + REFAkuma).toLocaleString("pt-BR")}\n`;
                 else {
-                    let refNormStr = strCalc(REF, bonus.refl, flatBonus.refl);
-                    if (REFAkuma > 0) refNormStr = refNormStr.split(" = ")[0] + `+${REFAkuma.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseRef + REFAkuma).toLocaleString("pt-BR")}`;
+                    let refNormStr = strCalc(REF, bonus.refl, flatBonus.refl, itemBonus.refl, itemFlat.refl);
+                    if (REFAkuma > 0) {
+                        let ptsStr = refNormStr.includes("=") ? refNormStr.substring(0, refNormStr.lastIndexOf(" = ")) : refNormStr;
+                        refNormStr = ptsStr + `+${REFAkuma.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseRef + REFAkuma).toLocaleString("pt-BR")}`;
+                    }
                     attrOut += `> _𝚁𝚎𝚏𝚕𝚎𝚡𝚘:_ ${refNormStr}\n`;
                 }
             }
             if (VCORP > 0 || VCORPAkuma > 0) {
-                let totalBaseVcorp = Math.round((VCORP + flatBonus.vcorp) * (1 + bonus.vcorp));
-                if (bonus.vcorp === 0 && flatBonus.vcorp === 0) attrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎 𝙲𝚘𝚛𝚙𝚘𝚛𝚊𝚕:_ ${(totalBaseVcorp + VCORPAkuma).toLocaleString("pt-BR")}\n`;
+                let totalBaseVcorp = Math.round((Math.round((VCORP + flatBonus.vcorp) * (1 + bonus.vcorp)) + itemFlat.vcorp) * (1 + itemBonus.vcorp));
+                if (bonus.vcorp === 0 && flatBonus.vcorp === 0 && itemBonus.vcorp === 0 && itemFlat.vcorp === 0) attrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎 𝙲𝚘𝚛𝚙𝚘𝚛𝚊𝚕:_ ${(totalBaseVcorp + VCORPAkuma).toLocaleString("pt-BR")}\n`;
                 else {
-                    let vcorpNormStr = strCalc(VCORP, bonus.vcorp, flatBonus.vcorp);
-                    if (VCORPAkuma > 0) vcorpNormStr = vcorpNormStr.split(" = ")[0] + `+${VCORPAkuma.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseVcorp + VCORPAkuma).toLocaleString("pt-BR")}`;
+                    let vcorpNormStr = strCalc(VCORP, bonus.vcorp, flatBonus.vcorp, itemBonus.vcorp, itemFlat.vcorp);
+                    if (VCORPAkuma > 0) {
+                        let ptsStr = vcorpNormStr.includes("=") ? vcorpNormStr.substring(0, vcorpNormStr.lastIndexOf(" = ")) : vcorpNormStr;
+                        vcorpNormStr = ptsStr + `+${VCORPAkuma.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseVcorp + VCORPAkuma).toLocaleString("pt-BR")}`;
+                    }
                     attrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎 𝙲𝚘𝚛𝚙𝚘𝚛𝚊𝚕:_ ${vcorpNormStr}\n`;
                 }
             }
@@ -3150,9 +3223,9 @@ function updateUI() {
     }
     
     if (totalFinal >= reqEsp && ESP > 0) {
-        attrOut += `↠ *𝙴𝚜𝚙𝚒́𝚛𝚒𝚝𝚘:* ${strCalc(ESP, bonus.esp, flatBonus.esp)}\n`;
+        attrOut += `↠ *𝙴𝚜𝚙𝚒́𝚛𝚒𝚝𝚘:* ${strCalc(ESP, bonus.esp, flatBonus.esp, itemBonus.esp, itemFlat.esp)}\n`;
         if (HA > 0) {
-            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝙰𝚛𝚖𝚊𝚖𝚎𝚗𝚝𝚘:_ ${strCalc(HA, bonus.ha, flatBonus.ha)}\n`;
+            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝙰𝚛𝚖𝚊𝚖𝚎𝚗𝚝𝚘:_ ${strCalc(HA, bonus.ha, flatBonus.ha, itemBonus.ha, itemFlat.ha)}\n`;
             let hasHigherHA = (i.unlockHA3 || i.unlockHA4 || i.unlockHA5 || i.unlockHA6);
             if (i.unlockHA1 && !i.unlockHA2 && !hasHigherHA) attrOut += `- 𝙸𝚗𝚟𝚒𝚜𝚒́𝚟𝚎𝚕✓\n`;
             if (i.unlockHA2 && !hasHigherHA) attrOut += `- 𝚅𝚒𝚜𝚒́𝚟𝚎𝚕✓\n`;
@@ -3162,13 +3235,13 @@ function updateUI() {
             if (i.unlockHA6) attrOut += `- 𝙰𝚟𝚊𝚗𝚌̧𝚊𝚍𝚘✓\n`;
         }
         if (HO > 0) {
-            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚊 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘:_ ${strCalc(HO, bonus.ho, flatBonus.ho)}\n`;
+            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚊 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘:_ ${strCalc(HO, bonus.ho, flatBonus.ho, itemBonus.ho, itemFlat.ho)}\n`;
             if (i.unlockHO2) attrOut += `- 𝙸𝚗𝚝𝚎𝚗𝚌̧𝚊̃𝚘✓\n`;
             if (i.unlockHO3) attrOut += `- 𝙿𝚛𝚎𝚖𝚘𝚗𝚒𝚌̧𝚊̃𝚘✓\n`;
             if (i.unlockHO4) attrOut += `- 𝙰𝚟𝚊𝚗𝚌̧𝚊𝚍𝚘✓\n`;
         }
         if (HR > 0) {
-            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝚁𝚎𝚒:_ ${strCalc(HR, bonus.hr, flatBonus.hr)}\n`;
+            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝚁𝚎𝚒:_ ${strCalc(HR, bonus.hr, flatBonus.hr, itemBonus.hr, itemFlat.hr)}\n`;
             if (i.unlockHR2) attrOut += `- 𝙳𝚘𝚖𝚒𝚗𝚊𝚌̧𝚊̃𝚘✓\n`;
             if (i.unlockHR3) attrOut += `- 𝙸𝚗𝚌𝚊𝚙𝚊𝚌𝚒𝚝𝚊𝚌̧𝚊̃𝚘✓\n`;
             if (i.unlockHR4) attrOut += `- 𝙿𝚛𝚎𝚜𝚜𝚊̃𝚘✓\n`;
@@ -3179,21 +3252,21 @@ function updateUI() {
     }
     
     if (AMI > 0) {
-        attrOut += `↠ *𝙰𝚔𝚞𝚖𝚊 𝚗𝚘 𝙼𝚒:* ${strCalc(AMI, bonus.ami, flatBonus.ami)}\n`;
+        attrOut += `↠ *𝙰𝚔𝚞𝚖𝚊 𝚗𝚘 𝙼𝚒:* ${strCalc(AMI, bonus.ami, flatBonus.ami, itemBonus.ami, itemFlat.ami)}\n`;
         if (i.hasAmiAlc && aAlc > 0) {
-            let calcAAlc = Math.round((aAlc + flatBonus.amiAlc) * (1 + bonus.amiAlc));
+            let calcAAlc = Math.round((Math.round((aAlc + flatBonus.amiAlc) * (1 + bonus.amiAlc)) + itemFlat.amiAlc) * (1 + itemBonus.amiAlc));
             let mult = parseFloat((i.amiAlcMult || "1").toString().replace(',', '.')) || 1;
             let metros = (calcAAlc / 20) * mult;
-            attrOut += `> _𝙰𝚕𝚌𝚊𝚗𝚌𝚎:_ ${strCalc(aAlc, bonus.amiAlc, flatBonus.amiAlc)} (${metros.toLocaleString("pt-BR", {maximumFractionDigits: 1})}m)\n`;
+            attrOut += `> _𝙰𝚕𝚌𝚊𝚗𝚌𝚎:_ ${strCalc(aAlc, bonus.amiAlc, flatBonus.amiAlc, itemBonus.amiAlc, itemFlat.amiAlc)} (${metros.toLocaleString("pt-BR", {maximumFractionDigits: 1})}m)\n`;
         }
         if (i.hasAmiDur && aDur > 0) {
-            let calcADur = Math.round((aDur + flatBonus.amiDur) * (1 + bonus.amiDur));
+            let calcADur = Math.round((Math.round((aDur + flatBonus.amiDur) * (1 + bonus.amiDur)) + itemFlat.amiDur) * (1 + itemBonus.amiDur));
             let cenas = Math.floor(calcADur / 500);
-            attrOut += `> _𝙳𝚞𝚛𝚊𝚋𝚒𝚕𝚒𝚍𝚊𝚍𝚎:_ ${strCalc(aDur, bonus.amiDur, flatBonus.amiDur)} (${cenas} cena${cenas !== 1 ? 's' : ''})\n`;
+            attrOut += `> _𝙳𝚞𝚛𝚊𝚋𝚒𝚕𝚒𝚍𝚊𝚍𝚎:_ ${strCalc(aDur, bonus.amiDur, flatBonus.amiDur, itemBonus.amiDur, itemFlat.amiDur)} (${cenas} cena${cenas !== 1 ? 's' : ''})\n`;
         }
         if (i.hasAmiPot && aPot > 0) {
-            let calcAPotFinal = Math.round((aPot + flatBonus.amiPot) * (1 + bonus.amiPot));
-            let strPotFinal = strCalc(aPot, bonus.amiPot, flatBonus.amiPot);
+            let calcAPotFinal = Math.round((Math.round((aPot + flatBonus.amiPot) * (1 + bonus.amiPot)) + itemFlat.amiPot) * (1 + itemBonus.amiPot));
+            let strPotFinal = strCalc(aPot, bonus.amiPot, flatBonus.amiPot, itemBonus.amiPot, itemFlat.amiPot);
             let amiResPctValFicha = parseInt(i.amiResPct) || 0;
             if (amiResPctValFicha > 0) {
                 let resCalcFinal = calcAPotFinal + Math.floor(calcAPotFinal * (amiResPctValFicha / 100));
@@ -3203,8 +3276,8 @@ function updateUI() {
             }
         }
         if (i.hasAmiVel && aVel > 0) {
-            let calcAVelFinalOut = Math.round((aVel + flatBonus.amiVel) * (1 + bonus.amiVel));
-            let strVelFinal = strCalc(aVel, bonus.amiVel, flatBonus.amiVel);
+            let calcAVelFinalOut = Math.round((Math.round((aVel + flatBonus.amiVel) * (1 + bonus.amiVel)) + itemFlat.amiVel) * (1 + itemBonus.amiVel));
+            let strVelFinal = strCalc(aVel, bonus.amiVel, flatBonus.amiVel, itemBonus.amiVel, itemFlat.amiVel);
             let baseAkumaVelUIOut = Math.floor(calcAVelFinalOut * (controlePct / 100));
             let amiVelBuffValOut = parseInt(i.amiVelBuff) || 0;
             if (amiVelBuffValOut > 0) {
@@ -3214,7 +3287,7 @@ function updateUI() {
                 attrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:_ ${strVelFinal} (${baseAkumaVelUIOut.toLocaleString("pt-BR")} de Velocidade Adicional)\n`;
             }
         }
-        if (i.hasAmiDesp && aDesp > 0) attrOut += `> _𝙳𝚎𝚜𝚙𝚎𝚛𝚝𝚊𝚛:_ ${strCalc(aDesp, bonus.amiDesp, flatBonus.amiDesp)}\n`;
+        if (i.hasAmiDesp && aDesp > 0) attrOut += `> _𝙳𝚎𝚜𝚙𝚎𝚛𝚝𝚊𝚛:_ ${strCalc(aDesp, bonus.amiDesp, flatBonus.amiDesp, itemBonus.amiDesp, itemFlat.amiDesp)}\n`;
         if (activeAmiStats > 0) attrOut += `> _𝙲𝚘𝚗𝚝𝚛ᴏ𝚕𝚎:_ ${controlePct}%\n`;
         attrOut += `\n`;
     }
@@ -3440,7 +3513,7 @@ function updateUI() {
         let formatAlcunha = (alcObj) => {
             if (alcObj && alcObj.buffs && alcObj.buffs.length > 0) {
                 let buffGroups = {};
-                let names = {tudo:"Todos os Atributos",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar"};
+                let names = {tudo:"Todos os Atributos",tudoAttr:"Todos os Atributos",tudoEsp:"Todo o Espírito",tudoAmi:"Toda a Akuma",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar"};
                 alcObj.buffs.forEach(b => {
                     let key = (b.val >= 0 ? '+' : '') + b.val + (b.type === 'pct' ? '%' : '');
                     if(!buffGroups[key]) buffGroups[key] = [];
@@ -3577,37 +3650,49 @@ function updateUI() {
         let totalFlatBonusVcorpAgua = flatBonus.vcorp + flatBonus.vcorpAgua;
 
         let refNormStr = "";
-        let totalBaseRef = Math.round((REF + flatBonus.refl) * (1 + bonus.refl));
-        if (bonus.refl === 0 && flatBonus.refl === 0) refNormStr = (totalBaseRef + REFAkumaMan).toLocaleString("pt-BR");
+        let totalBaseRef = Math.round((Math.round((REF + flatBonus.refl) * (1 + bonus.refl)) + itemFlat.refl) * (1 + itemBonus.refl));
+        if (bonus.refl === 0 && flatBonus.refl === 0 && itemBonus.refl === 0 && itemFlat.refl === 0) refNormStr = (totalBaseRef + REFAkumaMan).toLocaleString("pt-BR");
         else {
-            refNormStr = strCalc(REF, bonus.refl, flatBonus.refl);
-            if (REFAkumaMan > 0) refNormStr = refNormStr.split(" = ")[0] + `+${REFAkumaMan.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseRef + REFAkumaMan).toLocaleString("pt-BR")}`;
+            refNormStr = strCalc(REF, bonus.refl, flatBonus.refl, itemBonus.refl, itemFlat.refl);
+            if (REFAkumaMan > 0) {
+                let ptsStr = refNormStr.includes("=") ? refNormStr.substring(0, refNormStr.lastIndexOf(" = ")) : refNormStr;
+                refNormStr = ptsStr + `+${REFAkumaMan.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseRef + REFAkumaMan).toLocaleString("pt-BR")}`;
+            }
         }
 
         let refWaterStr = "";
-        let totalBaseRefAgua = Math.round((REFAgua + totalFlatBonusReflAgua) * (1 + totalBonusReflAgua));
-        if (totalBonusReflAgua === 0 && totalFlatBonusReflAgua === 0) refWaterStr = (totalBaseRefAgua + REFAkumaMan).toLocaleString("pt-BR");
+        let totalBaseRefAgua = Math.round((Math.round((REFAgua + totalFlatBonusReflAgua) * (1 + totalBonusReflAgua)) + itemFlat.reflAgua) * (1 + itemBonus.reflAgua));
+        if (totalBonusReflAgua === 0 && totalFlatBonusReflAgua === 0 && itemBonus.reflAgua === 0 && itemFlat.reflAgua === 0) refWaterStr = (totalBaseRefAgua + REFAkumaMan).toLocaleString("pt-BR");
         else {
-            refWaterStr = strCalc(REFAgua, totalBonusReflAgua, totalFlatBonusReflAgua);
-            if (REFAkumaMan > 0) refWaterStr = refWaterStr.split(" = ")[0] + `+${REFAkumaMan.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseRefAgua + REFAkumaMan).toLocaleString("pt-BR")}`;
+            refWaterStr = strCalc(REFAgua, totalBonusReflAgua, totalFlatBonusReflAgua, itemBonus.reflAgua, itemFlat.reflAgua);
+            if (REFAkumaMan > 0) {
+                let ptsStr = refWaterStr.includes("=") ? refWaterStr.substring(0, refWaterStr.lastIndexOf(" = ")) : refWaterStr;
+                refWaterStr = ptsStr + `+${REFAkumaMan.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseRefAgua + REFAkumaMan).toLocaleString("pt-BR")}`;
+            }
         }
 
         manualAttrOut += `> _𝚁𝚎𝚏𝚕𝚎𝚡𝚘:_ ${refNormStr} | ${refWaterStr} (dentro d'água)\n`;
 
         let vcorpNormStr = "";
-        let totalBaseVcorp = Math.round((VCORP + flatBonus.vcorp) * (1 + bonus.vcorp));
-        if (bonus.vcorp === 0 && flatBonus.vcorp === 0) vcorpNormStr = (totalBaseVcorp + VCORPAkumaMan).toLocaleString("pt-BR");
+        let totalBaseVcorp = Math.round((Math.round((VCORP + flatBonus.vcorp) * (1 + bonus.vcorp)) + itemFlat.vcorp) * (1 + itemBonus.vcorp));
+        if (bonus.vcorp === 0 && flatBonus.vcorp === 0 && itemBonus.vcorp === 0 && itemFlat.vcorp === 0) vcorpNormStr = (totalBaseVcorp + VCORPAkumaMan).toLocaleString("pt-BR");
         else {
-            vcorpNormStr = strCalc(VCORP, bonus.vcorp, flatBonus.vcorp);
-            if (VCORPAkumaMan > 0) vcorpNormStr = vcorpNormStr.split(" = ")[0] + `+${VCORPAkumaMan.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseVcorp + VCORPAkumaMan).toLocaleString("pt-BR")}`;
+            vcorpNormStr = strCalc(VCORP, bonus.vcorp, flatBonus.vcorp, itemBonus.vcorp, itemFlat.vcorp);
+            if (VCORPAkumaMan > 0) {
+                let ptsStr = vcorpNormStr.includes("=") ? vcorpNormStr.substring(0, vcorpNormStr.lastIndexOf(" = ")) : vcorpNormStr;
+                vcorpNormStr = ptsStr + `+${VCORPAkumaMan.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseVcorp + VCORPAkumaMan).toLocaleString("pt-BR")}`;
+            }
         }
 
         let vcorpWaterStr = "";
-        let totalBaseVcorpAgua = Math.round((VCORPAgua + totalFlatBonusVcorpAgua) * (1 + totalBonusVcorpAgua));
-        if (totalBonusVcorpAgua === 0 && totalFlatBonusVcorpAgua === 0) vcorpWaterStr = (totalBaseVcorpAgua + VCORPAkumaMan).toLocaleString("pt-BR");
+        let totalBaseVcorpAgua = Math.round((Math.round((VCORPAgua + totalFlatBonusVcorpAgua) * (1 + totalBonusVcorpAgua)) + itemFlat.vcorpAgua) * (1 + itemBonus.vcorpAgua));
+        if (totalBonusVcorpAgua === 0 && totalFlatBonusVcorpAgua === 0 && itemBonus.vcorpAgua === 0 && itemFlat.vcorpAgua === 0) vcorpWaterStr = (totalBaseVcorpAgua + VCORPAkumaMan).toLocaleString("pt-BR");
         else {
-            vcorpWaterStr = strCalc(VCORPAgua, totalBonusVcorpAgua, totalFlatBonusVcorpAgua);
-            if (VCORPAkumaMan > 0) vcorpWaterStr = vcorpWaterStr.split(" = ")[0] + `+${VCORPAkumaMan.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseVcorpAgua + VCORPAkumaMan).toLocaleString("pt-BR")}`;
+            vcorpWaterStr = strCalc(VCORPAgua, totalBonusVcorpAgua, totalFlatBonusVcorpAgua, itemBonus.vcorpAgua, itemFlat.vcorpAgua);
+            if (VCORPAkumaMan > 0) {
+                let ptsStr = vcorpWaterStr.includes("=") ? vcorpWaterStr.substring(0, vcorpWaterStr.lastIndexOf(" = ")) : vcorpWaterStr;
+                vcorpWaterStr = ptsStr + `+${VCORPAkumaMan.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseVcorpAgua + VCORPAkumaMan).toLocaleString("pt-BR")}`;
+            }
         }
 
         manualAttrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎 𝙲𝚘𝚛𝚙𝚘𝚛𝚊𝚕:_ ${vcorpNormStr} | ${vcorpWaterStr} (dentro d'água)\n`;
@@ -3615,26 +3700,32 @@ function updateUI() {
     } else {
         manualAttrOut += `↠ *𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:* ${velNormalStrMan}\n`;
         
-        let totalBaseRef = Math.round((REF + flatBonus.refl) * (1 + bonus.refl));
-        if (bonus.refl === 0 && flatBonus.refl === 0) manualAttrOut += `> _𝚁𝚎𝚏𝚕𝚎𝚡𝚘:_ ${(totalBaseRef + REFAkumaMan).toLocaleString("pt-BR")}\n`;
+        let totalBaseRef = Math.round((Math.round((REF + flatBonus.refl) * (1 + bonus.refl)) + itemFlat.refl) * (1 + itemBonus.refl));
+        if (bonus.refl === 0 && flatBonus.refl === 0 && itemBonus.refl === 0 && itemFlat.refl === 0) manualAttrOut += `> _𝚁𝚎𝚏𝚕𝚎𝚡𝚘:_ ${(totalBaseRef + REFAkumaMan).toLocaleString("pt-BR")}\n`;
         else {
-            let refNormStr = strCalc(REF, bonus.refl, flatBonus.refl);
-            if (REFAkumaMan > 0) refNormStr = refNormStr.split(" = ")[0] + `+${REFAkumaMan.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseRef + REFAkumaMan).toLocaleString("pt-BR")}`;
+            let refNormStr = strCalc(REF, bonus.refl, flatBonus.refl, itemBonus.refl, itemFlat.refl);
+            if (REFAkumaMan > 0) {
+                let ptsStr = refNormStr.includes("=") ? refNormStr.substring(0, refNormStr.lastIndexOf(" = ")) : refNormStr;
+                refNormStr = ptsStr + `+${REFAkumaMan.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseRef + REFAkumaMan).toLocaleString("pt-BR")}`;
+            }
             manualAttrOut += `> _𝚁𝚎𝚏𝚕𝚎𝚡𝚘:_ ${refNormStr}\n`;
         }
         
-        let totalBaseVcorp = Math.round((VCORP + flatBonus.vcorp) * (1 + bonus.vcorp));
-        if (bonus.vcorp === 0 && flatBonus.vcorp === 0) manualAttrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎 𝙲𝚘𝚛𝚙𝚘𝚛𝚊𝚕:_ ${(totalBaseVcorp + VCORPAkumaMan).toLocaleString("pt-BR")}\n`;
+        let totalBaseVcorp = Math.round((Math.round((VCORP + flatBonus.vcorp) * (1 + bonus.vcorp)) + itemFlat.vcorp) * (1 + itemBonus.vcorp));
+        if (bonus.vcorp === 0 && flatBonus.vcorp === 0 && itemBonus.vcorp === 0 && itemFlat.vcorp === 0) manualAttrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎 𝙲𝚘𝚛𝚙𝚘𝚛𝚊𝚕:_ ${(totalBaseVcorp + VCORPAkumaMan).toLocaleString("pt-BR")}\n`;
         else {
-            let vcorpNormStr = strCalc(VCORP, bonus.vcorp, flatBonus.vcorp);
-            if (VCORPAkumaMan > 0) vcorpNormStr = vcorpNormStr.split(" = ")[0] + `+${VCORPAkumaMan.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseVcorp + VCORPAkumaMan).toLocaleString("pt-BR")}`;
+            let vcorpNormStr = strCalc(VCORP, bonus.vcorp, flatBonus.vcorp, itemBonus.vcorp, itemFlat.vcorp);
+            if (VCORPAkumaMan > 0) {
+                let ptsStr = vcorpNormStr.includes("=") ? vcorpNormStr.substring(0, vcorpNormStr.lastIndexOf(" = ")) : vcorpNormStr;
+                vcorpNormStr = ptsStr + `+${VCORPAkumaMan.toLocaleString("pt-BR")} (Akuma) = ${(totalBaseVcorp + VCORPAkumaMan).toLocaleString("pt-BR")}`;
+            }
             manualAttrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎 𝙲𝚘𝚛𝚙𝚘𝚛𝚊𝚕:_ ${vcorpNormStr}\n`;
         }
     }
     manualAttrOut += `\n`;
 
-    manualAttrOut += `↠ *𝙴𝚜𝚙𝚒́𝚛𝚒𝚝𝚘:* ${strCalc(ESP, bonus.esp, flatBonus.esp)}\n`;
-    manualAttrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝙰𝚛𝚖𝚊𝚖𝚎𝚗𝚝𝚘:_ ${strCalc(HA, bonus.ha, flatBonus.ha)}\n`;
+    manualAttrOut += `↠ *𝙴𝚜𝚙𝚒́𝚛𝚒𝚝𝚘:* ${strCalc(ESP, bonus.esp, flatBonus.esp, itemBonus.esp, itemFlat.esp)}\n`;
+    manualAttrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝙰𝚛𝚖𝚊𝚖𝚎𝚗𝚝𝚘:_ ${strCalc(HA, bonus.ha, flatBonus.ha, itemBonus.ha, itemFlat.ha)}\n`;
     manualAttrOut += `- 𝙸𝚗𝚟𝚒𝚜𝚒́𝚟𝚎𝚕${i.unlockHA1 ? '✓' : '✘'}\n`;
     manualAttrOut += `- 𝚅𝚒𝚜𝚒́𝚟𝚎𝚕${i.unlockHA2 ? '✓' : '✘'}\n`;
     manualAttrOut += `- 𝙸𝚖𝚋𝚞𝚒𝚌̧𝚊̃𝚘${i.unlockHA3 ? '✓' : '✘'}\n`;
@@ -3642,30 +3733,30 @@ function updateUI() {
     manualAttrOut += `- 𝙴𝚖𝚒𝚜𝚜𝚊̃𝚘${i.unlockHA5 ? '✓' : '✘'}\n`;
     manualAttrOut += `- 𝙰𝚟𝚊𝚗𝚌̧𝚊𝚍𝚘${i.unlockHA6 ? '✓' : '✘'}\n`;
 
-    manualAttrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚊 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘:_ ${strCalc(HO, bonus.ho, flatBonus.ho)}\n`;
+    manualAttrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚊 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘:_ ${strCalc(HO, bonus.ho, flatBonus.ho, itemBonus.ho, itemFlat.ho)}\n`;
     manualAttrOut += `- 𝙸𝚗𝚝𝚎𝚗𝚌̧𝚊̃𝚘${i.unlockHO2 ? '✓' : '✘'}\n`;
     manualAttrOut += `- 𝙿𝚛𝚎𝚖𝚘𝚗𝚒𝚌̧𝚊̃𝚘${i.unlockHO3 ? '✓' : '✘'}\n`;
     manualAttrOut += `- 𝙰𝚟𝚊𝚗𝚌̧𝚊𝚍𝚘${i.unlockHO4 ? '✓' : '✘'}\n`;
 
-    manualAttrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝚁𝚎𝚒:_ ${strCalc(HR, bonus.hr, flatBonus.hr)}\n`;
+    manualAttrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝚁𝚎𝚒:_ ${strCalc(HR, bonus.hr, flatBonus.hr, itemBonus.hr, itemFlat.hr)}\n`;
     manualAttrOut += `- 𝙳𝚘𝚖𝚒𝚗𝚊𝚌̧𝚊̃𝚘${i.unlockHR2 ? '✓' : '✘'}\n`;
     manualAttrOut += `- 𝙸𝚗𝚌𝚊𝚙𝚊𝚌𝚒𝚝𝚊𝚌̧𝚊̃𝚘${i.unlockHR3 ? '✓' : '✘'}\n`;
     manualAttrOut += `- 𝙿𝚛𝚎𝚜𝚜𝚊̃𝚘${i.unlockHR4 ? '✓' : '✘'}\n`;
     manualAttrOut += `- 𝙰𝚜𝚜𝚊𝚜𝚜𝚒𝚗𝚊𝚝𝚘 𝚍𝚎 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘${i.unlockHR5 ? '✓' : '✘'}\n`;
     manualAttrOut += `- 𝙸𝚗𝚏𝚞𝚜𝚊̃𝚘${i.unlockHR6 ? '✓' : '✘'}\n\n`;
 
-    manualAttrOut += `↠ *𝙰𝚔𝚞𝚖𝚊 𝚗𝚘 𝙼𝚒:* ${strCalc(AMI, bonus.ami, flatBonus.ami)}\n`;
-    let calcAAlcMan = Math.round((aAlc + flatBonus.amiAlc) * (1 + bonus.amiAlc));
+    manualAttrOut += `↠ *𝙰𝚔𝚞𝚖𝚊 𝚗𝚘 𝙼𝚒:* ${strCalc(AMI, bonus.ami, flatBonus.ami, itemBonus.ami, itemFlat.ami)}\n`;
+    let calcAAlcMan = Math.round((Math.round((aAlc + flatBonus.amiAlc) * (1 + bonus.amiAlc)) + itemFlat.amiAlc) * (1 + itemBonus.amiAlc));
     let multMan = parseFloat((i.amiAlcMult || "1").toString().replace(',', '.')) || 1;
     let metrosMan = (calcAAlcMan / 20) * multMan;
-    manualAttrOut += `> _𝙰𝚕𝚌𝚊𝚗𝚌𝚎:_ ${strCalc(aAlc, bonus.amiAlc, flatBonus.amiAlc)} (${metrosMan.toLocaleString("pt-BR", {maximumFractionDigits: 1})}m)\n`;
+    manualAttrOut += `> _𝙰𝚕𝚌𝚊𝚗𝚌𝚎:_ ${strCalc(aAlc, bonus.amiAlc, flatBonus.amiAlc, itemBonus.amiAlc, itemFlat.amiAlc)} (${metrosMan.toLocaleString("pt-BR", {maximumFractionDigits: 1})}m)\n`;
 
-    let calcADurMan = Math.round((aDur + flatBonus.amiDur) * (1 + bonus.amiDur));
+    let calcADurMan = Math.round((Math.round((aDur + flatBonus.amiDur) * (1 + bonus.amiDur)) + itemFlat.amiDur) * (1 + itemBonus.amiDur));
     let cenasMan = Math.floor(calcADurMan / 500);
-    manualAttrOut += `> _𝙳𝚞𝚛𝚊𝚋𝚒𝚕𝚒𝚍𝚊𝚍𝚎:_ ${strCalc(aDur, bonus.amiDur, flatBonus.amiDur)} (${cenasMan} cena${cenasMan !== 1 ? 's' : ''})\n`;
+    manualAttrOut += `> _𝙳𝚞𝚛𝚊𝚋𝚒𝚕𝚒𝚍𝚊𝚍𝚎:_ ${strCalc(aDur, bonus.amiDur, flatBonus.amiDur, itemBonus.amiDur, itemFlat.amiDur)} (${cenasMan} cena${cenasMan !== 1 ? 's' : ''})\n`;
 
-    let calcAPotFinalMan = Math.round((aPot + flatBonus.amiPot) * (1 + bonus.amiPot));
-    let strPotFinalMan = strCalc(aPot, bonus.amiPot, flatBonus.amiPot);
+    let calcAPotFinalMan = Math.round((Math.round((aPot + flatBonus.amiPot) * (1 + bonus.amiPot)) + itemFlat.amiPot) * (1 + itemBonus.amiPot));
+    let strPotFinalMan = strCalc(aPot, bonus.amiPot, flatBonus.amiPot, itemBonus.amiPot, itemFlat.amiPot);
     let amiResPctValFichaMan = parseInt(i.amiResPct) || 0;
     if (amiResPctValFichaMan > 0) {
         let resCalcFinalMan = calcAPotFinalMan + Math.floor(calcAPotFinalMan * (amiResPctValFichaMan / 100));
@@ -3674,8 +3765,8 @@ function updateUI() {
         manualAttrOut += `> _𝙿𝚘𝚝𝚎̂𝚗𝚌𝚒𝚊:_ ${strPotFinalMan}\n`;
     }
 
-    let calcAVelFinalOutMan = Math.round((aVel + flatBonus.amiVel) * (1 + bonus.amiVel));
-    let strVelFinalMan = strCalc(aVel, bonus.amiVel, flatBonus.amiVel);
+    let calcAVelFinalOutMan = Math.round((Math.round((aVel + flatBonus.amiVel) * (1 + bonus.amiVel)) + itemFlat.amiVel) * (1 + itemBonus.amiVel));
+    let strVelFinalMan = strCalc(aVel, bonus.amiVel, flatBonus.amiVel, itemBonus.amiVel, itemFlat.amiVel);
     let baseAkumaVelUIOutMan = Math.floor(calcAVelFinalOutMan * (controlePct / 100));
     let amiVelBuffValOutMan = parseInt(i.amiVelBuff) || 0;
     if (amiVelBuffValOutMan > 0) {
@@ -3685,7 +3776,7 @@ function updateUI() {
         manualAttrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:_ ${strVelFinalMan} (${baseAkumaVelUIOutMan.toLocaleString("pt-BR")} de Velocidade Adicional)\n`;
     }
 
-    manualAttrOut += `> _𝙳𝚎𝚜𝚙𝚎𝚛𝚝𝚊𝚛:_ ${strCalc(aDesp, bonus.amiDesp, flatBonus.amiDesp)}\n`;
+    manualAttrOut += `> _𝙳𝚎𝚜𝚙𝚎𝚛𝚝𝚊𝚛:_ ${strCalc(aDesp, bonus.amiDesp, flatBonus.amiDesp, itemBonus.amiDesp, itemFlat.amiDesp)}\n`;
     manualAttrOut += `> _𝙲𝚘𝚗𝚝𝚛ᴏ𝚕𝚎:_ ${controlePct}%\n\n`;
 
     let out = `*Nᴇᴡ sᴇᴀs*
@@ -3753,7 +3844,7 @@ ${attrOut}${tecnicasOut}`;
     let formatAlcunhaManual = (alcObj) => {
         if (alcObj && alcObj.buffs && alcObj.buffs.length > 0) {
             let buffGroups = {};
-            let names = {tudo:"Todos os Atributos",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar"};
+            let names = {tudo:"Todos os Atributos",tudoAttr:"Todos os Atributos",tudoEsp:"Todo o Espírito",tudoAmi:"Toda a Akuma",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar"};
             alcObj.buffs.forEach(b => {
                 let key = (b.val >= 0 ? '+' : '') + b.val + (b.type === 'pct' ? '%' : '');
                 if(!buffGroups[key]) buffGroups[key] = [];
