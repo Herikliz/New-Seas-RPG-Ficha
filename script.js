@@ -37,6 +37,7 @@ const akumasFixas = {
   "Zoan Mítica": ["Batto Batto no Mi, Modelo: Vampiro", "Hebi Hebi no Mi, Modelo: Kaijū", "Hebi Hebi no Mi, Modelo: Yamata no Orochi", "Hito Hito no Mi, Modelo: Daibutsu", "Hito Hito no Mi, Modelo: O Anfitrião", "Hito Hito no Mi, Modelo: Ōnyūdō", "Inu Inu no Mi, Modelo: Bake-Danuki", "Inu Inu no Mi, Modelo: Cérbero", "Inu Inu no Mi, Modelo: Ōkuchi no Makami", "Inu Inu no Mi, Modelo: Raposa de Nove Caudas", "Ryū Ryū no Mi, Modelo: Dragão Ocidental", "Ryū Ryū no Mi, Modelo: Kirin", "Saru Saru no Mi, Modelo: Sun Wukong", "Tori Tori no Mi, Modelo: Fênix", "Tori Tori no Mi, Modelo: Nue", "Tori Tori no Mi, Modelo: Pássaro de Cinzas", "Tori Tori no Mi, Modelo: Pássaro de Gelo", "Tori Tori no Mi, Modelo: Thunderbird", "Uma Uma no Mi, Modelo: Pégaso", "Uo Uo no Mi, Modelo: Carpa Seiryū"],
 };
 
+const shipData = { "Bote": {hp: 3, gender: "m"}, "Barco Pesqueiro": {hp: 5, gender: "m"}, "Escuna": {hp: 7, gender: "f"}, "Brigue": {hp: 8, gender: "m"}, "Caravela": {hp: 9, gender: "f"}, "Fragata": {hp: 10, gender: "f"}, "Gran General": {hp: 12, gender: "m"}, "C-15 Kenpachi": {hp: 5, gender: "m"}, "Z-10 Perci": {hp: 7, gender: "m"}, "B-47 Hajime": {hp: 10, gender: "m"}, "T-33 Apollo": {hp: 10, gender: "m"}, "K-55 Mereoleona": {hp: 15, gender: "m"}, "A-1 Atlas": {hp: 20, gender: "m"}, "5-01 Sparkle": {hp: 7, gender: "m"}, "4-01 Dream": {hp: 10, gender: "m"}, "3-01 Scream": {hp: 10, gender: "m"}, "2-01 Liberty": {hp: 15, gender: "m"}, "1-01 Hope": {hp: 20, gender: "m"}, "Pérola Negra": {hp: null, gender: "m"}, "Holandês Voador": {hp: null, gender: "m"}, "Vingança da Rainha Ana": {hp: null, gender: "f"}, "Silent Mary": {hp: null, gender: "f"}, "Pequod": {hp: null, gender: "m"} };
 const baseClassesList = ["Arqueólogo", "Artista", "Atirador", "Carpinteiro", "Cientista", "Combatente", "Cozinheiro", "Ferreiro", "Inventor", "Médico", "Musicista", "Navegador"];
 const racas = { "Braços Longos":{f:.30,r:.15}, "Bucaneiro":{f:.35,r:.40}, "Gigante":{f:.40,r:.35,v:-.05}, "Humano":{}, "Kuja":{}, "Kumate":{d:.30,f:.15}, "Lunariano":{v:.45,r:.50}, "Meio-Gigante":{f:.25,r:.25}, "Mink":{v:.20,r:.15}, "Oni":{f:.40,r:.40}, "Pernas Longas":{v:.30,f:.15}, "Povo do Céu: Birkan":{d:.25,v:.25}, "Povo do Céu: Shandia":{d:.25,v:.25}, "Povo do Céu: Skypieano":{d:.25,v:.25}, "Sereiano":{d:.25,r:.15}, "Tontatta":{v:.25,f:.20}, "Três-Olhos":{v:.15,r:.15,d:.15}, "Tritão":{f:.25,r:.25}, "Wotan":{f:.30,r:.25} };
 const linhagens = { "Nenhuma":{}, "Augur":{d:.15,v:.15,req:["Humano"]}, "Barnum":{req:["Braços Longos","Pernas Longas","Kumate","Três-Olhos"]}, "Beckman":{d:.15,v:.15,ho:.15,req:["Humano"]}, "Boa":{f:.15,ha:.15,req:["Kuja"]}, "Capone":{d:.10,v:.10,req:["Humano"]}, "Charlotte":{charlotte:true}, "Chinjao":{f:.20,r:.10,req:["Humano"]}, "D.":{}, "Dracule":{d:.20,ho:.15,req:["Humano"]}, "Drole":{f:.10,r:.05,v:.10,ha:.10,req:["Gigante","Meio-Gigante","Wotan"]}, "Família do Sol":{f:.10,r:.10,req:["Tritão","Sereiano","Wotan"]}, "Gan":{esp:.10,req:["Povo do Céu: Birkan","Povo do Céu: Shandia","Povo do Céu: Skypieano"]}, "Kong":{req:["Humano"]}, "Kozuki":{d:.15,v:.15,esp:.10,req:["Humano"]}, "Kurozumi":{d:.10,v:.10,req:["Humano"]}, "Laufey":{f:.15,r:.15,v:-.05,req:["Gigante"]}, "Mokomo":{v:.15,req:["Mink"]}, "Nefertari":{d:.15,v:.15,req:["Humano"]}, "Neptune":{d:.15,req:["Sereiano"]}, "Newgate":{r:.20,f:.20,req:["Humano","Meio-Gigante"]}, "Nico":{req:["Humano"]}, "Sakazuki":{f:.25,r:.20,req:["Humano"]}, "Silvers":{esp:.20,req:["Humano"]}, "Tenryūbito: Família Donquixote":{d:.10,ami:.15,req:["Humano"]}, "Tenryūbito: Família Figarland":{d:.10,esp:.15,req:["Humano"]}, "Tom":{f:.10,r:.10,req:["Tritão"]}, "Vega":{v:.10,d:.05,req:["Humano"]} };
@@ -766,7 +767,7 @@ function runFallbackChecks() {
               alcunha: "", alcunhasList: [], alcunhaAtiva: "", recompensa: "", recompensaTravada: "", altura: "", idade: "", sexo: "", genero: "", hideSexo: false, hideGenero: false, sangue: "", nacionalidade: "", localizacao: "", 
               telefone: "", orgTipo: "", tripulacao: "", pirataStatus: "Normal", patente: "", salario: "", estilo1: "", freestyle1: "", estilo2: "", freestyle2: "",
               estilo3: "", freestyle3: "", estilo4: "", freestyle4: "", berries: 5000000, npcsComunsList: [], npcsEspeciaisList: [], akumaNome: "", 
-              personalidade: "", historia: "", aparencia: "", inventario: "", armasEquipadasList: [], hasAmiAlc: true, hasAmiDur: true, hasAmiPot: true, hasAmiVel: true, hasAmiDesp: false,
+              personalidade: "", historia: "", aparencia: "", inventario: "", naviosList: [], armasEquipadasList: [], hasAmiAlc: true, hasAmiDur: true, hasAmiPot: true, hasAmiVel: true, hasAmiDesp: false,
               amiResPct: "", amiAlcMult: "1", calcUseAttr: "", calcInimigoRes: "", calcResIgnorada: "", calcBuffFlat: "", calcBuffPct: "", calcBuffDanoFinalPct: "", calcUseAmi: "sim", amiPotBuff: "", calcUseHaki: "nao", sceneType: "Treino Padrão", sceneText: "", hpAtual: -1,
               boxIden: false, boxMec: false, boxSoc: false, boxBase: false, boxEsp: false, boxAmi: false, boxHist: false, 
               boxInv: false, boxCalc: false, boxEstamina: false, estaminaAtual: -1, estaminaVelocidade: "", estaminaDano: "", estaminaBuffPct: "", estaminaHakiArm: "nao", estaminaHakiObs: "nao", boxScene: false, akumaId: "", selCharR1: "", selCharR2: "", treinosAcumulados: 0, ordemTecnicas: "alfabetica", hideHistoria: false, hidePersonality: false, hideTecNome: false, hideTecDesc: false, hideTecEfeito: false, hiddenStyles: [], exaustaoCompleta: false, habilidadesExclusivas: [], habCaminhoAtiradorAtivo: false, habFavArmistaAtivo: "nenhum", habFavArmistaAttr: "d", habFuriaArdenteAttr: "f", habQIAvancadoAtivo: false, linhagemBeckmanArma: false, habRetornoUso: 1, merito: 0, aliadosEspiritoContagiante: 0,
@@ -883,6 +884,90 @@ function formatNpcNumber(el) {
     try { el.setSelectionRange(cursor + (newLength - oldLength), cursor + (newLength - oldLength)); } catch(e){}
     return num;
 }
+window.addNavio = function() {
+    if(isReadOnly) return;
+    if (!currentChar.info.naviosList) currentChar.info.naviosList = [];
+    currentChar.info.naviosList.push({tipo: "", nomeCustom: "", hpAtual: "", hpMax: ""});
+    saveData(); renderNavios(); updateUI(); toggleEditability();
+};
+window.removeNavio = function(idx) {
+    if(isReadOnly) return;
+    currentChar.info.naviosList.splice(idx, 1);
+    saveData(); renderNavios(); updateUI(); toggleEditability();
+};
+window.updateNavio = function(idx, field, val) {
+    if(isReadOnly) return;
+    let n = currentChar.info.naviosList[idx];
+    let reRender = false;
+    if (field === 'tipo') {
+        n.tipo = val;
+        if (val !== "Personalizado" && shipData[val] && shipData[val].hp !== null) {
+            n.hpAtual = shipData[val].hp;
+        }
+        reRender = true;
+    } else if (field === 'hpAtual' || field === 'hpMax') {
+        let clean = val.replace(/\D/g, "");
+        let num = clean === "" ? "" : parseInt(clean, 10);
+        n[field] = num;
+        
+        let maxVal = n.tipo === "Personalizado" ? (parseInt(n.hpMax) || 0) : (shipData[n.tipo] ? shipData[n.tipo].hp : null);
+        if (maxVal !== null) {
+            let currVal = parseInt(n.hpAtual) || 0;
+            if (currVal > maxVal) {
+                n.hpAtual = maxVal;
+                if (field === 'hpMax') reRender = true;
+            }
+        }
+    } else {
+        n[field] = val;
+    }
+    saveData(); updateUI();
+    if(reRender) renderNavios();
+};
+window.renderNavios = function() {
+    const container = document.getElementById('navios-container');
+    if(!container) return;
+    let html = '';
+    (currentChar.info.naviosList || []).forEach((n, idx) => {
+        let isCustom = n.tipo === "Personalizado";
+        let sData = shipData[n.tipo];
+        let hasHp = isCustom || (sData && sData.hp !== null);
+        let maxHp = isCustom ? (n.hpMax || "") : (sData ? sData.hp : "");
+
+        let opts = `<option value="">-- Selecione um Navio --</option>
+        <optgroup label="Comuns"><option value="Bote">Bote</option><option value="Barco Pesqueiro">Barco Pesqueiro</option><option value="Escuna">Escuna</option><option value="Brigue">Brigue</option><option value="Caravela">Caravela</option><option value="Fragata">Fragata</option><option value="Gran General">Gran General</option></optgroup>
+        <optgroup label="Governo"><option value="C-15 Kenpachi">C-15 Kenpachi</option><option value="Z-10 Perci">Z-10 Perci</option><option value="B-47 Hajime">B-47 Hajime</option><option value="T-33 Apollo">T-33 Apollo</option><option value="K-55 Mereoleona">K-55 Mereoleona</option><option value="A-1 Atlas">A-1 Atlas</option></optgroup>
+        <optgroup label="Vanguarda"><option value="5-01 Sparkle">5-01 Sparkle</option><option value="4-01 Dream">4-01 Dream</option><option value="3-01 Scream">3-01 Scream</option><option value="2-01 Liberty">2-01 Liberty</option><option value="1-01 Hope">1-01 Hope</option></optgroup>
+        <optgroup label="Especiais"><option value="Pérola Negra">Pérola Negra</option><option value="Holandês Voador">Holandês Voador</option><option value="Vingança da Rainha Ana">Vingança da Rainha Ana</option><option value="Silent Mary">Silent Mary</option><option value="Pequod">Pequod</option></optgroup>
+        <option value="Personalizado">Personalizado...</option>`;
+
+        if (n.tipo) opts = opts.replace(`value="${n.tipo}"`, `value="${n.tipo}" selected`);
+
+        html += `<div style="background: rgba(0,0,0,0.3); padding: 5px; border: 1px dashed #555; border-radius: 6px; margin-bottom: 5px; display: flex; flex-direction: column; gap: 5px;">
+            <div style="display: flex; gap: 5px; align-items: center;">
+                <select onchange="updateNavio(${idx}, 'tipo', this.value)" style="flex:1; padding: 6px; font-size: 11px;">${opts}</select>
+                <button type="button" class="btn btn-outline btn-danger" style="padding: 4px 8px; font-size: 11px; margin: 0;" onclick="removeNavio(${idx})">X</button>
+            </div>`;
+
+        if (isCustom) {
+            html += `<div style="display: flex; gap: 5px;">
+                <input type="text" placeholder="Nome do Navio" value="${n.nomeCustom || ''}" oninput="updateNavio(${idx}, 'nomeCustom', this.value)" style="flex: 2; padding: 6px;">
+                <input type="text" class="no-sum" placeholder="HP Atual" value="${n.hpAtual !== undefined ? n.hpAtual : ''}" oninput="let cursor = this.selectionStart; updateNavio(${idx}, 'hpAtual', this.value); this.value = currentChar.info.naviosList[${idx}].hpAtual !== undefined ? currentChar.info.naviosList[${idx}].hpAtual : ''; try{this.setSelectionRange(cursor,cursor);}catch(e){}" style="flex: 1; padding: 6px; text-align: center;">
+                <span style="display:flex; align-items:center;">/</span>
+                <input type="text" class="no-sum" placeholder="HP Máx" value="${n.hpMax || ''}" oninput="let cursor = this.selectionStart; updateNavio(${idx}, 'hpMax', this.value); this.value = currentChar.info.naviosList[${idx}].hpMax !== undefined ? currentChar.info.naviosList[${idx}].hpMax : ''; try{this.setSelectionRange(cursor,cursor);}catch(e){}" style="flex: 1; padding: 6px; text-align: center;">
+            </div>`;
+        } else if (hasHp) {
+            html += `<div style="display: flex; gap: 5px; align-items: center;">
+                <span style="font-size: 11px; color:#aaa;">Vida do Navio:</span>
+                <input type="text" class="no-sum" placeholder="HP Atual" value="${n.hpAtual !== undefined ? n.hpAtual : ''}" oninput="let cursor = this.selectionStart; updateNavio(${idx}, 'hpAtual', this.value); this.value = currentChar.info.naviosList[${idx}].hpAtual !== undefined ? currentChar.info.naviosList[${idx}].hpAtual : ''; try{this.setSelectionRange(cursor,cursor);}catch(e){}" style="width: 60px; padding: 6px; text-align: center;">
+                <span style="font-size: 11px;">/ ${maxHp}</span>
+            </div>`;
+        }
+        html += `</div>`;
+    });
+    container.innerHTML = html;
+}
+
 window.addArmaEquipada = function() {
     if(isReadOnly) return;
     if (!currentChar.info.armasEquipadasList) currentChar.info.armasEquipadasList = [];
@@ -969,6 +1054,7 @@ function renderArmasEquipadas() {
 
 function renderNpcsComuns() {
     if (typeof renderArmasEquipadas === 'function') renderArmasEquipadas();
+    if (typeof renderNavios === 'function') renderNavios();
     const container = document.getElementById('npcs-comuns-container');
     if(!container) return;
     let finalHtml = '';
@@ -3611,11 +3697,47 @@ function updateUI() {
         npcsOutText += `\n  : ᓩ _𝐍𝐏𝐂s ᴇꜱᴘᴇᴄɪᴀɪꜱ:_\n${outNpcsE}\n`;
     }
 
-    let inventarioFormatado = "";
     let invLines = [];
     if (i.inventario && i.inventario.trim() !== "") { invLines = i.inventario.split('\n').map(l => { let t = l.trim(); if (t === "") return ""; return t.startsWith("*") ? t : "* " + t; }).filter(l => l !== ""); }
-    while (invLines.length < 3) { invLines.push("* "); }
-    inventarioFormatado = invLines.join('\n');
+    
+    if (i.naviosList && i.naviosList.length > 0) {
+        i.naviosList.forEach(navio => {
+            if (!navio.tipo) return;
+            let name = navio.tipo;
+            let gender = "m";
+            let isDestruido = false;
+            let hpStr = "";
+
+            if (navio.tipo === "Personalizado") {
+                name = navio.nomeCustom || "Navio Personalizado";
+                let hpAtual = parseInt(navio.hpAtual) || 0;
+                let hpMax = parseInt(navio.hpMax) || 0;
+                if (hpAtual <= 0 && hpMax > 0) isDestruido = true;
+                if (hpMax > 0) hpStr = ` [${hpAtual}/${hpMax}]`;
+                if (name.trim().toLowerCase().endsWith('a')) gender = "f";
+            } else if (shipData[navio.tipo]) {
+                gender = shipData[navio.tipo].gender;
+                let hpMax = shipData[navio.tipo].hp;
+                if (hpMax !== null) {
+                    let hpAtual = parseInt(navio.hpAtual);
+                    if (isNaN(hpAtual)) hpAtual = hpMax;
+                    if (hpAtual <= 0) isDestruido = true;
+                    hpStr = ` [${hpAtual}/${hpMax}]`;
+                }
+            }
+
+            if (isDestruido) {
+                name = `${name} Destruíd${gender === 'f' ? 'a' : 'o'}`;
+                hpStr = "";
+            }
+
+            invLines.push(`* ${name}${hpStr}`);
+        });
+    }
+
+    let filledLines = invLines.filter(l => l !== "* " && l !== "*");
+    while (filledLines.length < 3) { filledLines.push("* "); }
+    let inventarioFormatado = filledLines.join('\n');
 
     let manualAttrOut = "";
     manualAttrOut += `↠ *𝙳𝚎𝚜𝚝𝚛𝚎𝚣𝚊:* ${strCalc(D, bonus.d, flatBonus.d, itemBonus.d, itemFlat.d)}\n\n`;
