@@ -50,13 +50,14 @@
               <div class="input-group"><label>Nome do Personagem</label><input type="text" id="pc-name" oninput="updateField('name', null, this.value)"></div>
               <div class="input-row">
                   <div class="input-group">
-                      <label>Alcunha</label>
-                      <div style="display:flex; gap:5px;">
-                          <select id="info-alcunha" onchange="updateField('info', 'alcunhaAtiva', this.value)" style="flex:1; padding:6px; background-color:#2a2a2a; border:1px solid #444; color:var(--text); border-radius:4px;"></select>
-                          <button class="btn btn-outline btn-success" style="padding: 4px 8px;" onclick="openAlcunhaModal()">+</button>
-                          <button class="btn btn-outline btn-warning" style="padding: 4px 8px;" onclick="editAlcunhaModal()">✏️</button>
-                      </div>
-                  </div>
+                    <label>Alcunha</label>
+                    <div style="display:flex; gap:5px;">
+                        <select id="info-alcunha" onchange="updateField('info', 'alcunhaAtiva', this.value)" style="flex:1;"></select>
+                        <button type="button" class="btn btn-outline btn-success" style="padding:4px 8px; font-size:14px; display:flex; align-items:center;" onclick="openAlcunhaModal()" title="Criar Nova Alcunha">+</button>
+                        <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:14px; display:flex; align-items:center;" onclick="editAlcunhaModal()" title="Editar Alcunha Ativa">✏️</button>
+                    </div>
+                    <div id="alcunha-condicoes-container" style="margin-top: 5px; display: flex; flex-wrap: wrap; gap: 5px;"></div>
+                </div>
                   <div class="input-group"><label>Idade</label><input type="text" id="info-idade" placeholder="Mín: 15" onchange="formatIdade(this.value)"></div>
               </div>
               <div class="input-row">

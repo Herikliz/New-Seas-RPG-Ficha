@@ -1328,6 +1328,13 @@ function renderLogs() {
     });
 }
 
+window.toggleAlcunhaCondicao = function(condName) {
+    if(isReadOnly) return;
+    if(!currentChar.info.alcunhaCondicoes) currentChar.info.alcunhaCondicoes = {};
+    currentChar.info.alcunhaCondicoes[condName] = !currentChar.info.alcunhaCondicoes[condName];
+    saveData(); updateUI();
+};
+
 let editingAlcunhaOldName = "";
 
 function openAlcunhaModal() {
@@ -1362,6 +1369,7 @@ function editAlcunhaModal() {
             lastRow.querySelector('.buff-stat').value = b.stat;
             lastRow.querySelector('.buff-type').value = b.type;
             lastRow.querySelector('.buff-val').value = b.val;
+            lastRow.querySelector('.buff-cond').value = b.cond || "";
         });
     } else {
         document.getElementById('alcunha-has-buff').checked = false;
@@ -1387,6 +1395,7 @@ function addAlcunhaBuffRow() {
             <option value="flat">Pts (+X)</option>
         </select>
         <input type="number" class="buff-val" placeholder="Qtd" style="flex:1; font-size:11px; padding:4px; background:#2a2a2a; border:1px solid #444; color:#fff; border-radius:4px;" oninput="if(this.parentElement.querySelector('.buff-type').value === 'pct' && this.value > 100) this.value = 100;">
+        <input type="text" class="buff-cond" placeholder="Condição (Vazio = Fixo)" style="flex:2; font-size:11px; padding:4px; background:#2a2a2a; border:1px solid #444; color:#fff; border-radius:4px;" title="Se preencher, ativará apenas ligando o botão na tela inicial.">
         <button class="btn btn-outline btn-danger" style="padding:2px 6px; font-size:10px; margin:0;" onclick="this.parentElement.remove()">X</button>
     `;
     list.appendChild(row);
@@ -1402,8 +1411,9 @@ function saveAlcunha() {
             let stat = row.querySelector('.buff-stat').value;
             let type = row.querySelector('.buff-type').value;
             let val = parseInt(row.querySelector('.buff-val').value) || 0;
+            let cond = row.querySelector('.buff-cond').value.trim();
             if (type === 'pct' && val > 100) val = 100;
-            if(val !== 0) buffs.push({stat, type, val});
+            if(val !== 0) buffs.push({stat, type, val, cond});
         });
     }
     if(!currentChar.info.alcunhasList) currentChar.info.alcunhasList = [];
@@ -1819,6 +1829,25 @@ function updateUI() {
         if(selAlcunha.innerHTML !== htmlAlc) selAlcunha.innerHTML = htmlAlc;
         selAlcunha.value = i.alcunhaAtiva || "";
     }
+    
+    let condContainer = document.getElementById('alcunha-condicoes-container');
+    if (condContainer) {
+        let condHtml = '';
+        if (i.alcunhasList && i.alcunhaAtiva) {
+            let ativa = i.alcunhasList.find(a => a.nome === i.alcunhaAtiva);
+            if (ativa && ativa.buffs) {
+                let uniqueConds = [...new Set(ativa.buffs.filter(b => b.cond && b.cond.trim() !== "").map(b => b.cond.trim()))];
+                if (!i.alcunhaCondicoes) i.alcunhaCondicoes = {};
+                uniqueConds.forEach(cond => {
+                    let isActive = i.alcunhaCondicoes[cond];
+                    let btnCor = isActive ? 'var(--success)' : '#444';
+                    let btnTxt = isActive ? 'ON' : 'OFF';
+                    condHtml += `<button type="button" class="btn btn-outline" style="padding: 2px 8px; font-size: 10px; margin: 0; color: ${btnCor}; border-color: ${btnCor};" onclick="toggleAlcunhaCondicao('${cond.replace(/'/g, "\\'")}')">${cond}: ${btnTxt}</button>`;
+                });
+            }
+        }
+        condContainer.innerHTML = condHtml;
+    }
 
     let calcAttrEl = document.getElementById('info-calcUseAttr');
     if(calcAttrEl) calcAttrEl.value = i.calcUseAttr ? i.calcUseAttr.toLocaleString("pt-BR") : "";
@@ -1886,6 +1915,7 @@ function updateUI() {
             let ativa = i.alcunhasList.find(a => a.nome === i.alcunhaAtiva);
             if (ativa && ativa.buffs) {
                 ativa.buffs.forEach(b => {
+                    if (b.cond && (!i.alcunhaCondicoes || !i.alcunhaCondicoes[b.cond])) return;
                     let targets = [b.stat];
                     if (b.stat === "tudo" || b.stat === "tudoAttr") targets = ["d","f","r","v","refl","vcorp"];
                     else if (b.stat === "tudoEsp") targets = ["esp","ha","ho","hr"];
@@ -2353,14 +2383,15 @@ function updateUI() {
         let ativa = i.alcunhasList.find(a => a.nome === i.alcunhaAtiva);
         if (ativa && ativa.buffs) {
             ativa.buffs.forEach(b => {
-                let targets = [b.stat];
-                if (b.stat === "tudo" || b.stat === "tudoAttr") targets = ["d","f","r","v","refl","vcorp"];
-                else if (b.stat === "tudoEsp") targets = ["esp","ha","ho","hr"];
-                else if (b.stat === "tudoAmi") targets = ["amiAlc","amiDur","amiPot","amiVel","amiDesp"];
+                    if (b.cond && (!i.alcunhaCondicoes || !i.alcunhaCondicoes[b.cond])) return;
+                    let targets = [b.stat];
+                    if (b.stat === "tudo" || b.stat === "tudoAttr") targets = ["d","f","r","v","refl","vcorp"];
+                    else if (b.stat === "tudoEsp") targets = ["esp","ha","ho","hr"];
+                    else if (b.stat === "tudoAmi") targets = ["amiAlc","amiDur","amiPot","amiVel","amiDesp"];
                 
-                targets.forEach(t => {
-                    if (b.type === "pct") { if(typeof bonus[t] !== 'undefined') bonus[t] += (b.val / 100); }
-                    else { if(typeof flatBonus[t] !== 'undefined') flatBonus[t] += b.val; }
+                    targets.forEach(t => {
+                        if (b.type === "pct") { if(typeof bonus[t] !== 'undefined') bonus[t] += (b.val / 100); }
+                        else { if(typeof flatBonus[t] !== 'undefined') flatBonus[t] += b.val; }
                 });
             });
         }
@@ -3598,20 +3629,40 @@ function updateUI() {
     } else if (i.alcunhaAtiva) {
         let formatAlcunha = (alcObj) => {
             if (alcObj && alcObj.buffs && alcObj.buffs.length > 0) {
-                let buffGroups = {};
                 let names = {tudo:"Todos os Atributos",tudoAttr:"Todos os Atributos",tudoEsp:"Todo o Espírito",tudoAmi:"Toda a Akuma",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar"};
+                let condGroups = { "": [] };
                 alcObj.buffs.forEach(b => {
-                    let key = (b.val >= 0 ? '+' : '') + b.val + (b.type === 'pct' ? '%' : '');
-                    if(!buffGroups[key]) buffGroups[key] = [];
-                    buffGroups[key].push(names[b.stat] || b.stat);
+                    let cName = (b.cond && b.cond.trim() !== "") ? b.cond.trim() : "";
+                    if (!condGroups[cName]) condGroups[cName] = [];
+                    condGroups[cName].push(b);
                 });
-                let buffStrings = [];
-                for (let k in buffGroups) {
-                    let items = buffGroups[k];
-                    let joined = items.length > 1 ? items.slice(0, -1).join(", ") + " e " + items[items.length - 1] : items[0];
-                    buffStrings.push(`${k} em ${joined}`);
+                let buildStringForGroup = (buffArray) => {
+                    let buffGroups = {};
+                    buffArray.forEach(b => {
+                        let key = (b.val >= 0 ? '+' : '') + b.val + (b.type === 'pct' ? '%' : '');
+                        if(!buffGroups[key]) buffGroups[key] = [];
+                        buffGroups[key].push(names[b.stat] || b.stat);
+                    });
+                    let buffStrings = [];
+                    for (let k in buffGroups) {
+                        let items = buffGroups[k];
+                        let joined = items.length > 1 ? items.slice(0, -1).join(", ") + " e " + items[items.length - 1] : items[0];
+                        buffStrings.push(`${k} em ${joined}`);
+                    }
+                    return `[${buffStrings.join("; ")}]`;
+                };
+                let lines = [];
+                if (condGroups[""].length > 0) {
+                    lines.push(`${alcObj.nome} ${buildStringForGroup(condGroups[""])}`);
+                } else {
+                    lines.push(`${alcObj.nome}`);
                 }
-                return `${alcObj.nome} [${buffStrings.join("; ")}]`;
+                for (let cond in condGroups) {
+                    if (cond !== "") {
+                        lines.push(`> - Quando '${cond}': ${buildStringForGroup(condGroups[cond])}`);
+                    }
+                }
+                return lines.join("\n");
             }
             return alcObj ? alcObj.nome : "";
         };
@@ -3965,20 +4016,40 @@ ${attrOut}${tecnicasOut}`;
 
     let formatAlcunhaManual = (alcObj) => {
         if (alcObj && alcObj.buffs && alcObj.buffs.length > 0) {
-            let buffGroups = {};
             let names = {tudo:"Todos os Atributos",tudoAttr:"Todos os Atributos",tudoEsp:"Todo o Espírito",tudoAmi:"Toda a Akuma",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar"};
+            let condGroups = { "": [] };
             alcObj.buffs.forEach(b => {
-                let key = (b.val >= 0 ? '+' : '') + b.val + (b.type === 'pct' ? '%' : '');
-                if(!buffGroups[key]) buffGroups[key] = [];
-                buffGroups[key].push(names[b.stat] || b.stat);
+                let cName = (b.cond && b.cond.trim() !== "") ? b.cond.trim() : "";
+                if (!condGroups[cName]) condGroups[cName] = [];
+                condGroups[cName].push(b);
             });
-            let buffStrings = [];
-            for (let k in buffGroups) {
-                let items = buffGroups[k];
-                let joined = items.length > 1 ? items.slice(0, -1).join(", ") + " e " + items[items.length - 1] : items[0];
-                buffStrings.push(`${k} em ${joined}`);
+            let buildStringForGroup = (buffArray) => {
+                let buffGroups = {};
+                buffArray.forEach(b => {
+                    let key = (b.val >= 0 ? '+' : '') + b.val + (b.type === 'pct' ? '%' : '');
+                    if(!buffGroups[key]) buffGroups[key] = [];
+                    buffGroups[key].push(names[b.stat] || b.stat);
+                });
+                let buffStrings = [];
+                for (let k in buffGroups) {
+                    let items = buffGroups[k];
+                    let joined = items.length > 1 ? items.slice(0, -1).join(", ") + " e " + items[items.length - 1] : items[0];
+                    buffStrings.push(`${k} em ${joined}`);
+                }
+                return `[${buffStrings.join("; ")}]`;
+            };
+            let lines = [];
+            if (condGroups[""].length > 0) {
+                lines.push(`${alcObj.nome} ${buildStringForGroup(condGroups[""])}`);
+            } else {
+                lines.push(`${alcObj.nome}`);
             }
-            return `${alcObj.nome} [${buffStrings.join("; ")}]`;
+            for (let cond in condGroups) {
+                if (cond !== "") {
+                    lines.push(`> - Quando '${cond}': ${buildStringForGroup(condGroups[cond])}`);
+                }
+            }
+            return lines.join("\n");
         }
         return alcObj ? alcObj.nome : "";
     };
