@@ -2799,9 +2799,10 @@ function updateUI() {
 
     let ESP = currentChar.stats.esp; 
     
-    let maxEspInput = 30000;
-    if (temFruta) maxEspInput = 25000;
-    if (ln === "Silvers") maxEspInput = 40000;
+    let maxEspInput = 35000;
+    if (temFruta) maxEspInput = 30000;
+    if (ln === "Silvers") maxEspInput = 45000;
+    if ((currentChar.substats.hRei || 0) > 0) maxEspInput += 5000;
     
     if (!isSuperAdmin && ESP > maxEspInput) {
         ESP = maxEspInput;
