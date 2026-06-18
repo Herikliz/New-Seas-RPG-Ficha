@@ -891,11 +891,14 @@ function updateNpcComum(idx, field, val) {
 function formatNpcNumber(el) {
     let cleanVal = el.value.replace(/\D/g, "");
     let num = cleanVal ? parseInt(cleanVal, 10) : "";
-    let cursor = el.selectionStart;
-    let oldLength = el.value.length;
-    el.value = cleanVal ? num.toLocaleString("pt-BR") : "";
-    let newLength = el.value.length;
-    try { el.setSelectionRange(cursor + (newLength - oldLength), cursor + (newLength - oldLength)); } catch(e){}
+    let formatted = cleanVal ? num.toLocaleString("pt-BR") : "";
+    if (el.value !== formatted) {
+        let cursor = el.selectionStart;
+        let oldLength = el.value.length;
+        el.value = formatted;
+        let newLength = el.value.length;
+        try { el.setSelectionRange(cursor + (newLength - oldLength), cursor + (newLength - oldLength)); } catch(e){}
+    }
     return num;
 }
 window.addNavio = function() {
@@ -966,14 +969,14 @@ window.renderNavios = function() {
         if (isCustom) {
             html += `<div style="display: flex; gap: 5px;">
                 <input type="text" placeholder="Nome do Navio" value="${n.nomeCustom || ''}" oninput="updateNavio(${idx}, 'nomeCustom', this.value)" style="flex: 2; padding: 6px;">
-                <input type="text" class="no-sum" placeholder="HP Atual" value="${n.hpAtual !== undefined ? n.hpAtual : ''}" oninput="let cursor = this.selectionStart; updateNavio(${idx}, 'hpAtual', this.value); this.value = currentChar.info.naviosList[${idx}].hpAtual !== undefined ? currentChar.info.naviosList[${idx}].hpAtual : ''; try{this.setSelectionRange(cursor,cursor);}catch(e){}" style="flex: 1; padding: 6px; text-align: center;">
+                <input type="text" class="no-sum" placeholder="HP Atual" value="${n.hpAtual !== undefined ? n.hpAtual : ''}" oninput="let cursor = this.selectionStart; updateNavio(${idx}, 'hpAtual', this.value); let formatted = currentChar.info.naviosList[${idx}].hpAtual !== undefined ? currentChar.info.naviosList[${idx}].hpAtual : ''; if(this.value != formatted) { this.value = formatted; try{this.setSelectionRange(cursor,cursor);}catch(e){} }" style="flex: 1; padding: 6px; text-align: center;">
                 <span style="display:flex; align-items:center;">/</span>
-                <input type="text" class="no-sum" placeholder="HP Máx" value="${n.hpMax || ''}" oninput="let cursor = this.selectionStart; updateNavio(${idx}, 'hpMax', this.value); this.value = currentChar.info.naviosList[${idx}].hpMax !== undefined ? currentChar.info.naviosList[${idx}].hpMax : ''; try{this.setSelectionRange(cursor,cursor);}catch(e){}" style="flex: 1; padding: 6px; text-align: center;">
+                <input type="text" class="no-sum" placeholder="HP Máx" value="${n.hpMax || ''}" oninput="let cursor = this.selectionStart; updateNavio(${idx}, 'hpMax', this.value); let formatted2 = currentChar.info.naviosList[${idx}].hpMax !== undefined ? currentChar.info.naviosList[${idx}].hpMax : ''; if(this.value != formatted2) { this.value = formatted2; try{this.setSelectionRange(cursor,cursor);}catch(e){} }" style="flex: 1; padding: 6px; text-align: center;">
             </div>`;
         } else if (hasHp) {
             html += `<div style="display: flex; gap: 5px; align-items: center;">
                 <span style="font-size: 11px; color:#aaa;">Vida do Navio:</span>
-                <input type="text" class="no-sum" placeholder="HP Atual" value="${n.hpAtual !== undefined ? n.hpAtual : ''}" oninput="let cursor = this.selectionStart; updateNavio(${idx}, 'hpAtual', this.value); this.value = currentChar.info.naviosList[${idx}].hpAtual !== undefined ? currentChar.info.naviosList[${idx}].hpAtual : ''; try{this.setSelectionRange(cursor,cursor);}catch(e){}" style="width: 60px; padding: 6px; text-align: center;">
+                <input type="text" class="no-sum" placeholder="HP Atual" value="${n.hpAtual !== undefined ? n.hpAtual : ''}" oninput="let cursor = this.selectionStart; updateNavio(${idx}, 'hpAtual', this.value); let formatted = currentChar.info.naviosList[${idx}].hpAtual !== undefined ? currentChar.info.naviosList[${idx}].hpAtual : ''; if(this.value != formatted) { this.value = formatted; try{this.setSelectionRange(cursor,cursor);}catch(e){} }" style="width: 60px; padding: 6px; text-align: center;">
                 <span style="font-size: 11px;">/ ${maxHp}</span>
             </div>`;
         }
@@ -1061,7 +1064,7 @@ function renderArmasEquipadas() {
                     <option value="pct" ${a.type === 'pct' ? 'selected' : ''}>%</option>
                     <option value="flat" ${a.type === 'flat' ? 'selected' : ''}>Pts</option>
                 </select>
-                <input type="text" class="no-sum" placeholder="Valor" value="${valFmt}" oninput="let cursor = this.selectionStart; let oldLen = this.value.length; updateArmaEquipada(${idx}, 'val', this.value); this.value = currentChar.info.armasEquipadasList[${idx}].val ? currentChar.info.armasEquipadasList[${idx}].val.toLocaleString('pt-BR') : ''; let newLen = this.value.length; try { this.setSelectionRange(cursor + (newLen - oldLen), cursor + (newLen - oldLen)); } catch(e){}" style="width: 70px; padding: 6px; text-align: center;">
+                <input type="text" class="no-sum" placeholder="Valor" value="${valFmt}" oninput="let cursor = this.selectionStart; let oldLen = this.value.length; updateArmaEquipada(${idx}, 'val', this.value); let formatted = currentChar.info.armasEquipadasList[${idx}].val ? currentChar.info.armasEquipadasList[${idx}].val.toLocaleString('pt-BR') : ''; if(this.value !== formatted) { this.value = formatted; let newLen = this.value.length; try { this.setSelectionRange(cursor + (newLen - oldLen), cursor + (newLen - oldLen)); } catch(e){} }" style="width: 70px; padding: 6px; text-align: center;">
                 <button type="button" class="btn btn-outline" style="padding: 4px 8px; font-size: 11px; margin: 0; color: ${btnCor}; border-color: ${btnCor}; min-width: 40px;" onclick="toggleArmaAtiva(${idx})">${btnTxt}</button>
                 <button type="button" class="btn btn-outline btn-danger" style="padding: 4px 8px; font-size: 11px; margin: 0;" onclick="removeArmaEquipada(${idx})">X</button>
             </div>
@@ -1594,9 +1597,12 @@ async function handlePatenteChange(val) {
 function formatAndSave(category, field, el) {
     let cleanVal = el.value.replace(/\D/g, ""); let num = cleanVal ? parseInt(cleanVal, 10) : 0;
     currentChar[category][field] = num;
-    let cursor = el.selectionStart; let oldLength = el.value.length; 
-    el.value = cleanVal ? num.toLocaleString("pt-BR") : "";
-    let newLength = el.value.length; try { el.setSelectionRange(cursor + (newLength - oldLength), cursor + (newLength - oldLength)); } catch(e){}
+    let formatted = cleanVal ? num.toLocaleString("pt-BR") : "";
+    if (el.value !== formatted) {
+        let cursor = el.selectionStart; let oldLength = el.value.length; 
+        el.value = formatted;
+        let newLength = el.value.length; try { el.setSelectionRange(cursor + (newLength - oldLength), cursor + (newLength - oldLength)); } catch(e){}
+    }
     saveData(); updateUI();
 }
 
@@ -1604,9 +1610,12 @@ function formatCurrency(category, field, el) {
     let cleanVal = el.value.replace(/\D/g, "");
     let num = cleanVal ? parseInt(cleanVal, 10) : "";
     currentChar[category][field] = num;
-    let cursor = el.selectionStart; let oldLength = el.value.length; 
-    el.value = cleanVal ? num.toLocaleString("pt-BR") : "";
-    let newLength = el.value.length; try { el.setSelectionRange(cursor + (newLength - oldLength), cursor + (newLength - oldLength)); } catch(e){}
+    let formatted = cleanVal ? num.toLocaleString("pt-BR") : "";
+    if (el.value !== formatted) {
+        let cursor = el.selectionStart; let oldLength = el.value.length; 
+        el.value = formatted;
+        let newLength = el.value.length; try { el.setSelectionRange(cursor + (newLength - oldLength), cursor + (newLength - oldLength)); } catch(e){}
+    }
     saveData(); updateUI();
 }
 
@@ -1846,9 +1855,17 @@ function updateUI() {
         anim2.style.display = "block"; anim2.placeholder = i.raca2 === "Mink" ? "Mamífero" : "Animal Marinho";
     } else { anim2.style.display = "none"; }
 
-    document.getElementById('pc-name').value = currentChar.name;
+    let pcNameEl = document.getElementById('pc-name');
+    if (pcNameEl && pcNameEl.value !== currentChar.name) pcNameEl.value = currentChar.name || "";
+    
     const textFields = ['selClasseDF', 'selDF', 'selRV', 'selLinDF', 'selLinRV', 'selLin4', 'selLinEspAmi', 'altura', 'idade', 'sexo', 'genero', 'sangue', 'telefone', 'nacionalidade', 'localizacao', 'tripulacao', 'pirataStatus', 'akumaNome', 'personalidade', 'historia', 'aparencia', 'inventario', 'animal', 'animal2', 'calcUseAmi', 'calcUseHaki', 'amiAlcMult', 'ordemTecnicas', 'estaminaHakiArm', 'estaminaHakiObs'];
-    textFields.forEach(f => { let el = document.getElementById('info-'+f); if(el) el.value = i[f] || ""; });
+    textFields.forEach(f => { 
+        let el = document.getElementById('info-'+f); 
+        if(el) {
+            let val = i[f] || "";
+            if (el.value != val) el.value = val;
+        }
+    });
 
     const checkFields = ['unlockHA1', 'unlockHA2', 'unlockHA3', 'unlockHA4', 'unlockHA5', 'unlockHA6', 'unlockHO2', 'unlockHO3', 'unlockHO4', 'unlockHR2', 'unlockHR3', 'unlockHR4', 'unlockHR5', 'unlockHR6'];
     checkFields.forEach(f => { let el = document.getElementById('chk-'+f); if(el) el.checked = i[f] || false; });
@@ -1920,48 +1937,74 @@ function updateUI() {
     }
 
     let calcAttrEl = document.getElementById('info-calcUseAttr');
-    if(calcAttrEl) calcAttrEl.value = i.calcUseAttr ? i.calcUseAttr.toLocaleString("pt-BR") : "";
+    let fmtCalcAttr = i.calcUseAttr ? i.calcUseAttr.toLocaleString("pt-BR") : "";
+    if(calcAttrEl && calcAttrEl.value !== fmtCalcAttr) calcAttrEl.value = fmtCalcAttr;
+
     let calcResEl = document.getElementById('info-calcInimigoRes');
-    if(calcResEl) calcResEl.value = i.calcInimigoRes ? i.calcInimigoRes.toLocaleString("pt-BR") : "";
+    let fmtCalcRes = i.calcInimigoRes ? i.calcInimigoRes.toLocaleString("pt-BR") : "";
+    if(calcResEl && calcResEl.value !== fmtCalcRes) calcResEl.value = fmtCalcRes;
+
     let calcResIgnEl = document.getElementById('info-calcResIgnorada');
-    if(calcResIgnEl) calcResIgnEl.value = i.calcResIgnorada ? i.calcResIgnorada.toLocaleString("pt-BR") : "";
+    let fmtCalcResIgn = i.calcResIgnorada ? i.calcResIgnorada.toLocaleString("pt-BR") : "";
+    if(calcResIgnEl && calcResIgnEl.value !== fmtCalcResIgn) calcResIgnEl.value = fmtCalcResIgn;
+
     let calcBuffFlatEl = document.getElementById('info-calcBuffFlat');
-    if(calcBuffFlatEl) calcBuffFlatEl.value = i.calcBuffFlat ? i.calcBuffFlat.toLocaleString("pt-BR") : "";
+    let fmtCalcBuffFlat = i.calcBuffFlat ? i.calcBuffFlat.toLocaleString("pt-BR") : "";
+    if(calcBuffFlatEl && calcBuffFlatEl.value !== fmtCalcBuffFlat) calcBuffFlatEl.value = fmtCalcBuffFlat;
+
     let calcBuffPctEl = document.getElementById('info-calcBuffPct');
-    if(calcBuffPctEl) calcBuffPctEl.value = i.calcBuffPct ? i.calcBuffPct.toLocaleString("pt-BR") : "";
+    let fmtCalcBuffPct = i.calcBuffPct ? i.calcBuffPct.toLocaleString("pt-BR") : "";
+    if(calcBuffPctEl && calcBuffPctEl.value !== fmtCalcBuffPct) calcBuffPctEl.value = fmtCalcBuffPct;
+
     let calcBuffDanoFinalPctEl = document.getElementById('info-calcBuffDanoFinalPct');
-    if(calcBuffDanoFinalPctEl) calcBuffDanoFinalPctEl.value = i.calcBuffDanoFinalPct ? i.calcBuffDanoFinalPct.toLocaleString("pt-BR") : "";
+    let fmtCalcBuffDanoFinalPct = i.calcBuffDanoFinalPct ? i.calcBuffDanoFinalPct.toLocaleString("pt-BR") : "";
+    if(calcBuffDanoFinalPctEl && calcBuffDanoFinalPctEl.value !== fmtCalcBuffDanoFinalPct) calcBuffDanoFinalPctEl.value = fmtCalcBuffDanoFinalPct;
 
     let amiPotBuffEl = document.getElementById('info-amiPotBuff');
-    if(amiPotBuffEl) amiPotBuffEl.value = i.amiPotBuff ? i.amiPotBuff.toLocaleString("pt-BR") : "";
+    let fmtAmiPotBuff = i.amiPotBuff ? i.amiPotBuff.toLocaleString("pt-BR") : "";
+    if(amiPotBuffEl && amiPotBuffEl.value !== fmtAmiPotBuff) amiPotBuffEl.value = fmtAmiPotBuff;
+
     let amiVelBuffEl = document.getElementById('info-amiVelBuff');
-    if(amiVelBuffEl) amiVelBuffEl.value = i.amiVelBuff ? i.amiVelBuff.toLocaleString("pt-BR") : "";
+    let fmtAmiVelBuff = i.amiVelBuff ? i.amiVelBuff.toLocaleString("pt-BR") : "";
+    if(amiVelBuffEl && amiVelBuffEl.value !== fmtAmiVelBuff) amiVelBuffEl.value = fmtAmiVelBuff;
+
     let chkAmiVelAtivo = document.getElementById('chk-amiVelAtivo');
     if(chkAmiVelAtivo) chkAmiVelAtivo.checked = i.amiVelAtivo || false;
+
     let amiResPctEl = document.getElementById('info-amiResPct');
-    if(amiResPctEl) amiResPctEl.value = i.amiResPct ? i.amiResPct.toLocaleString("pt-BR") : "";
+    let fmtAmiResPct = i.amiResPct ? i.amiResPct.toLocaleString("pt-BR") : "";
+    if(amiResPctEl && amiResPctEl.value !== fmtAmiResPct) amiResPctEl.value = fmtAmiResPct;
 
     let estVelEl = document.getElementById('info-estaminaVelocidade');
-    if(estVelEl) estVelEl.value = i.estaminaVelocidade ? i.estaminaVelocidade.toLocaleString("pt-BR") : "";
+    let fmtEstVel = i.estaminaVelocidade ? i.estaminaVelocidade.toLocaleString("pt-BR") : "";
+    if(estVelEl && estVelEl.value !== fmtEstVel) estVelEl.value = fmtEstVel;
+
     let estDanoEl = document.getElementById('info-estaminaDano');
-    if(estDanoEl) estDanoEl.value = i.estaminaDano ? i.estaminaDano.toLocaleString("pt-BR") : "";
+    let fmtEstDano = i.estaminaDano ? i.estaminaDano.toLocaleString("pt-BR") : "";
+    if(estDanoEl && estDanoEl.value !== fmtEstDano) estDanoEl.value = fmtEstDano;
+
     let estBuffPctEl = document.getElementById('info-estaminaBuffPct');
-    if(estBuffPctEl) estBuffPctEl.value = i.estaminaBuffPct ? i.estaminaBuffPct.toLocaleString("pt-BR") : "";
+    let fmtEstBuffPct = i.estaminaBuffPct ? i.estaminaBuffPct.toLocaleString("pt-BR") : "";
+    if(estBuffPctEl && estBuffPctEl.value !== fmtEstBuffPct) estBuffPctEl.value = fmtEstBuffPct;
 
     let recEl = document.getElementById('info-recompensa');
-    if(recEl) recEl.value = i.recompensa ? i.recompensa.toLocaleString("pt-BR") : "";
+    let fmtRec = i.recompensa ? i.recompensa.toLocaleString("pt-BR") : "";
+    if(recEl && recEl.value !== fmtRec) recEl.value = fmtRec;
 
     let recTravEl = document.getElementById('info-recompensaTravada');
-    if(recTravEl) recTravEl.value = i.recompensaTravada ? i.recompensaTravada.toLocaleString("pt-BR") : "";
+    let fmtRecTrav = i.recompensaTravada ? i.recompensaTravada.toLocaleString("pt-BR") : "";
+    if(recTravEl && recTravEl.value !== fmtRecTrav) recTravEl.value = fmtRecTrav;
 
     let elTreinos = document.getElementById('info-treinosAcumulados');
-    if(elTreinos) elTreinos.value = i.treinosAcumulados ? i.treinosAcumulados.toLocaleString("pt-BR") : "";
+    let fmtTreinos = i.treinosAcumulados ? i.treinosAcumulados.toLocaleString("pt-BR") : "";
+    if(elTreinos && elTreinos.value !== fmtTreinos) elTreinos.value = fmtTreinos;
 
+    let berEl = document.getElementById('info-berries');
     if(isNPC && !isSuperAdmin && (!i.berries || i.berries === 0)) {
-        document.getElementById('info-berries').value = "Bloqueado";
+        if (berEl && berEl.value !== "Bloqueado") berEl.value = "Bloqueado";
     } else {
-        let berEl = document.getElementById('info-berries');
-        if(berEl) berEl.value = i.berries ? i.berries.toLocaleString("pt-BR") : "";
+        let fmtBerries = i.berries ? i.berries.toLocaleString("pt-BR") : "";
+        if(berEl && berEl.value !== fmtBerries) berEl.value = fmtBerries;
     }
 
     let D = currentChar.stats.d, F = currentChar.stats.f, R = currentChar.stats.r, V = currentChar.stats.v;
@@ -2642,7 +2685,13 @@ function updateUI() {
         }
 
     const statFields = ['f', 'd', 'r', 'v', 'esp', 'ami'];
-    statFields.forEach(f => { let el = document.getElementById('stat-'+f); if(el) el.value = currentChar.stats[f] ? currentChar.stats[f].toLocaleString("pt-BR") : ""; });
+    statFields.forEach(f => { 
+        let el = document.getElementById('stat-'+f); 
+        if(el) {
+            let formatted = currentChar.stats[f] ? currentChar.stats[f].toLocaleString("pt-BR") : "";
+            if (el.value !== formatted) el.value = formatted;
+        }
+    });
 
     let estTotalVal = Math.round((R + flatBonus.r) * (1 + bonus.r)) * 2;
     if (ln === "Beckman") estTotalVal = Math.floor(estTotalVal * 1.10);
@@ -2736,8 +2785,13 @@ function updateUI() {
         document.getElementById('avisoVel').style.display = "block"; document.getElementById('avisoVel').textContent = `Pontos não distribuídos nos sub-atributos de Velocidade: ${diff.toLocaleString("pt-BR")}`;
     } else { document.getElementById('avisoVel').style.display = "none"; }
     
-    document.getElementById('sub-refl').value = currentChar.substats.refl ? currentChar.substats.refl.toLocaleString("pt-BR") : "";
-    document.getElementById('sub-vcorp').value = currentChar.substats.vcorp ? currentChar.substats.vcorp.toLocaleString("pt-BR") : "";
+    let elRefl = document.getElementById('sub-refl');
+    let fmtRefl = currentChar.substats.refl ? currentChar.substats.refl.toLocaleString("pt-BR") : "";
+    if (elRefl && elRefl.value !== fmtRefl) elRefl.value = fmtRefl;
+
+    let elVcorp = document.getElementById('sub-vcorp');
+    let fmtVcorp = currentChar.substats.vcorp ? currentChar.substats.vcorp.toLocaleString("pt-BR") : "";
+    if (elVcorp && elVcorp.value !== fmtVcorp) elVcorp.value = fmtVcorp;
 
     let hasWaterDiff = (waterBuffV !== 0 || bonus.vAgua !== 0 || flatBonus.vAgua !== 0 || bonus.reflAgua !== 0 || flatBonus.reflAgua !== 0 || bonus.vcorpAgua !== 0 || flatBonus.vcorpAgua !== 0);
     let elBoxVelAgua = document.getElementById('container-boxVelAgua');
@@ -2803,8 +2857,13 @@ function updateUI() {
                 document.getElementById('avisoVelAgua').style.display = "block"; document.getElementById('avisoVelAgua').textContent = `Pontos não distribuídos na Água: ${diff.toLocaleString("pt-BR")}`;
             } else { document.getElementById('avisoVelAgua').style.display = "none"; }
             
-            document.getElementById('sub-reflAgua').value = currentChar.substats.reflAgua ? currentChar.substats.reflAgua.toLocaleString("pt-BR") : "";
-            document.getElementById('sub-vcorpAgua').value = currentChar.substats.vcorpAgua ? currentChar.substats.vcorpAgua.toLocaleString("pt-BR") : "";
+            let elReflAgua = document.getElementById('sub-reflAgua');
+            let fmtReflAgua = currentChar.substats.reflAgua ? currentChar.substats.reflAgua.toLocaleString("pt-BR") : "";
+            if (elReflAgua && elReflAgua.value !== fmtReflAgua) elReflAgua.value = fmtReflAgua;
+
+            let elVcorpAgua = document.getElementById('sub-vcorpAgua');
+            let fmtVcorpAgua = currentChar.substats.vcorpAgua ? currentChar.substats.vcorpAgua.toLocaleString("pt-BR") : "";
+            if (elVcorpAgua && elVcorpAgua.value !== fmtVcorpAgua) elVcorpAgua.value = fmtVcorpAgua;
         } else {
             elBoxVelAgua.style.display = "none";
             if(currentChar.substats.reflAgua) currentChar.substats.reflAgua = 0; 
@@ -2858,8 +2917,13 @@ function updateUI() {
                 document.getElementById('avisoVelAkuma').style.display = "block"; document.getElementById('avisoVelAkuma').textContent = `Pontos não distribuídos no Adicional: ${diff.toLocaleString("pt-BR")}`;
             } else { document.getElementById('avisoVelAkuma').style.display = "none"; }
             
-            document.getElementById('sub-reflAkuma').value = currentChar.substats.reflAkuma ? currentChar.substats.reflAkuma.toLocaleString("pt-BR") : "";
-            document.getElementById('sub-vcorpAkuma').value = currentChar.substats.vcorpAkuma ? currentChar.substats.vcorpAkuma.toLocaleString("pt-BR") : "";
+            let elReflAkuma = document.getElementById('sub-reflAkuma');
+            let fmtReflAkuma = currentChar.substats.reflAkuma ? currentChar.substats.reflAkuma.toLocaleString("pt-BR") : "";
+            if (elReflAkuma && elReflAkuma.value !== fmtReflAkuma) elReflAkuma.value = fmtReflAkuma;
+
+            let elVcorpAkuma = document.getElementById('sub-vcorpAkuma');
+            let fmtVcorpAkuma = currentChar.substats.vcorpAkuma ? currentChar.substats.vcorpAkuma.toLocaleString("pt-BR") : "";
+            if (elVcorpAkuma && elVcorpAkuma.value !== fmtVcorpAkuma) elVcorpAkuma.value = fmtVcorpAkuma;
         } else {
             elBoxVelAkuma.style.display = "none";
             if(currentChar.substats.reflAkuma) currentChar.substats.reflAkuma = 0; 
@@ -2902,9 +2966,17 @@ function updateUI() {
         document.getElementById('avisoEsp').style.display = "block"; document.getElementById('avisoEsp').textContent = `Pontos não distribuídos nos sub-atributos de Espírito: ${diff.toLocaleString("pt-BR")}`;
     } else { document.getElementById('avisoEsp').style.display = "none"; }
     
-    document.getElementById('sub-hArm').value = currentChar.substats.hArm ? currentChar.substats.hArm.toLocaleString("pt-BR") : "";
-    document.getElementById('sub-hObs').value = currentChar.substats.hObs ? currentChar.substats.hObs.toLocaleString("pt-BR") : "";
-    document.getElementById('sub-hRei').value = currentChar.substats.hRei ? currentChar.substats.hRei.toLocaleString("pt-BR") : "";
+    let elHArm = document.getElementById('sub-hArm');
+    let fmtHArm = currentChar.substats.hArm ? currentChar.substats.hArm.toLocaleString("pt-BR") : "";
+    if (elHArm && elHArm.value !== fmtHArm) elHArm.value = fmtHArm;
+
+    let elHObs = document.getElementById('sub-hObs');
+    let fmtHObs = currentChar.substats.hObs ? currentChar.substats.hObs.toLocaleString("pt-BR") : "";
+    if (elHObs && elHObs.value !== fmtHObs) elHObs.value = fmtHObs;
+
+    let elHRei = document.getElementById('sub-hRei');
+    let fmtHRei = currentChar.substats.hRei ? currentChar.substats.hRei.toLocaleString("pt-BR") : "";
+    if (elHRei && elHRei.value !== fmtHRei) elHRei.value = fmtHRei;
 
     let haPts = finalHA;
     let hoPts = finalHO;
@@ -2989,7 +3061,9 @@ function updateUI() {
                 i.hasAmiDesp = false;
                 aDesp = 0;
                 let chkDesp = document.getElementById('chk-amiDesp'); if(chkDesp) chkDesp.checked = false;
-                let subDesp = document.getElementById('sub-amiDesp'); if(subDesp) subDesp.value = "";
+                
+                let subDesp = document.getElementById('sub-amiDesp'); 
+                if(subDesp && subDesp.value !== "") subDesp.value = "";
                 
                 maxStatAmiInput = baseAmiStats * 10000;
                 if (AMI > maxStatAmiInput) {
@@ -3038,12 +3112,25 @@ function updateUI() {
         document.getElementById('avisoAmi').style.display = "block"; document.getElementById('avisoAmi').textContent = `Máximo de ${maxAmiPoints.toLocaleString("pt-BR")} pontos por atributo alcançado!`;
     } else { document.getElementById('avisoAmi').style.display = "none"; }
     
-    document.getElementById('sub-amiAlc').value = currentChar.substats.amiAlc ? currentChar.substats.amiAlc.toLocaleString("pt-BR") : "";
-    document.getElementById('sub-amiDur').value = currentChar.substats.amiDur ? currentChar.substats.amiDur.toLocaleString("pt-BR") : "";
-    document.getElementById('sub-amiPot').value = currentChar.substats.amiPot ? currentChar.substats.amiPot.toLocaleString("pt-BR") : "";
-    document.getElementById('sub-amiVel').value = currentChar.substats.amiVel ? currentChar.substats.amiVel.toLocaleString("pt-BR") : "";
-    let despEl = document.getElementById('sub-amiDesp');
-    if (despEl) despEl.value = currentChar.substats.amiDesp ? currentChar.substats.amiDesp.toLocaleString("pt-BR") : "";
+    let elAmiAlc = document.getElementById('sub-amiAlc');
+    let fmtAmiAlc = currentChar.substats.amiAlc ? currentChar.substats.amiAlc.toLocaleString("pt-BR") : "";
+    if (elAmiAlc && elAmiAlc.value !== fmtAmiAlc) elAmiAlc.value = fmtAmiAlc;
+
+    let elAmiDur = document.getElementById('sub-amiDur');
+    let fmtAmiDur = currentChar.substats.amiDur ? currentChar.substats.amiDur.toLocaleString("pt-BR") : "";
+    if (elAmiDur && elAmiDur.value !== fmtAmiDur) elAmiDur.value = fmtAmiDur;
+
+    let elAmiPot = document.getElementById('sub-amiPot');
+    let fmtAmiPot = currentChar.substats.amiPot ? currentChar.substats.amiPot.toLocaleString("pt-BR") : "";
+    if (elAmiPot && elAmiPot.value !== fmtAmiPot) elAmiPot.value = fmtAmiPot;
+
+    let elAmiVel = document.getElementById('sub-amiVel');
+    let fmtAmiVel = currentChar.substats.amiVel ? currentChar.substats.amiVel.toLocaleString("pt-BR") : "";
+    if (elAmiVel && elAmiVel.value !== fmtAmiVel) elAmiVel.value = fmtAmiVel;
+
+    let despEl2 = document.getElementById('sub-amiDesp');
+    let fmtDesp = currentChar.substats.amiDesp ? currentChar.substats.amiDesp.toLocaleString("pt-BR") : "";
+    if (despEl2 && despEl2.value !== fmtDesp) despEl2.value = fmtDesp;
 
     let amiResPctVal = parseInt(i.amiResPct) || 0;
     let calcAPotRes = Math.round((aPot + flatBonus.amiPot) * (1 + bonus.amiPot));
