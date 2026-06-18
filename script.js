@@ -825,6 +825,28 @@ window.toggleHiddenStyle = function(styleName, isChecked) {
     updateUI();
 };
 
+window.updateHideNaoTreinadas = function(isChecked) {
+    if (isReadOnly) return;
+    currentChar.info.hideNaoTreinadas = isChecked;
+    if (isChecked) {
+        currentChar.info.showApenasNaoTreinadas = false;
+        let el = document.getElementById('info-showApenasNaoTreinadas');
+        if(el) el.checked = false;
+    }
+    saveData(); updateUI();
+};
+
+window.updateShowApenasNaoTreinadas = function(isChecked) {
+    if (isReadOnly) return;
+    currentChar.info.showApenasNaoTreinadas = isChecked;
+    if (isChecked) {
+        currentChar.info.hideNaoTreinadas = false;
+        let el = document.getElementById('info-hideNaoTreinadas');
+        if(el) el.checked = false;
+    }
+    saveData(); updateUI();
+};
+
 window.addHabilidade = function() {
     if(isReadOnly) return;
     let sel = document.getElementById('hab-select');
@@ -1189,6 +1211,16 @@ function addTecnica() {
     toggleEditability();
 }
 
+window.cloneTecnica = function(idx) {
+    if(isReadOnly) return;
+    let obj = currentChar.tecnicasList[idx];
+    currentChar.tecnicasList.splice(idx + 1, 0, JSON.parse(JSON.stringify(obj)));
+    saveData();
+    renderTecnicas();
+    updateUI();
+    toggleEditability();
+};
+
 function removeTecnica(idx) {
     currentChar.tecnicasList.splice(idx, 1);
     saveData();
@@ -1212,13 +1244,44 @@ function changeOrdemTecnicas(val) {
             return nA.localeCompare(nB);
         });
         renderTecnicas();
+    } else if (val === 'estilo') {
+        let i = currentChar.info;
+        let availableStylesMap = {};
+        if (i.raca === "Mink" || (i.linhagem === "Charlotte" && i.raca2 === "Mink") || (currentChar.isNPC && i.raca === 'Outra')) availableStylesMap["Electro"] = "Electro";
+        if (i.akumaNome && i.akumaNome !== "nenhuma" && i.akumaNome.trim() !== "") availableStylesMap["Akuma"] = i.akumaNome;
+        [1, 2, 3, 4].forEach(n => {
+            let st = i['estilo'+n];
+            if (st && st !== "Nenhum") {
+                let dName = st === "Freestyle" ? (i['freestyle'+n] && i['freestyle'+n].trim() !== "" ? i['freestyle'+n] : "Freestyle") : st;
+                availableStylesMap['estilo'+n] = dName;
+            }
+        });
+
+        currentChar.tecnicasList.sort((a, b) => {
+            if (a.estilo === "Akuma" && b.estilo !== "Akuma") return 1;
+            if (b.estilo === "Akuma" && a.estilo !== "Akuma") return -1;
+            
+            let stA = a.estilo ? (availableStylesMap[a.estilo] || a.estilo) : "Sem Estilo";
+            let stB = b.estilo ? (availableStylesMap[b.estilo] || b.estilo) : "Sem Estilo";
+            
+            if (stA === "Sem Estilo" && stB !== "Sem Estilo") return 1;
+            if (stB === "Sem Estilo" && stA !== "Sem Estilo") return -1;
+
+            let cmp = stA.localeCompare(stB);
+            if (cmp !== 0) return cmp;
+
+            let nA = (a.nome || "").trim().toLowerCase();
+            let nB = (b.nome || "").trim().toLowerCase();
+            return nA.localeCompare(nB);
+        });
+        renderTecnicas();
     }
     saveData();
     updateUI();
 }
 
 function moveTecnica(idx, dir) {
-    if (currentChar.info.ordemTecnicas === 'alfabetica') {
+    if (currentChar.info.ordemTecnicas === 'alfabetica' || currentChar.info.ordemTecnicas === 'estilo') {
         currentChar.info.ordemTecnicas = 'manual';
         let selectOrdem = document.getElementById('info-ordemTecnicas');
         if (selectOrdem) selectOrdem.value = 'manual';
@@ -1270,6 +1333,7 @@ function renderTecnicas() {
                         </label>
                     </div>
                     <div style="display:flex; gap: 5px;">
+                        <button type="button" class="btn btn-outline" style="color:var(--info); border-color:var(--info); font-size:10px; padding:2px 6px;" onclick="cloneTecnica(${idx})">Clonar</button>
                         <button type="button" class="btn btn-outline" style="font-size:10px; padding:2px 6px;" onclick="moveTecnica(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>⬆️</button>
                         <button type="button" class="btn btn-outline" style="font-size:10px; padding:2px 6px;" onclick="moveTecnica(${idx}, 1)" ${idx === currentChar.tecnicasList.length - 1 ? 'disabled' : ''}>⬇️</button>
                         <button type="button" class="btn btn-outline" style="color:var(--danger); border-color:var(--danger); font-size:10px; padding:2px 6px;" onclick="removeTecnica(${idx})">Remover</button>
@@ -1284,6 +1348,10 @@ function renderTecnicas() {
             </div>
         `;
     });
+
+    if (currentChar.tecnicasList && currentChar.tecnicasList.length > 0) {
+        container.innerHTML += `<button type="button" class="btn btn-outline btn-success" style="width: 100%; margin-bottom: 5px; margin-top: 5px; font-size: 12px; padding: 6px;" onclick="addTecnica()">+ Adicionar Entrada</button>`;
+    }
 
     setTimeout(() => {
         container.querySelectorAll('textarea').forEach(ta => {
@@ -1330,6 +1398,14 @@ function renderLogs() {
             </div>
         `;
     });
+
+    if (currentChar.logList && currentChar.logList.length > 0) {
+        container.innerHTML += `<button type="button" class="btn btn-outline btn-success" style="width: 100%; margin-bottom: 5px; font-size: 12px; padding: 6px;" onclick="addLog()">+ Adicionar Entrada</button>`;
+    }
+
+    if (currentChar.logList && currentChar.logList.length > 0) {
+        container.innerHTML += `<button type="button" class="btn btn-outline btn-success" style="width: 100%; margin-top: 5px; font-size: 12px; padding: 6px;" onclick="addLog()">+ Adicionar Entrada</button>`;
+    }
 }
 
 window.toggleAlcunhaCondicao = function(condName) {
@@ -1799,6 +1875,8 @@ function updateUI() {
     let chkHideTecNome = document.getElementById('info-hideTecNome'); if (chkHideTecNome) chkHideTecNome.checked = i.hideTecNome || false;
     let chkHideTecDesc = document.getElementById('info-hideTecDesc'); if (chkHideTecDesc) chkHideTecDesc.checked = i.hideTecDesc || false;
     let chkHideTecEfeito = document.getElementById('info-hideTecEfeito'); if (chkHideTecEfeito) chkHideTecEfeito.checked = i.hideTecEfeito || false;
+    let chkHideNaoTreinadas = document.getElementById('info-hideNaoTreinadas'); if (chkHideNaoTreinadas) chkHideNaoTreinadas.checked = i.hideNaoTreinadas || false;
+    let chkShowApenasNaoTreinadas = document.getElementById('info-showApenasNaoTreinadas'); if (chkShowApenasNaoTreinadas) chkShowApenasNaoTreinadas.checked = i.showApenasNaoTreinadas || false;
     
     let hideStylesContainer = document.getElementById('hide-styles-container');
     if (hideStylesContainer) {
@@ -3601,12 +3679,15 @@ function updateUI() {
     });
     
     let tecnicasOut = "";
+    let tecnicasOutCopy = "";
     let hasValidTecnica = currentChar.tecnicasList && currentChar.tecnicasList.some(t => t.nome || t.desc || t.efeito);
     let trAcum = i.treinosAcumulados ? i.treinosAcumulados : 0;
   
     if (hasValidTecnica || trAcum > 0) {
         tecnicasOut += "▬▬▬▬  [ 𝐓ᴇ́ᴄɴɪᴄᴀs ]  ▬▬▬▬\n\n";
         tecnicasOut += `Treinos Acumulados: ${trAcum.toLocaleString("pt-BR")}\n\n`;
+        tecnicasOutCopy += "▬▬▬▬  [ 𝐓ᴇ́ᴄɴɪᴄᴀs ]  ▬▬▬▬\n\n";
+        tecnicasOutCopy += `Treinos Acumulados: ${trAcum.toLocaleString("pt-BR")}\n\n`;
       
         let tecnicasOrdenadas = [...currentChar.tecnicasList].filter(t => t.nome || t.desc || t.efeito);
         if (i.ordemTecnicas !== "manual") {
@@ -3643,26 +3724,60 @@ function updateUI() {
             if (i.hiddenStyles.includes(stKey)) return;
 
             let stKeyContent = "";
+            let stKeyContentCopy = "";
             agrupado[stKey].forEach(t => {
+                if (i.hideNaoTreinadas && t.naoTreinada) return;
+                if (i.showApenasNaoTreinadas && !t.naoTreinada) return;
                 let tContent = "";
+                let tContentCopy = "";
                 let unt = t.naoTreinada ? "~" : "";
-                if (t.nome && !i.hideTecNome) tContent += `* ${unt}${t.nome}${unt}\n`;
-                if (t.desc && !i.hideTecDesc) { t.desc.split('\n').forEach(line => { let trimLine = line.trim(); if(trimLine !== "") tContent += `> ${unt}${trimLine.replace(/^>\s*/, '')}${unt}\n`; }); }
-                if (t.efeito && !i.hideTecEfeito) { t.efeito.split('\n').forEach((line, idx) => { let trimLine = line.trim(); if(trimLine !== "") { if (idx === 0) tContent += `> ${unt}Efeito: ${trimLine.replace(/^>\s*/, '')}${unt}\n`; else tContent += `> ${unt}${trimLine.replace(/^>\s*/, '')}${unt}\n`; } }); }
+                let untCopy = (t.naoTreinada && !i.showApenasNaoTreinadas) ? "~" : "";
+                
+                if (t.nome && !i.hideTecNome) {
+                    tContent += `* ${unt}${t.nome}${unt}\n`;
+                    tContentCopy += `* ${untCopy}${t.nome}${untCopy}\n`;
+                }
+                if (t.desc && !i.hideTecDesc) { 
+                    t.desc.split('\n').forEach(line => { 
+                        let trimLine = line.trim(); 
+                        if(trimLine !== "") {
+                            tContent += `> ${unt}${trimLine.replace(/^>\s*/, '')}${unt}\n`; 
+                            tContentCopy += `> ${untCopy}${trimLine.replace(/^>\s*/, '')}${untCopy}\n`; 
+                        }
+                    }); 
+                }
+                if (t.efeito && !i.hideTecEfeito) { 
+                    t.efeito.split('\n').forEach((line, idx) => { 
+                        let trimLine = line.trim(); 
+                        if(trimLine !== "") { 
+                            if (idx === 0) {
+                                tContent += `> ${unt}Efeito: ${trimLine.replace(/^>\s*/, '')}${unt}\n`; 
+                                tContentCopy += `> ${untCopy}Efeito: ${trimLine.replace(/^>\s*/, '')}${untCopy}\n`; 
+                            } else {
+                                tContent += `> ${unt}${trimLine.replace(/^>\s*/, '')}${unt}\n`; 
+                                tContentCopy += `> ${untCopy}${trimLine.replace(/^>\s*/, '')}${untCopy}\n`; 
+                            }
+                        } 
+                    }); 
+                }
                 
                 if (tContent !== "") {
                     stKeyContent += tContent + "\n";
+                    stKeyContentCopy += tContentCopy + "\n";
                 }
             });
 
             if (stKeyContent !== "") {
                 tecnicasOut += `« ${stKey} »\n` + stKeyContent;
+                tecnicasOutCopy += `« ${stKey} »\n` + stKeyContentCopy;
             }
         });
 
         tecnicasOut += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;
+        tecnicasOutCopy += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;
     } else { 
         tecnicasOut += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`; 
+        tecnicasOutCopy += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`; 
     }
 
     let orgOut = "";
@@ -4154,9 +4269,12 @@ ${attrOut}${tecnicasOut}`;
     manualHistPersOut += `\n  : ᓩ _𝐇ɪsᴛᴏ́ʀɪᴀ:_\n${(i.historia && i.historia.trim() !== "") ? formatHistPers(i.historia) : "> "}\n`;
 
     let manualTecnicasOut = "";
+    let manualTecnicasOutCopy = "";
     if (hasValidTecnica || trAcum > 0) {
         manualTecnicasOut += "▬▬▬▬  [ 𝐓ᴇ́ᴄɴɪᴄᴀs ]  ▬▬▬▬\n\n";
         manualTecnicasOut += `Treinos Acumulados: ${trAcum.toLocaleString("pt-BR")}\n\n`;
+        manualTecnicasOutCopy += "▬▬▬▬  [ 𝐓ᴇ́ᴄɴɪᴄᴀs ]  ▬▬▬▬\n\n";
+        manualTecnicasOutCopy += `Treinos Acumulados: ${trAcum.toLocaleString("pt-BR")}\n\n`;
 
         let tecnicasOrdenadas = [...currentChar.tecnicasList].filter(t => t.nome || t.desc || t.efeito);
         if (i.ordemTecnicas !== "manual") {
@@ -4189,26 +4307,60 @@ ${attrOut}${tecnicasOut}`;
 
         estilosKeysManual.forEach(stKey => {
             let stKeyContent = "";
+            let stKeyContentCopy = "";
             agrupadoManual[stKey].forEach(t => {
+                if (i.hideNaoTreinadas && t.naoTreinada) return;
+                if (i.showApenasNaoTreinadas && !t.naoTreinada) return;
                 let tContent = "";
+                let tContentCopy = "";
                 let unt = t.naoTreinada ? "~" : "";
-                if (t.nome) tContent += `* ${unt}${t.nome}${unt}\n`;
-                if (t.desc) { t.desc.split('\n').forEach(line => { let trimLine = line.trim(); if(trimLine !== "") tContent += `> ${unt}${trimLine.replace(/^>\s*/, '')}${unt}\n`; }); }
-                if (t.efeito) { t.efeito.split('\n').forEach((line, idx) => { let trimLine = line.trim(); if(trimLine !== "") { if (idx === 0) tContent += `> ${unt}Efeito: ${trimLine.replace(/^>\s*/, '')}${unt}\n`; else tContent += `> ${unt}${trimLine.replace(/^>\s*/, '')}${unt}\n`; } }); }
+                let untCopy = (t.naoTreinada && !i.showApenasNaoTreinadas) ? "~" : "";
+                
+                if (t.nome) {
+                    tContent += `* ${unt}${t.nome}${unt}\n`;
+                    tContentCopy += `* ${untCopy}${t.nome}${untCopy}\n`;
+                }
+                if (t.desc) { 
+                    t.desc.split('\n').forEach(line => { 
+                        let trimLine = line.trim(); 
+                        if(trimLine !== "") {
+                            tContent += `> ${unt}${trimLine.replace(/^>\s*/, '')}${unt}\n`; 
+                            tContentCopy += `> ${untCopy}${trimLine.replace(/^>\s*/, '')}${untCopy}\n`; 
+                        }
+                    }); 
+                }
+                if (t.efeito) { 
+                    t.efeito.split('\n').forEach((line, idx) => { 
+                        let trimLine = line.trim(); 
+                        if(trimLine !== "") { 
+                            if (idx === 0) {
+                                tContent += `> ${unt}Efeito: ${trimLine.replace(/^>\s*/, '')}${unt}\n`; 
+                                tContentCopy += `> ${untCopy}Efeito: ${trimLine.replace(/^>\s*/, '')}${untCopy}\n`; 
+                            } else {
+                                tContent += `> ${unt}${trimLine.replace(/^>\s*/, '')}${unt}\n`; 
+                                tContentCopy += `> ${untCopy}${trimLine.replace(/^>\s*/, '')}${untCopy}\n`; 
+                            }
+                        } 
+                    }); 
+                }
                 
                 if (tContent !== "") {
                     stKeyContent += tContent + "\n";
+                    stKeyContentCopy += tContentCopy + "\n";
                 }
             });
 
             if (stKeyContent !== "") {
                 manualTecnicasOut += `« ${stKey} »\n` + stKeyContent;
+                manualTecnicasOutCopy += `« ${stKey} »\n` + stKeyContentCopy;
             }
         });
 
         manualTecnicasOut += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;
+        manualTecnicasOutCopy += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;
     } else { 
         manualTecnicasOut += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`; 
+        manualTecnicasOutCopy += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`; 
     }
 
     let outManual = `*Nᴇᴡ sᴇᴀs*
@@ -4276,10 +4428,11 @@ HP: ${i.hpAtual.toLocaleString("pt-BR")} / ${totalHP.toLocaleString("pt-BR")}
 
 ${manualAttrOut}${manualTecnicasOut}`;
 
-    window.copyDataFichaManual = outManual.trim();
+    window.copyDataFichaManual = outManual.replace(manualTecnicasOut, manualTecnicasOutCopy).trim();
     window.copyDataAtributos = `▬▬▬▬  [ 𝐒ᴛᴀᴛᴜs ]  ▬▬▬▬\nHP: ${i.hpAtual.toLocaleString("pt-BR")} / ${totalHP.toLocaleString("pt-BR")}\n\n↠  *𝐀ᴛʀɪʙᴜᴛᴏs*\n* Base: ${totalBase.toLocaleString("pt-BR")}\n* Total: ${totalFinal.toLocaleString("pt-BR")}\n\n${attrOut}`.trim();
-    window.copyDataTecnicas = tecnicasOut.trim();
+    window.copyDataTecnicas = tecnicasOutCopy.trim();
     document.getElementById('resBox').textContent = out.trim();
+    window.copyDataFichaPronta = out.replace(tecnicasOut, tecnicasOutCopy).trim();
 
     let logOut = "*Log de Atualizações:*Iີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊\n";
     if (currentChar.logList && currentChar.logList.length > 0) {
@@ -4295,7 +4448,7 @@ ${manualAttrOut}${manualTecnicasOut}`;
 }
 
 async function copyFicha() {
-    let text = document.getElementById('resBox').textContent;
+    let text = window.copyDataFichaPronta || document.getElementById('resBox').textContent;
     let tempArea = document.createElement("textarea"); tempArea.value = text;
     document.body.appendChild(tempArea); tempArea.select(); document.execCommand("copy"); document.body.removeChild(tempArea);
     await customAlert("Ficha copiada para a área de transferência!");
