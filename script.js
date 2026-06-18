@@ -1038,6 +1038,10 @@ function renderArmasEquipadas() {
                         <option value="amiVel" ${a.stat === 'amiVel' ? 'selected' : ''}>Velocidade</option>
                         <option value="amiDesp" ${a.stat === 'amiDesp' ? 'selected' : ''}>Despertar</option>
                     </optgroup>
+                    <optgroup label="Combate">
+                        <option value="dano" ${a.stat === 'dano' ? 'selected' : ''}>Dano</option>
+                        <option value="ignRes" ${a.stat === 'ignRes' ? 'selected' : ''}>Ignorar Resistência</option>
+                    </optgroup>
                 </select>
                 <select onchange="updateArmaEquipada(${idx}, 'type', this.value)" style="width: 70px; padding: 6px; font-size: 11px;">
                     <option value="pct" ${a.type === 'pct' ? 'selected' : ''}>%</option>
@@ -1389,6 +1393,7 @@ function addAlcunhaBuffRow() {
             <optgroup label="Atributos"><option value="tudoAttr">Todos os Atributos</option><option value="d">Destreza</option><option value="f">Força</option><option value="r">Resistência</option><option value="v">Velocidade</option><option value="refl">Reflexo</option><option value="vcorp">Vel. Corporal</option><option value="vAgua">Velocidade (Água)</option><option value="reflAgua">Reflexo (Água)</option><option value="vcorpAgua">Vel. Corporal (Água)</option></optgroup>
             <optgroup label="Espírito"><option value="tudoEsp">Todo o Espírito</option><option value="esp">Espírito</option><option value="ha">Armamento</option><option value="ho">Observação</option><option value="hr">Rei</option></optgroup>
             <optgroup label="Akuma no Mi"><option value="tudoAmi">Toda a Akuma</option><option value="amiAlc">Alcance</option><option value="amiDur">Durabilidade</option><option value="amiPot">Potência</option><option value="amiVel">Velocidade</option><option value="amiDesp">Despertar</option></optgroup>
+            <optgroup label="Combate"><option value="dano">Dano</option><option value="ignRes">Ignorar Resistência</option></optgroup>
         </select>
         <select class="buff-type" style="flex:1; font-size:11px; padding:4px; background:#2a2a2a; border:1px solid #444; color:#fff; border-radius:4px;">
             <option value="pct">% (+X%)</option>
@@ -2376,8 +2381,8 @@ function updateUI() {
         amiEl.placeholder = "0"; 
     }
 
-    let bonus = {d:0, f:0, r:0, v:0, esp:0, ha:0, ho:0, hr:0, ami:0, refl:0, vcorp:0, amiAlc:0, amiDur:0, amiPot:0, amiVel:0, amiDesp:0, vAgua:0, reflAgua:0, vcorpAgua:0};
-    let flatBonus = {d:0, f:0, r:0, v:0, esp:0, ha:0, ho:0, hr:0, ami:0, refl:0, vcorp:0, amiAlc:0, amiDur:0, amiPot:0, amiVel:0, amiDesp:0, vAgua:0, reflAgua:0, vcorpAgua:0};
+    let bonus = {d:0, f:0, r:0, v:0, esp:0, ha:0, ho:0, hr:0, ami:0, refl:0, vcorp:0, amiAlc:0, amiDur:0, amiPot:0, amiVel:0, amiDesp:0, vAgua:0, reflAgua:0, vcorpAgua:0, dano:0, ignRes:0};
+    let flatBonus = {d:0, f:0, r:0, v:0, esp:0, ha:0, ho:0, hr:0, ami:0, refl:0, vcorp:0, amiAlc:0, amiDur:0, amiPot:0, amiVel:0, amiDesp:0, vAgua:0, reflAgua:0, vcorpAgua:0, dano:0, ignRes:0};
 
     if (i.alcunhasList && i.alcunhaAtiva) {
         let ativa = i.alcunhasList.find(a => a.nome === i.alcunhaAtiva);
@@ -2397,8 +2402,8 @@ function updateUI() {
         }
     }
 
-    let itemBonus = {d:0, f:0, r:0, v:0, refl:0, vcorp:0, vAgua:0, reflAgua:0, vcorpAgua:0, esp:0, ha:0, ho:0, hr:0, ami:0, amiAlc:0, amiDur:0, amiPot:0, amiVel:0, amiDesp:0};
-    let itemFlat = {d:0, f:0, r:0, v:0, refl:0, vcorp:0, vAgua:0, reflAgua:0, vcorpAgua:0, esp:0, ha:0, ho:0, hr:0, ami:0, amiAlc:0, amiDur:0, amiPot:0, amiVel:0, amiDesp:0};
+    let itemBonus = {d:0, f:0, r:0, v:0, refl:0, vcorp:0, vAgua:0, reflAgua:0, vcorpAgua:0, esp:0, ha:0, ho:0, hr:0, ami:0, amiAlc:0, amiDur:0, amiPot:0, amiVel:0, amiDesp:0, dano:0, ignRes:0};
+    let itemFlat = {d:0, f:0, r:0, v:0, refl:0, vcorp:0, vAgua:0, reflAgua:0, vcorpAgua:0, esp:0, ha:0, ho:0, hr:0, ami:0, amiAlc:0, amiDur:0, amiPot:0, amiVel:0, amiDesp:0, dano:0, ignRes:0};
     if (i.armasEquipadasList) {
         i.armasEquipadasList.forEach(a => {
             if (a.ativo && a.stat) {
@@ -3007,10 +3012,6 @@ function updateUI() {
         calcAttrVal = step1Attr + Math.floor(step1Attr * (buffPct / 100));
     }
 
-    let calcResInimiga = parseInt(i.calcInimigoRes) || 0;
-    let calcResIgn = parseInt(i.calcResIgnorada) || 0;
-    let calcRes = calcResInimiga - Math.floor(calcResInimiga * (calcResIgn / 100));
-    if (calcRes < 0) calcRes = 0;
     let K = 25000;
     
     let calcAPot = Math.round((aPot + flatBonus.amiPot) * (1 + bonus.amiPot));
@@ -3044,6 +3045,7 @@ function updateUI() {
         }
     }
     let danoHaki = 0;
+    let hakiIgnRes = 0;
     if (calcHA > 0) {
         if (i.calcUseHaki === 'invisivel') danoHaki = Math.floor(calcHA * 0.25);
         else if (i.calcUseHaki === 'visivel') danoHaki = Math.floor(calcHA * 0.50);
@@ -3052,8 +3054,59 @@ function updateUI() {
         else if (i.calcUseHaki === 'emissao') danoHaki = calcHA;
         else if (i.calcUseHaki === 'avancado') {
             danoHaki = calcHA;
-            calcRes = Math.floor(calcRes * 0.75);
+            hakiIgnRes = 25;
         }
+    }
+
+    let calcResInimiga = parseInt(i.calcInimigoRes) || 0;
+    let calcResIgnManual = parseInt(i.calcResIgnorada) || 0;
+    
+    let ignResSourcesTexts = [];
+    let totalIgnRes = 0;
+
+    if (hakiIgnRes > 0) {
+        totalIgnRes += hakiIgnRes;
+        ignResSourcesTexts.push(`${hakiIgnRes}% de Armamento Avançado`);
+    }
+
+    if (i.alcunhasList && i.alcunhaAtiva) {
+        let ativa = i.alcunhasList.find(a => a.nome === i.alcunhaAtiva);
+        if (ativa && ativa.buffs) {
+            ativa.buffs.forEach(b => {
+                if (b.cond && (!i.alcunhaCondicoes || !i.alcunhaCondicoes[b.cond])) return;
+                if (b.stat === 'ignRes') {
+                    totalIgnRes += b.val;
+                    ignResSourcesTexts.push(`${b.val}% de ${ativa.nome}`);
+                }
+            });
+        }
+    }
+    
+    if (i.armasEquipadasList) {
+        i.armasEquipadasList.forEach(a => {
+            if (a.ativo && a.stat === 'ignRes') {
+                let val = parseInt(a.val) || 0;
+                totalIgnRes += val;
+                ignResSourcesTexts.push(`${val}% de ${a.nome || 'Item'}`);
+            }
+        });
+    }
+
+    if (calcResIgnManual > 0) {
+        totalIgnRes += calcResIgnManual;
+        ignResSourcesTexts.push(`${calcResIgnManual}% manual`);
+    }
+
+    let calcResBruta = calcResInimiga;
+    if (totalIgnRes > 0) {
+        calcResBruta = calcResInimiga - Math.floor(calcResInimiga * (totalIgnRes / 100));
+    }
+    
+    let danoBonusResNegativa = 0;
+    let calcRes = calcResBruta;
+    if (calcResBruta < 0) {
+        danoBonusResNegativa = Math.abs(calcResBruta);
+        calcRes = 0;
     }
 
     let calcAttrSemAmi = calcAttrVal;
@@ -3070,15 +3123,22 @@ function updateUI() {
     let calcFator = K / (K + calcRes);
     let danoFisico = Math.floor(calcAttrVal * calcFator);
     let buffDanoFinalPct = parseInt(i.calcBuffDanoFinalPct) || 0;
-    let calcDanoFinal = danoFisico;
-    if (buffDanoFinalPct !== 0) {
-        calcDanoFinal = danoFisico + Math.floor(danoFisico * (buffDanoFinalPct / 100));
+
+    let extraFlatDano = (flatBonus.dano || 0) + (itemFlat.dano || 0);
+    let extraPctDano = Math.round(((bonus.dano || 0) + (itemBonus.dano || 0)) * 100);
+    let totalPctDano = buffDanoFinalPct + extraPctDano;
+
+    let baseComFlat = danoFisico + extraFlatDano + danoBonusResNegativa;
+    let calcDanoFinal = baseComFlat;
+
+    if (totalPctDano !== 0) {
+        calcDanoFinal = baseComFlat + Math.floor(baseComFlat * (totalPctDano / 100));
     }
     
     document.getElementById('calc-dano-final').textContent = calcDanoFinal.toLocaleString("pt-BR");
     
     let calcFormTexto = "";
-    if (buffFlat > 0 || buffPct !== 0 || danoAmi > 0 || danoHaki > 0 || buffDanoFinalPct !== 0) {
+    if (buffFlat > 0 || buffPct !== 0 || danoAmi > 0 || danoHaki > 0 || totalPctDano !== 0 || extraFlatDano !== 0) {
         calcFormTexto += `<span style="color:#0dcaf0;">${baseCalcAttr.toLocaleString("pt-BR")} (Atributo)</span>`;
         if (buffFlat > 0) calcFormTexto += ` <span style="color:#ffc107;">+ ${buffFlat.toLocaleString("pt-BR")} (Bônus de Estilo) = ${step1Attr.toLocaleString("pt-BR")}</span>`;
         if (buffPct !== 0) calcFormTexto += ` <span style="color:#198754;">+ ${buffPct}% (Buff Ativo) = ${calcAttrSemAmi.toLocaleString("pt-BR")}</span>`;
@@ -3098,12 +3158,22 @@ function updateUI() {
         }
         calcFormTexto += `<br>`;
     }
-    if (calcResIgn > 0) {
-        calcFormTexto += `Resistência Ignorada: ${calcResInimiga.toLocaleString("pt-BR")} - ${calcResIgn}% = ${calcRes.toLocaleString("pt-BR")}<br>`;
+    if (totalIgnRes > 0) {
+        calcFormTexto += `Resistência Ignorada: ${calcResInimiga.toLocaleString("pt-BR")} - ${totalIgnRes}% *(${ignResSourcesTexts.join(" + ")})* = ${calcResBruta.toLocaleString("pt-BR")}<br>`;
     }
     calcFormTexto += `Dano Básico: ${calcAttrVal.toLocaleString("pt-BR")} × (${K.toLocaleString("pt-BR")} / (${K.toLocaleString("pt-BR")} + ${calcRes.toLocaleString("pt-BR")})) = ${danoFisico.toLocaleString("pt-BR")}`;
-    if (buffDanoFinalPct !== 0) {
-        calcFormTexto += `<br><span style="color:#ffc107;">Dano com Buff Final: ${danoFisico.toLocaleString("pt-BR")} + ${buffDanoFinalPct}% = ${calcDanoFinal.toLocaleString("pt-BR")}</span>`;
+    
+    if (danoBonusResNegativa > 0) {
+        let somadoParcial = danoFisico + danoBonusResNegativa;
+        calcFormTexto += `<br><span style="color:#ff69b4;">Dano Adicional (Resistência Negativa): +${danoBonusResNegativa.toLocaleString("pt-BR")} = ${somadoParcial.toLocaleString("pt-BR")}</span>`;
+    }
+    
+    if (extraFlatDano !== 0) {
+        let baseSomaText = danoBonusResNegativa > 0 ? (danoFisico + danoBonusResNegativa) : danoFisico;
+        calcFormTexto += `<br><span style="color:#0dcaf0;">Bônus Fixo (Itens/Alcunha): ${baseSomaText.toLocaleString("pt-BR")} + ${extraFlatDano.toLocaleString("pt-BR")} = ${baseComFlat.toLocaleString("pt-BR")}</span>`;
+    }
+    if (totalPctDano !== 0) {
+        calcFormTexto += `<br><span style="color:#ffc107;">Dano com Buff Final: ${baseComFlat.toLocaleString("pt-BR")} + ${totalPctDano}% = ${calcDanoFinal.toLocaleString("pt-BR")}</span>`;
     }
     document.getElementById('calc-formula').innerHTML = calcFormTexto;
 
@@ -3353,16 +3423,22 @@ function updateUI() {
             if (i.unlockHA6) attrOut += `- 𝙰𝚟𝚊𝚗𝚌̧𝚊𝚍𝚘✓\n`;
         }
         if (HO > 0) {
-            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚊 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘:_ ${strCalc(HO, bonus.ho, flatBonus.ho, itemBonus.ho, itemFlat.ho)}\n`;
+            let passiveHO = Math.round((HO + flatBonus.ho) * (1 + bonus.ho));
+            let totalHO = Math.round((passiveHO + itemFlat.ho) * (1 + itemBonus.ho));
+            let alcanceHO = Math.floor(totalHO / 10);
+            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚊 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘:_ ${strCalc(HO, bonus.ho, flatBonus.ho, itemBonus.ho, itemFlat.ho)} (${alcanceHO.toLocaleString("pt-BR")}m)\n`;
             if (i.unlockHO2) attrOut += `- 𝙸𝚗𝚝𝚎𝚗𝚌̧𝚊̃𝚘✓\n`;
             if (i.unlockHO3) attrOut += `- 𝙿𝚛𝚎𝚖𝚘𝚗𝚒𝚌̧𝚊̃𝚘✓\n`;
             if (i.unlockHO4) attrOut += `- 𝙰𝚟𝚊𝚗𝚌̧𝚊𝚍𝚘✓\n`;
         }
         if (HR > 0) {
+            let passiveHR = Math.round((HR + flatBonus.hr) * (1 + bonus.hr));
+            let totalHR = Math.round((passiveHR + itemFlat.hr) * (1 + itemBonus.hr));
+            let alcanceHR = Math.floor(totalHR / 10);
             attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝚁𝚎𝚒:_ ${strCalc(HR, bonus.hr, flatBonus.hr, itemBonus.hr, itemFlat.hr)}\n`;
             if (i.unlockHR2) attrOut += `- 𝙳𝚘𝚖𝚒𝚗𝚊𝚌̧𝚊̃𝚘✓\n`;
             if (i.unlockHR3) attrOut += `- 𝙸𝚗𝚌𝚊𝚙𝚊𝚌𝚒𝚝𝚊𝚌̧𝚊̃𝚘✓\n`;
-            if (i.unlockHR4) attrOut += `- 𝙿𝚛𝚎𝚜𝚜𝚊̃𝚘✓\n`;
+            if (i.unlockHR4) attrOut += `- 𝙿𝚛𝚎𝚜𝚜𝚊̃𝚘✓ (${alcanceHR.toLocaleString("pt-BR")}m)\n`;
             if (i.unlockHR5) attrOut += `- 𝙰𝚜𝚜𝚊𝚜𝚜𝚒𝚗𝚊𝚝𝚘 𝚍𝚎 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘✓\n`;
             if (i.unlockHR6) attrOut += `- 𝙸𝚗𝚏𝚞𝚜𝚊̃𝚘✓\n`;
         }
@@ -3630,7 +3706,7 @@ function updateUI() {
     } else if (i.alcunhaAtiva) {
         let formatAlcunha = (alcObj) => {
             if (alcObj && alcObj.buffs && alcObj.buffs.length > 0) {
-                let names = {tudo:"Todos os Atributos",tudoAttr:"Todos os Atributos",tudoEsp:"Todo o Espírito",tudoAmi:"Toda a Akuma",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar"};
+                let names = {tudo:"Todos os Atributos",tudoAttr:"Todos os Atributos",tudoEsp:"Todo o Espírito",tudoAmi:"Toda a Akuma",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar",dano:"Dano Final",ignRes:"Ignorar Resistência"};
                 let condGroups = { "": [] };
                 alcObj.buffs.forEach(b => {
                     let cName = (b.cond && b.cond.trim() !== "") ? b.cond.trim() : "";
@@ -3907,15 +3983,21 @@ function updateUI() {
     manualAttrOut += `- 𝙴𝚖𝚒𝚜𝚜𝚊̃𝚘${i.unlockHA5 ? '✓' : '✘'}\n`;
     manualAttrOut += `- 𝙰𝚟𝚊𝚗𝚌̧𝚊𝚍𝚘${i.unlockHA6 ? '✓' : '✘'}\n`;
 
-    manualAttrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚊 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘:_ ${strCalc(HO, bonus.ho, flatBonus.ho, itemBonus.ho, itemFlat.ho)}\n`;
+    let passiveHOMan = Math.round((HO + flatBonus.ho) * (1 + bonus.ho));
+    let totalHOMan = Math.round((passiveHOMan + itemFlat.ho) * (1 + itemBonus.ho));
+    let alcanceHOMan = Math.floor(totalHOMan / 10);
+    manualAttrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚊 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘:_ ${strCalc(HO, bonus.ho, flatBonus.ho, itemBonus.ho, itemFlat.ho)} (${alcanceHOMan.toLocaleString("pt-BR")}m)\n`;
     manualAttrOut += `- 𝙸𝚗𝚝𝚎𝚗𝚌̧𝚊̃𝚘${i.unlockHO2 ? '✓' : '✘'}\n`;
     manualAttrOut += `- 𝙿𝚛𝚎𝚖𝚘𝚗𝚒𝚌̧𝚊̃𝚘${i.unlockHO3 ? '✓' : '✘'}\n`;
     manualAttrOut += `- 𝙰𝚟𝚊𝚗𝚌̧𝚊𝚍𝚘${i.unlockHO4 ? '✓' : '✘'}\n`;
 
+    let passiveHRMan = Math.round((HR + flatBonus.hr) * (1 + bonus.hr));
+    let totalHRMan = Math.round((passiveHRMan + itemFlat.hr) * (1 + itemBonus.hr));
+    let alcanceHRMan = Math.floor(totalHRMan / 10);
     manualAttrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝚁𝚎𝚒:_ ${strCalc(HR, bonus.hr, flatBonus.hr, itemBonus.hr, itemFlat.hr)}\n`;
     manualAttrOut += `- 𝙳𝚘𝚖𝚒𝚗𝚊𝚌̧𝚊̃𝚘${i.unlockHR2 ? '✓' : '✘'}\n`;
     manualAttrOut += `- 𝙸𝚗𝚌𝚊𝚙𝚊𝚌𝚒𝚝𝚊𝚌̧𝚊̃𝚘${i.unlockHR3 ? '✓' : '✘'}\n`;
-    manualAttrOut += `- 𝙿𝚛𝚎𝚜𝚜𝚊̃𝚘${i.unlockHR4 ? '✓' : '✘'}\n`;
+    manualAttrOut += `- 𝙿𝚛𝚎𝚜𝚜𝚊̃𝚘${i.unlockHR4 ? '✓' : '✘'} (${alcanceHRMan.toLocaleString("pt-BR")}m)\n`;
     manualAttrOut += `- 𝙰𝚜𝚜𝚊𝚜𝚜𝚒𝚗𝚊𝚝𝚘 𝚍𝚎 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘${i.unlockHR5 ? '✓' : '✘'}\n`;
     manualAttrOut += `- 𝙸𝚗𝚏𝚞𝚜𝚊̃𝚘${i.unlockHR6 ? '✓' : '✘'}\n\n`;
 
@@ -4017,7 +4099,7 @@ ${attrOut}${tecnicasOut}`;
 
     let formatAlcunhaManual = (alcObj) => {
         if (alcObj && alcObj.buffs && alcObj.buffs.length > 0) {
-            let names = {tudo:"Todos os Atributos",tudoAttr:"Todos os Atributos",tudoEsp:"Todo o Espírito",tudoAmi:"Toda a Akuma",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar"};
+            let names = {tudo:"Todos os Atributos",tudoAttr:"Todos os Atributos",tudoEsp:"Todo o Espírito",tudoAmi:"Toda a Akuma",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar",dano:"Dano Final",ignRes:"Ignorar Resistência"};
             let condGroups = { "": [] };
             alcObj.buffs.forEach(b => {
                 let cName = (b.cond && b.cond.trim() !== "") ? b.cond.trim() : "";
