@@ -678,8 +678,9 @@ function toggleEditability() {
         let isBerriesBlocked = isNPC && !isSuperAdmin && !hasBerries && el.id === 'info-berries';
         let isNpcCBlocked = isNPC && !isSuperAdmin && !hasNpcC && (el.id === 'btn-add-npc-c' || (el.closest && el.closest('#npcs-comuns-container')));
         let isNpcEBlocked = isNPC && !isSuperAdmin && !hasNpcE && (el.id === 'btn-add-npc-e' || (el.closest && el.closest('#npcs-especiais-container')));
+        let isKuja = currentChar.info.raca === "Kuja" || currentChar.info.raca2 === "Kuja";
 
-        if (isBerriesBlocked || isNpcCBlocked || isNpcEBlocked) {
+        if (isBerriesBlocked || isNpcCBlocked || isNpcEBlocked || (isKuja && (el.id === 'info-sexo' || el.id === 'info-genero'))) {
             el.disabled = true;
         } else if(el.type === 'checkbox') {
             el.disabled = isReadOnly;
@@ -1519,6 +1520,51 @@ function deleteAlcunha() {
 
 function populateSelects() {}
 
+function customConfirm(msg) {
+    return new Promise((resolve) => {
+        const overlay = document.getElementById('custom-prompt-overlay');
+        const msgEl = document.getElementById('custom-prompt-msg');
+        const inputEl = document.getElementById('custom-prompt-input');
+        const btnOk = document.getElementById('custom-prompt-ok');
+        const btnCancel = document.getElementById('custom-prompt-cancel');
+
+        msgEl.textContent = msg;
+        inputEl.style.display = 'none';
+        btnOk.textContent = 'Sim';
+        btnCancel.textContent = 'Não';
+        
+        overlay.style.display = 'flex';
+        btnOk.focus();
+
+        const cleanup = () => {
+            overlay.style.display = 'none';
+            inputEl.style.display = 'block';
+            btnOk.textContent = 'Confirmar';
+            btnCancel.textContent = 'Cancelar';
+            btnOk.onclick = null;
+            btnCancel.onclick = null;
+        };
+
+        btnOk.onclick = () => { cleanup(); resolve(true); };
+        btnCancel.onclick = () => { cleanup(); resolve(false); };
+    });
+}
+
+window.handleRacaChange = async function(field, val) {
+    if (isReadOnly) return;
+    if (val === "Kuja") {
+        let conf = await customConfirm("Todas as Kuja são obrigatoriamente mulheres cisgênero. Você tem certeza que deseja escolher essa raça?");
+        if (!conf) {
+            updateUI();
+            return;
+        }
+        currentChar.info.sexo = "Feminino";
+        currentChar.info.genero = "Mulher";
+    }
+    updateField('info', field, val);
+    toggleEditability();
+};
+
 function updateField(category, field, value) { 
     if (category === 'name') { 
         currentChar.name = value || ""; 
@@ -1737,9 +1783,6 @@ function updateUI() {
         }
     });
 
-    if (i.raca === "Kuja" && i.sexo !== "Feminino") i.raca = "";
-    if (i.raca2 === "Kuja" && i.sexo !== "Feminino") i.raca2 = "";
-
     const noCharlotteRaces = ["Bucaneiro", "Lunariano", "Oni", "Meio-Gigante", "Wotan"];
     if (i.linhagem === "Charlotte") {
         if (noCharlotteRaces.includes(i.raca)) i.raca = "";
@@ -1749,7 +1792,6 @@ function updateUI() {
     let rHtml = '<option value="">-- Selecione --</option>';
     if (isNPC) rHtml += `<option value="Outra" ${i.raca === 'Outra' ? 'selected' : ''}>Outra...</option>`;
     for(let r in racas) {
-        if (r === "Kuja" && i.sexo !== "Feminino") continue;
         if (i.linhagem === "Charlotte" && noCharlotteRaces.includes(r)) continue;
         rHtml += `<option value="${r}">${r}</option>`;
     }
@@ -1789,7 +1831,6 @@ function updateUI() {
         let r2Html = '<option value="">-- Selecione --</option>';
         if (isNPC) r2Html += `<option value="Outra" ${i.raca2 === 'Outra' ? 'selected' : ''}>Outra...</option>`;
         for(let r in racas) {
-            if (r === "Kuja" && i.sexo !== "Feminino") continue;
             if (noCharlotteRaces.includes(r)) continue;
             r2Html += `<option value="${r}">${r}</option>`;
         }
