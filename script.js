@@ -585,14 +585,6 @@ function saveData(force = false) {
       document.getElementById('db-status').classList.add('syncing');
       
       let dataToSave = JSON.parse(JSON.stringify(charData));
-      dataToSave.pcs.forEach(p => {
-          if (p.pc && p.pc.info) { delete p.pc.info.sceneType; delete p.pc.info.sceneText; }
-          if (p.npcs) {
-              p.npcs.forEach(n => {
-                  if (n.info) { delete n.info.sceneType; delete n.info.sceneText; }
-              });
-          }
-      });
 
       db.collection('fichas_op').doc(currentDocId).set(dataToSave)
         .then(() => { 
@@ -807,7 +799,7 @@ window.toggleBox = function(id) {
 
 window.toggleAllBoxes = function(state) {
     if (!currentChar) return;
-    const boxKeys = ['boxIden', 'boxMec', 'boxSoc', 'boxHab', 'boxBase', 'boxEsp', 'boxAmi', 'boxHist', 'boxLog', 'boxInv', 'boxTec', 'boxRes', 'boxCalc', 'boxEstamina', 'boxScene'];
+    const boxKeys = ['boxIden', 'boxMec', 'boxSoc', 'boxHab', 'boxBase', 'boxEsp', 'boxAmi', 'boxHist', 'boxLog', 'boxInv', 'boxTec', 'boxRes', 'boxCalc', 'boxEstamina'];
     boxKeys.forEach(k => currentChar.info[k] = state);
     document.querySelectorAll('.box').forEach(box => box.classList.remove('flipped'));
     saveData();
@@ -1532,11 +1524,6 @@ function updateField(category, field, value) {
         currentChar[category][field] = value; 
     } 
     
-    if (field === 'sceneText' || field === 'sceneType') {
-        updateUI();
-        return;
-    }
-    
     saveData(); updateUI(); 
     if (field.startsWith('estilo') || field.startsWith('freestyle') || field === 'raca' || field === 'raca2' || field === 'linhagem') renderTecnicas();
 }
@@ -1722,7 +1709,7 @@ function updateUI() {
     let i = currentChar.info;
     let isNPC = currentChar.isNPC;
 
-    ['boxIden', 'boxMec', 'boxSoc', 'boxHab', 'boxBase', 'boxEsp', 'boxAmi', 'boxHist', 'boxLog', 'boxInv', 'boxTec', 'boxRes', 'boxCalc', 'boxEstamina', 'boxScene'].forEach(id => {
+    ['boxIden', 'boxMec', 'boxSoc', 'boxHab', 'boxBase', 'boxEsp', 'boxAmi', 'boxHist', 'boxLog', 'boxInv', 'boxTec', 'boxRes', 'boxCalc', 'boxEstamina'].forEach(id => {
         let wrapper = document.getElementById('wrapper-' + id);
         let icon = document.getElementById('icon-' + id);
         let titleBlock = document.getElementById('title-' + id);
@@ -1860,7 +1847,7 @@ function updateUI() {
     } else { anim2.style.display = "none"; }
 
     document.getElementById('pc-name').value = currentChar.name;
-    const textFields = ['selClasseDF', 'selDF', 'selRV', 'selLinDF', 'selLinRV', 'selLin4', 'selLinEspAmi', 'altura', 'idade', 'sexo', 'genero', 'sangue', 'telefone', 'nacionalidade', 'localizacao', 'tripulacao', 'pirataStatus', 'akumaNome', 'personalidade', 'historia', 'aparencia', 'inventario', 'animal', 'animal2', 'sceneType', 'sceneText', 'calcUseAmi', 'calcUseHaki', 'amiAlcMult', 'ordemTecnicas', 'estaminaHakiArm', 'estaminaHakiObs'];
+    const textFields = ['selClasseDF', 'selDF', 'selRV', 'selLinDF', 'selLinRV', 'selLin4', 'selLinEspAmi', 'altura', 'idade', 'sexo', 'genero', 'sangue', 'telefone', 'nacionalidade', 'localizacao', 'tripulacao', 'pirataStatus', 'akumaNome', 'personalidade', 'historia', 'aparencia', 'inventario', 'animal', 'animal2', 'calcUseAmi', 'calcUseHaki', 'amiAlcMult', 'ordemTecnicas', 'estaminaHakiArm', 'estaminaHakiObs'];
     textFields.forEach(f => { let el = document.getElementById('info-'+f); if(el) el.value = i[f] || ""; });
 
     const checkFields = ['unlockHA1', 'unlockHA2', 'unlockHA3', 'unlockHA4', 'unlockHA5', 'unlockHA6', 'unlockHO2', 'unlockHO3', 'unlockHO4', 'unlockHR2', 'unlockHR3', 'unlockHR4', 'unlockHR5', 'unlockHR6'];
@@ -3300,20 +3287,6 @@ function updateUI() {
     }
     document.getElementById('estamina-formula').innerHTML = estFormula;
 
-    let typeMin = { "Treino Padrão": 250, "Treino de Técnicas": 60, "Interação": 50, "Missão": 250, "Recrutar NPCs": 200, "Trabalho Tipo 1": 200, "Trabalho Tipo 2": 300, "Trabalho Tipo 3": 500, "Extra-Narrada": 2000 };
-    let sceneTxt = i.sceneText || "";
-    let sChars = sceneTxt.length;
-    let sParas = sceneTxt.trim() === "" ? 0 : sceneTxt.split(/\n+/).filter(p => p.trim().length > 0).length;
-    let sWords = sceneTxt.trim() === "" ? 0 : sceneTxt.trim().split(/\s+/).length;
-    let minW = typeMin[i.sceneType] || 0;
-    
-    document.getElementById('scene-chars').textContent = sChars;
-    document.getElementById('scene-paras').textContent = sParas;
-    document.getElementById('scene-words').textContent = sWords;
-    let statusEl = document.getElementById('scene-status');
-    if (sWords >= minW) { statusEl.textContent = `(✔️ Alcançou o mínimo de ${minW})`; statusEl.style.color = "var(--success)"; } 
-    else { statusEl.textContent = `(❌ Faltam ${minW - sWords})`; statusEl.style.color = "var(--danger)"; }
-
     let rHP = i.exaustaoCompleta ? Math.round(R / 0.8) : R;
     let totalHP = 10000 + Math.round((rHP + flatBonus.r) * (1 + bonus.r));
     if (typeof i.lastHPTotal === 'undefined') i.lastHPTotal = totalHP;
@@ -4590,14 +4563,6 @@ async function saveBackup() {
     }
     document.getElementById('db-status').classList.add('syncing');
     let dataToSave = JSON.parse(JSON.stringify(charData));
-    dataToSave.pcs.forEach(p => {
-        if (p.pc && p.pc.info) { delete p.pc.info.sceneType; delete p.pc.info.sceneText; }
-        if (p.npcs) {
-            p.npcs.forEach(n => {
-                if (n.info) { delete n.info.sceneType; delete n.info.sceneText; }
-            });
-        }
-    });
     dataToSave.backupPassword = newPass;
     try {
         await backupRef.set(dataToSave);

@@ -709,35 +709,6 @@
 
     <div>
         <div class="box">
-            <div class="box-title" id="title-boxScene" onclick="toggleBox('boxScene')">
-                <span style="color: var(--info);">Escritor de Cenas <span onclick="openInfoModal('Escritor de Cenas', 'Use a área de texto para realizar a contagem simultânea do seu roleplay. Selecione na aba que tipo de cena está produzindo. Acompanhe a marcação na parte inferior. Enquanto estiver em vermelho, seu texto ainda não atingiu o limite estipulado pelo sistema. Lembre-se que este campo serve somente de bloco de notas e apagará seus rascunhos caso feche a aba sem copiar.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxScene" class="toggle-icon">▼</span>
-            </div>
-            <div id="wrapper-boxScene" class="box-content">
-                <div class="input-group">
-                    <label>Tipo de Cena / Trabalho</label>
-                    <select id="info-sceneType" onchange="updateField('info', 'sceneType', this.value)">
-                        <option value="Treino Padrão">Treino Padrão (Mín: 250 palavras)</option>
-                        <option value="Treino de Técnicas">Treino de Técnicas (Mín: 60 palavras)</option>
-                        <option value="Interação">Interação (Mín: 50 palavras)</option>
-                        <option value="Missão">Missão (Mín: 250 palavras)</option>
-                        <option value="Recrutar NPCs">Recrutar NPCs (Mín: 200 palavras)</option>
-                        <option value="Trabalho Tipo 1">Trabalho Tipo 1 (Mín: 200 palavras)</option>
-                        <option value="Trabalho Tipo 2">Trabalho Tipo 2 (Mín: 300 palavras)</option>
-                        <option value="Trabalho Tipo 3">Trabalho Tipo 3 (Mín: 500 palavras)</option>
-                        <option value="Extra-Narrada">Extra-Narrada (Mín: 2000 palavras)</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <textarea id="info-sceneText" placeholder="Escreva sua narrativa aqui para realizar a contagem de palavras..." style="min-height: 150px;" oninput="updateField('info', 'sceneText', this.value)"></textarea>
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items: center; font-size:12px; font-weight:bold; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 4px; border: 1px solid #444;">
-                    <span style="color: #aaa;"><span id="scene-chars">0</span> Carac. | <span id="scene-paras">0</span> Parág.</span>
-                    <span>Palavras: <span id="scene-words" style="font-size:14px; margin: 0 5px;">0</span> <span id="scene-status"></span></span>
-                </div>
-            </div>
-        </div>
-
-        <div class="box">
             <div class="box-title" id="title-boxLog" style="color: var(--warning);" onclick="toggleBox('boxLog')">
                 <span>Log de Atualizações <span onclick="openInfoModal('Log de Atualizações', 'Ao final de toda semana, clique em Adicionar Entrada. Use o título para indicar a numeração da semana e a caixa maior para listar os treinos feitos, dinheiro conquistado e NPCs recrutados. Para aprovação da sua ficha com os ADMs, não mande prints, use o botão Copiar Tudo para exportar perfeitamente a lista de evolução.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxLog" class="toggle-icon">▼</span>
             </div>
