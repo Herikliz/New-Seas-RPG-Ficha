@@ -4960,6 +4960,14 @@ window.promoverCargo = async function() {
     }
 };
 
+window.updateSexo = async function(val) {
+    if (isReadOnly) return;
+    if (val === "Assexuado") {
+        await customAlert("Atenção: A escolha de \"Assexuado\" requer aprovação da ADM. Apenas seres bem específicos podem possuir essa característica fisiológica.");
+    }
+    updateField('info', 'sexo', val);
+};
+
 window.toggleHideSexoGenero = function(type, isChecked) {
     if (isReadOnly) return;
     

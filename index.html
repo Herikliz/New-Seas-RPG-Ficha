@@ -68,10 +68,11 @@
                               <input type="checkbox" id="info-hideSexo" onchange="toggleHideSexoGenero('sexo', this.checked)" style="width:auto; margin:0;"> Ocultar
                           </label>
                       </label>
-                      <select id="info-sexo" onchange="updateField('info', 'sexo', this.value)">
+                      <select id="info-sexo" onchange="updateSexo(this.value)">
                           <option value="">-- Selecione --</option>
                           <option value="Masculino">Masculino</option>
                           <option value="Feminino">Feminino</option>
+                          <option value="Assexuado">Assexuado</option>
                       </select>
                   </div>
                   <div class="input-group">
