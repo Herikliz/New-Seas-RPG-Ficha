@@ -3773,8 +3773,16 @@ function updateUI() {
         });
 
         let estilosKeys = Object.keys(agrupado).sort((a, b) => {
-            if (a === "Sem Estilo") return 1;
-            if (b === "Sem Estilo") return -1;
+            let aIsAmi = (a === i.akumaNome);
+            let bIsAmi = (b === i.akumaNome);
+            let aIsSem = (a === "Sem Estilo");
+            let bIsSem = (b === "Sem Estilo");
+
+            if (aIsAmi && !bIsAmi) return 1;
+            if (!aIsAmi && bIsAmi) return -1;
+            if (aIsSem && !bIsSem) return 1;
+            if (!aIsSem && bIsSem) return -1;
+
             return a.localeCompare(b);
         });
 
@@ -4360,8 +4368,16 @@ ${attrOut}${tecnicasOut}`;
         });
 
         let estilosKeysManual = Object.keys(agrupadoManual).sort((a, b) => {
-            if (a === "Sem Estilo") return 1;
-            if (b === "Sem Estilo") return -1;
+            let aIsAmi = (a === i.akumaNome);
+            let bIsAmi = (b === i.akumaNome);
+            let aIsSem = (a === "Sem Estilo");
+            let bIsSem = (b === "Sem Estilo");
+
+            if (aIsAmi && !bIsAmi) return 1;
+            if (!aIsAmi && bIsAmi) return -1;
+            if (aIsSem && !bIsSem) return 1;
+            if (!aIsSem && bIsSem) return -1;
+
             return a.localeCompare(b);
         });
 
