@@ -682,6 +682,8 @@ function toggleEditability() {
 
         if (isBerriesBlocked || isNpcCBlocked || isNpcEBlocked || (isKuja && (el.id === 'info-sexo' || el.id === 'info-genero'))) {
             el.disabled = true;
+        } else if (el.id === 'info-expectativaVida') {
+            el.disabled = !isSuperAdmin;
         } else if(el.type === 'checkbox') {
             el.disabled = isReadOnly;
         } else {
@@ -1562,6 +1564,25 @@ window.handleRacaChange = async function(field, val) {
         currentChar.info.genero = "Mulher";
     }
     updateField('info', field, val);
+    
+    if (currentChar.info.idade) {
+        let currentIdadeStr = String(currentChar.info.idade).replace(/\D/g, '');
+        if (currentIdadeStr) {
+            let currentAge = parseInt(currentIdadeStr, 10);
+            let baseExp = 100;
+            let calcExp = baseExp;
+            if (val === "Gigante") calcExp = baseExp * 4;
+            else if (["Meio-Gigante", "Wotan", "Bucaneiro", "Lunariano", "Oni"].includes(val)) calcExp = baseExp * 2;
+            let expFinal = currentChar.info.expectativaVidaOverride || calcExp;
+            
+            if (currentAge > expFinal) {
+                currentChar.info.idade = expFinal + " anos";
+                saveData();
+                updateUI();
+            }
+        }
+    }
+    
     toggleEditability();
 };
 
@@ -1605,6 +1626,22 @@ function formatAltura(val) {
     updateField('info', 'altura', formatted);
 }
 
+window.formatExpectativa = function(val) {
+    if (!isSuperAdmin) return;
+    let num = parseInt(val.replace(/\D/g, ''));
+    if (isNaN(num)) num = 0;
+    currentChar.info.expectativaVidaOverride = num;
+    let ageStr = String(currentChar.info.idade).replace(/\D/g, '');
+    if (ageStr) {
+        let currentAge = parseInt(ageStr, 10);
+        if (currentAge > num && num > 0) {
+            currentChar.info.idade = num + " anos";
+        }
+    }
+    saveData();
+    updateUI();
+};
+
 function formatIdade(val) {
     let digits = val.replace(/\D/g, "");
     if (!digits) { updateField('info', 'idade', ""); return; }
@@ -1612,6 +1649,18 @@ function formatIdade(val) {
     
     if (!currentChar.isNPC && age < 15) {
         age = 15;
+    }
+
+    let i = currentChar.info;
+    let baseExp = 100;
+    let calcExp = baseExp;
+    if (i.raca === "Gigante") calcExp = baseExp * 4;
+    else if (["Meio-Gigante", "Wotan", "Bucaneiro", "Lunariano", "Oni"].includes(i.raca)) calcExp = baseExp * 2;
+    let expFinal = i.expectativaVidaOverride || calcExp;
+
+    if (age > expFinal) {
+        age = expFinal;
+        customAlert("A idade máxima para esta raça é " + expFinal + " anos.");
     }
     
     let textoIdade = age === 1 ? " ano" : " anos";
@@ -1895,6 +1944,28 @@ function updateUI() {
     if (i.linhagem === "Charlotte" && (["Tritão", "Wotan", "Mink"].includes(i.raca2) || (isNPC && i.raca2 === 'Outra'))) {
         anim2.style.display = "block"; anim2.placeholder = i.raca2 === "Mink" ? "Mamífero" : "Animal Marinho";
     } else { anim2.style.display = "none"; }
+
+    let baseExp = 100;
+    let calcExp = baseExp;
+    if (i.raca === "Gigante") calcExp = baseExp * 4;
+    else if (["Meio-Gigante", "Wotan", "Bucaneiro", "Lunariano", "Oni"].includes(i.raca)) calcExp = baseExp * 2;
+    let expFinal = i.expectativaVidaOverride || calcExp;
+
+    let elExp = document.getElementById('info-expectativaVida');
+    if (elExp) {
+        let fmtExp = expFinal + " anos";
+        if (elExp.value !== fmtExp && document.activeElement !== elExp) {
+            elExp.value = fmtExp;
+        }
+    }
+
+    let currentIdadeStr = String(i.idade).replace(/\D/g, '');
+    if (currentIdadeStr) {
+        let currentAge = parseInt(currentIdadeStr, 10);
+        if (currentAge > expFinal) {
+            i.idade = expFinal + " anos";
+        }
+    }
 
     let pcNameEl = document.getElementById('pc-name');
     if (pcNameEl && pcNameEl.value !== currentChar.name) pcNameEl.value = currentChar.name || "";
