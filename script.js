@@ -2989,7 +2989,7 @@ function updateUI() {
     let tempControlePct = 0;
     if(tempBaseAmiStats > 0) {
         let currentBasePoints = tempAAlc + tempADur + tempAPot + tempAVel;
-        tempControlePct = Math.round((currentBasePoints / (tempBaseAmiStats * 10000)) * 100);
+        tempControlePct = parseFloat(((currentBasePoints / (tempBaseAmiStats * 10000)) * 100).toFixed(2));
     }
     
     let calcAVelFinalBox = Math.round(((currentChar.substats.amiVel || 0) + flatBonus.amiVel) * (1 + bonus.amiVel));
@@ -3157,7 +3157,7 @@ function updateUI() {
     let controlePct = 0;
     if(baseAmiStats > 0) {
         let currentBasePoints = aAlc + aDur + aPot + aVel;
-        controlePct = Math.round((currentBasePoints / (baseAmiStats * 10000)) * 100);
+        controlePct = parseFloat(((currentBasePoints / (baseAmiStats * 10000)) * 100).toFixed(2));
     }
 
     let despContainer = document.getElementById('box-despertar');
@@ -3411,9 +3411,9 @@ function updateUI() {
         if (danoAmi > 0) {
             somaAtual += danoAmi;
             if (buffAmiVal > 0) {
-                calcFormTexto += ` <span style="color:#dc3545;">+ ${danoAmi.toLocaleString("pt-BR")} (Akuma no Mi: ${controlePct}% de ${aPot.toLocaleString("pt-BR")} + ${buffAmiVal}%) = ${somaAtual.toLocaleString("pt-BR")}</span>`;
+                calcFormTexto += ` <span style="color:#dc3545;">+ ${danoAmi.toLocaleString("pt-BR")} (Akuma no Mi: ${controlePct.toLocaleString("pt-BR")}% de ${aPot.toLocaleString("pt-BR")} + ${buffAmiVal}%) = ${somaAtual.toLocaleString("pt-BR")}</span>`;
             } else {
-                calcFormTexto += ` <span style="color:#dc3545;">+ ${danoAmi.toLocaleString("pt-BR")} (Akuma no Mi: ${controlePct}% de ${aPot.toLocaleString("pt-BR")}) = ${somaAtual.toLocaleString("pt-BR")}</span>`;
+                calcFormTexto += ` <span style="color:#dc3545;">+ ${danoAmi.toLocaleString("pt-BR")} (Akuma no Mi: ${controlePct.toLocaleString("pt-BR")}% de ${aPot.toLocaleString("pt-BR")}) = ${somaAtual.toLocaleString("pt-BR")}</span>`;
             }
         }
         if (danoHaki > 0) {
@@ -3732,7 +3732,7 @@ function updateUI() {
             }
         }
         if (i.hasAmiDesp && aDesp > 0) attrOut += `> _𝙳𝚎𝚜𝚙𝚎𝚛𝚝𝚊𝚛:_ ${strCalc(aDesp, bonus.amiDesp, flatBonus.amiDesp, itemBonus.amiDesp, itemFlat.amiDesp)}\n`;
-        if (activeAmiStats > 0) attrOut += `> _𝙲𝚘𝚗𝚝𝚛ᴏ𝚕𝚎:_ ${controlePct}%\n`;
+        if (activeAmiStats > 0) attrOut += `> _𝙲𝚘𝚗𝚝𝚛ᴏ𝚕𝚎:_ ${controlePct.toLocaleString("pt-BR")}%\n`;
         attrOut += `\n`;
     }
 
@@ -4328,7 +4328,7 @@ function updateUI() {
     }
 
     manualAttrOut += `> _𝙳𝚎𝚜𝚙𝚎𝚛𝚝𝚊𝚛:_ ${strCalc(aDesp, bonus.amiDesp, flatBonus.amiDesp, itemBonus.amiDesp, itemFlat.amiDesp)}\n`;
-    manualAttrOut += `> _𝙲𝚘𝚗𝚝𝚛ᴏ𝚕𝚎:_ ${controlePct}%\n\n`;
+    manualAttrOut += `> _𝙲𝚘𝚗𝚝𝚛ᴏ𝚕𝚎:_ ${controlePct.toLocaleString("pt-BR")}%\n\n`;
 
     let out = `*Nᴇᴡ sᴇᴀs*
 — ロールプレイングゲーム - 𝚁𝙿𝙶 [𝙾𝙽𝙴 𝙿𝙸𝙴𝙲𝙴]
