@@ -288,6 +288,10 @@ function customPrompt(msg, numericOnly = false) {
         const btnOk = document.getElementById('custom-prompt-ok');
         const btnCancel = document.getElementById('custom-prompt-cancel');
 
+        inputEl.setAttribute('autocomplete', 'new-password');
+        inputEl.setAttribute('data-lpignore', 'true');
+        inputEl.setAttribute('data-1p-ignore', 'true');
+
         msgEl.textContent = msg;
         inputEl.value = '';
         
@@ -430,6 +434,12 @@ function setupSumButtons() {
 }
 
 function init() {
+  document.querySelectorAll('input').forEach(inp => {
+      inp.setAttribute('autocomplete', 'new-password');
+      inp.setAttribute('data-lpignore', 'true');
+      inp.setAttribute('data-1p-ignore', 'true');
+  });
+
   populateSelects();
   runFallbackChecks();
   currentChar = activeNpcIndex === -1 ? charData.pcs[activePcIndex].pc : charData.pcs[activePcIndex].npcs[activeNpcIndex];
