@@ -778,7 +778,8 @@ function runFallbackChecks() {
               boxInv: false, boxCalc: false, boxEstamina: false, estaminaAtual: -1, estaminaVelocidade: "", estaminaDano: "", estaminaBuffPct: "", estaminaHakiArm: "nao", estaminaHakiObs: "nao", boxScene: false, akumaId: "", selCharR1: "", selCharR2: "", treinosAcumulados: 0, ordemTecnicas: "alfabetica", hideHistoria: false, hidePersonality: false, hideTecNome: false, hideTecDesc: false, hideTecEfeito: false, hiddenStyles: [], exaustaoCompleta: false, habilidadesExclusivas: [], habCaminhoAtiradorAtivo: false, habFavArmistaAtivo: "nenhum", habFavArmistaAttr: "d", habFuriaArdenteAttr: "f", habQIAvancadoAtivo: false, linhagemBeckmanArma: false, habRetornoUso: 1, merito: 0, aliadosEspiritoContagiante: 0,
               unlockHA1: false, unlockHA2: false, unlockHA3: false, unlockHA4: false, unlockHA5: false, unlockHA6: false,
               unlockHO2: false, unlockHO3: false, unlockHO4: false,
-              unlockHR2: false, unlockHR3: false, unlockHR4: false, unlockHR5: false, unlockHR6: false
+              unlockHR2: false, unlockHR3: false, unlockHR4: false, unlockHR5: false, unlockHR6: false,
+              zoanBuffF: 0, zoanBuffD: 0, zoanBuffR: 0, zoanBuffV: 0, zoanForma: "Comum"
           };
           for(let k in defInfo) if (typeof c.info[k] === 'undefined') c.info[k] = defInfo[k];
           
@@ -1738,24 +1739,29 @@ function formatPhone(el) {
     saveData();
 }
 
-function strCalc(base, bonus, flat = 0, itemBonus = 0, itemFlat = 0) {
+function strCalc(base, bonus, flat = 0, itemBonus = 0, itemFlat = 0, zoanBonus = 0) {
     let passive = Math.round((base + flat) * (1 + bonus)); 
     let parts = [base.toLocaleString("pt-BR")];
     if (flat !== 0) parts.push(`${flat >= 0 ? "+" : ""}${flat.toLocaleString("pt-BR")}`);
     if (bonus !== 0) parts.push(`${bonus >= 0 ? "+" : ""}${(bonus * 100).toFixed(0)}%`);
     
-    if (itemBonus === 0 && itemFlat === 0) {
-        if(bonus === 0 && flat === 0) return base.toLocaleString("pt-BR");
-        return `${parts.join("")} = ${passive.toLocaleString("pt-BR")}`;
+    let midStr = "";
+    if (bonus === 0 && flat === 0) midStr = base.toLocaleString("pt-BR");
+    else midStr = `${parts.join("")} = ${passive.toLocaleString("pt-BR")}`;
+
+    let midValue = passive;
+    if (zoanBonus !== 0) {
+        let zoanBoost = Math.round(passive * (1 + zoanBonus));
+        midStr += `${zoanBonus > 0 ? "+" : ""}${(zoanBonus * 100).toFixed(0)}% = ${zoanBoost.toLocaleString("pt-BR")}`;
+        midValue = zoanBoost;
     }
 
-    let active = Math.round((passive + itemFlat) * (1 + itemBonus));
-    let activeStr = "";
-    if (bonus === 0 && flat === 0) {
-        activeStr = base.toLocaleString("pt-BR");
-    } else {
-        activeStr = `${parts.join("")} = ${passive.toLocaleString("pt-BR")}`;
+    if (itemBonus === 0 && itemFlat === 0) {
+        return midStr;
     }
+
+    let active = Math.round((midValue + itemFlat) * (1 + itemBonus));
+    let activeStr = midStr;
     
     if (itemFlat !== 0) activeStr += `${itemFlat >= 0 ? "+" : ""}${itemFlat.toLocaleString("pt-BR")}`;
     if (itemBonus !== 0) activeStr += `${itemBonus >= 0 ? "+" : ""}${(itemBonus * 100).toFixed(0)}%`;
@@ -2632,6 +2638,70 @@ function updateUI() {
         }
     }
 
+    let baseAmiStatsForZoan = 0;
+    if(i.hasAmiAlc) baseAmiStatsForZoan++; if(i.hasAmiDur) baseAmiStatsForZoan++; if(i.hasAmiPot) baseAmiStatsForZoan++; if(i.hasAmiVel) baseAmiStatsForZoan++;
+    let currentBasePointsForZoan = (currentChar.substats.amiAlc || 0) + (currentChar.substats.amiDur || 0) + (currentChar.substats.amiPot || 0) + (currentChar.substats.amiVel || 0);
+    let controlePctForZoan = baseAmiStatsForZoan > 0 ? parseFloat(((currentBasePointsForZoan / (baseAmiStatsForZoan * 10000)) * 100).toFixed(2)) : 0;
+    
+    let isZoan = i.akumaNome && (
+        (akumasFixas["Zoan"] && akumasFixas["Zoan"].includes(i.akumaNome)) ||
+        (akumasFixas["Zoan Ancestral"] && akumasFixas["Zoan Ancestral"].includes(i.akumaNome)) ||
+        (akumasFixas["Zoan Mítica"] && akumasFixas["Zoan Mítica"].includes(i.akumaNome))
+    );
+    let isParameciaEspecial = i.akumaNome === "Suji Suji no Mi"; 
+    let hasZoanBox = isZoan || isParameciaEspecial;
+    
+    let elZoanBox = document.getElementById('box-zoan-buffs');
+    if (elZoanBox) {
+        if (hasZoanBox) {
+            elZoanBox.style.display = "block";
+            document.getElementById('info-zoanBuffF').value = i.zoanBuffF || 0;
+            document.getElementById('info-zoanBuffD').value = i.zoanBuffD || 0;
+            document.getElementById('info-zoanBuffR').value = i.zoanBuffR || 0;
+            document.getElementById('info-zoanBuffV').value = i.zoanBuffV || 0;
+            
+            let btnForms = document.getElementById('box-zoan-forms');
+            if (isParameciaEspecial) {
+                btnForms.style.display = "none";
+                i.zoanForma = "Completa";
+            } else {
+                btnForms.style.display = "flex";
+                document.getElementById('btn-forma-comum').style.borderColor = i.zoanForma === 'Comum' ? 'var(--success)' : '#444';
+                document.getElementById('btn-forma-comum').style.color = i.zoanForma === 'Comum' ? 'var(--success)' : 'inherit';
+                document.getElementById('btn-forma-instavel').style.borderColor = i.zoanForma === 'Instável' ? 'var(--success)' : '#444';
+                document.getElementById('btn-forma-instavel').style.color = i.zoanForma === 'Instável' ? 'var(--success)' : 'inherit';
+                
+                let btnHibrida = document.getElementById('btn-forma-hibrida');
+                if (controlePctForZoan < 20 && !isSuperAdmin) { btnHibrida.disabled = true; if(i.zoanForma === 'Híbrida') i.zoanForma = 'Comum'; }
+                else { btnHibrida.disabled = false; }
+                btnHibrida.style.borderColor = i.zoanForma === 'Híbrida' ? 'var(--success)' : '#444';
+                btnHibrida.style.color = i.zoanForma === 'Híbrida' ? 'var(--success)' : 'inherit';
+                
+                let btnCompleta = document.getElementById('btn-forma-completa');
+                if (controlePctForZoan < 60 && !isSuperAdmin) { btnCompleta.disabled = true; if(i.zoanForma === 'Completa') i.zoanForma = 'Comum'; }
+                else { btnCompleta.disabled = false; }
+                btnCompleta.style.borderColor = i.zoanForma === 'Completa' ? 'var(--success)' : '#444';
+                btnCompleta.style.color = i.zoanForma === 'Completa' ? 'var(--success)' : 'inherit';
+            }
+        } else {
+            elZoanBox.style.display = "none";
+            i.zoanBuffF = 0; i.zoanBuffD = 0; i.zoanBuffR = 0; i.zoanBuffV = 0;
+            i.zoanForma = "Comum";
+        }
+    }
+
+    let multZoan = 0;
+    if (i.zoanForma === 'Completa') multZoan = 1;
+    else if (i.zoanForma === 'Híbrida') multZoan = 0.5;
+    else if (i.zoanForma === 'Instável') multZoan = 0.3333;
+    
+    let zBonus = {
+        f: Math.round((i.zoanBuffF || 0) * multZoan) / 100,
+        d: Math.round((i.zoanBuffD || 0) * multZoan) / 100,
+        r: Math.round((i.zoanBuffR || 0) * multZoan) / 100,
+        v: Math.round((i.zoanBuffV || 0) * multZoan) / 100
+    };
+
     let itemBonus = {d:0, f:0, r:0, v:0, refl:0, vcorp:0, vAgua:0, reflAgua:0, vcorpAgua:0, esp:0, ha:0, ho:0, hr:0, ami:0, amiAlc:0, amiDur:0, amiPot:0, amiVel:0, amiDesp:0, dano:0, ignRes:0};
     let itemFlat = {d:0, f:0, r:0, v:0, refl:0, vcorp:0, vAgua:0, reflAgua:0, vcorpAgua:0, esp:0, ha:0, ho:0, hr:0, ami:0, amiAlc:0, amiDur:0, amiPot:0, amiVel:0, amiDesp:0, dano:0, ignRes:0};
     if (i.armasEquipadasList) {
@@ -2828,19 +2898,22 @@ function updateUI() {
     }
 
     let passiveD = Math.round((D + flatBonus.d) * (1 + bonus.d));
-    let totalD = Math.round((passiveD + itemFlat.d) * (1 + itemBonus.d));
+    let zoanBaseD = passiveD; if(zBonus.d > 0) zoanBaseD = Math.round(passiveD * (1 + zBonus.d));
+    let totalD = Math.round((zoanBaseD + itemFlat.d) * (1 + itemBonus.d));
     let elTotalD = document.getElementById('total-d');
     elTotalD.innerText = "Total: " + totalD.toLocaleString("pt-BR");
     elTotalD.dataset.passive = passiveD; elTotalD.dataset.active = totalD;
 
     let passiveF = Math.round((F + flatBonus.f) * (1 + bonus.f));
-    let totalF = Math.round((passiveF + itemFlat.f) * (1 + itemBonus.f));
+    let zoanBaseF = passiveF; if(zBonus.f > 0) zoanBaseF = Math.round(passiveF * (1 + zBonus.f));
+    let totalF = Math.round((zoanBaseF + itemFlat.f) * (1 + itemBonus.f));
     let elTotalF = document.getElementById('total-f');
     elTotalF.innerText = "Total: " + totalF.toLocaleString("pt-BR");
     elTotalF.dataset.passive = passiveF; elTotalF.dataset.active = totalF;
 
     let passiveR = Math.round((R + flatBonus.r) * (1 + bonus.r));
-    let totalR = Math.round((passiveR + itemFlat.r) * (1 + itemBonus.r));
+    let zoanBaseR = passiveR; if(zBonus.r > 0) zoanBaseR = Math.round(passiveR * (1 + zBonus.r));
+    let totalR = Math.round((zoanBaseR + itemFlat.r) * (1 + itemBonus.r));
     let elTotalR = document.getElementById('total-r');
     elTotalR.innerText = "Total: " + totalR.toLocaleString("pt-BR");
     elTotalR.dataset.passive = passiveR; elTotalR.dataset.active = totalR;
@@ -2873,7 +2946,8 @@ function updateUI() {
     }
 
     let passiveV = Math.round((V + flatBonus.v) * (1 + bonus.v));
-    let totalV = Math.round((passiveV + itemFlat.v) * (1 + itemBonus.v));
+    let zoanBaseV = passiveV; if(zBonus.v > 0) zoanBaseV = Math.round(passiveV * (1 + zBonus.v));
+    let totalV = Math.round((zoanBaseV + itemFlat.v) * (1 + itemBonus.v));
     let elTotalV = document.getElementById('total-v');
     elTotalV.innerText = "Total: " + totalV.toLocaleString("pt-BR");
     elTotalV.dataset.passive = passiveV; elTotalV.dataset.active = totalV;
@@ -3537,9 +3611,9 @@ function updateUI() {
     }
 
     let attrOut = "";
-    if (D > 0) attrOut += `↠ *𝙳𝚎𝚜𝚝𝚛𝚎𝚣𝚊:* ${strCalc(D, bonus.d, flatBonus.d, itemBonus.d, itemFlat.d)}\n\n`;
-    if (F > 0) attrOut += `↠ *𝙵𝚘𝚛𝚌̧𝚊:* ${strCalc(F, bonus.f, flatBonus.f, itemBonus.f, itemFlat.f)}\n\n`;
-    if (R > 0) { attrOut += `↠ *𝚁𝚎𝚜𝚒𝚜𝚝𝚎̂𝚗𝚌𝚒𝚊:* ${strCalc(R, bonus.r, flatBonus.r, itemBonus.r, itemFlat.r)}\n> 𝙴𝚜𝚝𝚊𝚖𝚒𝚗𝚊: ${i.estaminaAtual.toLocaleString("pt-BR")} / ${estTotalVal.toLocaleString("pt-BR")}\n\n`; }
+    if (D > 0) attrOut += `↠ *𝙳𝚎𝚜𝚝𝚛𝚎𝚣𝚊:* ${strCalc(D, bonus.d, flatBonus.d, itemBonus.d, itemFlat.d, zBonus.d)}\n\n`;
+    if (F > 0) attrOut += `↠ *𝙵𝚘𝚛𝚌̧𝚊:* ${strCalc(F, bonus.f, flatBonus.f, itemBonus.f, itemFlat.f, zBonus.f)}\n\n`;
+    if (R > 0) { attrOut += `↠ *𝚁𝚎𝚜𝚒𝚜𝚝𝚎̂𝚗𝚌𝚒𝚊:* ${strCalc(R, bonus.r, flatBonus.r, itemBonus.r, itemFlat.r, zBonus.r)}\n> 𝙴𝚜𝚝𝚊𝚖𝚒𝚗𝚊: ${i.estaminaAtual.toLocaleString("pt-BR")} / ${estTotalVal.toLocaleString("pt-BR")}\n\n`; }
     let aVelOut = currentChar.substats.amiVel || 0;
     let calcAVelFinal = Math.round((aVelOut + flatBonus.amiVel) * (1 + bonus.amiVel));
     let finalAkumaVel = 0;
@@ -3554,7 +3628,7 @@ function updateUI() {
     }
 
     if (V > 0) {
-        let velNormalStr = strCalc(V, bonus.v, flatBonus.v, itemBonus.v, itemFlat.v);
+        let velNormalStr = strCalc(V, bonus.v, flatBonus.v, itemBonus.v, itemFlat.v, zBonus.v);
         if (i.amiVelAtivo && finalAkumaVel > 0) {
             let totalVBase = Math.round((Math.round((V + flatBonus.v) * (1 + bonus.v)) + itemFlat.v) * (1 + itemBonus.v));
             velNormalStr += `+${finalAkumaVel.toLocaleString("pt-BR")} (Akuma no Mi) = ${(totalVBase + finalAkumaVel).toLocaleString("pt-BR")}`;
@@ -4173,11 +4247,11 @@ function updateUI() {
     let inventarioFormatado = filledLines.join('\n');
 
     let manualAttrOut = "";
-    manualAttrOut += `↠ *𝙳𝚎𝚜𝚝𝚛𝚎𝚣𝚊:* ${strCalc(D, bonus.d, flatBonus.d, itemBonus.d, itemFlat.d)}\n\n`;
-    manualAttrOut += `↠ *𝙵𝚘𝚛𝚌̧𝚊:* ${strCalc(F, bonus.f, flatBonus.f, itemBonus.f, itemFlat.f)}\n\n`;
-    manualAttrOut += `↠ *𝚁𝚎𝚜𝚒𝚜𝚝𝚎̂𝚗𝚌𝚒𝚊:* ${strCalc(R, bonus.r, flatBonus.r, itemBonus.r, itemFlat.r)}\n> 𝙴𝚜𝚝𝚊𝚖𝚒𝚗𝚊: ${i.estaminaAtual.toLocaleString("pt-BR")} / ${estTotalVal.toLocaleString("pt-BR")}\n\n`;
+    manualAttrOut += `↠ *𝙳𝚎𝚜𝚝𝚛𝚎𝚣𝚊:* ${strCalc(D, bonus.d, flatBonus.d, itemBonus.d, itemFlat.d, zBonus.d)}\n\n`;
+    manualAttrOut += `↠ *𝙵𝚘𝚛𝚌̧𝚊:* ${strCalc(F, bonus.f, flatBonus.f, itemBonus.f, itemFlat.f, zBonus.f)}\n\n`;
+    manualAttrOut += `↠ *𝚁𝚎𝚜𝚒𝚜𝚝𝚎̂𝚗𝚌𝚒𝚊:* ${strCalc(R, bonus.r, flatBonus.r, itemBonus.r, itemFlat.r, zBonus.r)}\n> 𝙴𝚜𝚝𝚊𝚖𝚒𝚗𝚊: ${i.estaminaAtual.toLocaleString("pt-BR")} / ${estTotalVal.toLocaleString("pt-BR")}\n\n`;
 
-    let velNormalStrMan = strCalc(V, bonus.v, flatBonus.v, itemBonus.v, itemFlat.v);
+    let velNormalStrMan = strCalc(V, bonus.v, flatBonus.v, itemBonus.v, itemFlat.v, zBonus.v);
     if (i.amiVelAtivo && finalAkumaVel > 0) {
         let totalVBase = Math.round((Math.round((V + flatBonus.v) * (1 + bonus.v)) + itemFlat.v) * (1 + itemBonus.v));
         velNormalStrMan += `+${finalAkumaVel.toLocaleString("pt-BR")} (Akuma no Mi) = ${(totalVBase + finalAkumaVel).toLocaleString("pt-BR")}`;
