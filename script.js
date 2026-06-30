@@ -2881,7 +2881,7 @@ function updateUI() {
         }
     });
 
-    let estTotalVal = Math.round((R + flatBonus.r) * (1 + bonus.r)) * 2;
+    let estTotalVal = Math.round((R + flatBonus.r) * (1 + bonus.r)) * 5;
     if (ln === "Beckman") estTotalVal = Math.floor(estTotalVal * 1.10);
     if (typeof i.lastEstTotal === 'undefined') i.lastEstTotal = estTotalVal;
     if (estTotalVal !== i.lastEstTotal && (i.estaminaAtual === 0 || i.estaminaAtual === i.lastEstTotal)) i.estaminaAtual = estTotalVal;
@@ -3567,7 +3567,13 @@ function updateUI() {
     document.getElementById('estamina-formula').innerHTML = estFormula;
 
     let rHP = i.exaustaoCompleta ? Math.round(R / 0.8) : R;
-    let totalHP = 10000 + Math.round((rHP + flatBonus.r) * (1 + bonus.r));
+    
+    let hpMultiplier = 1.5;
+    if (totalFinal >= 40000) hpMultiplier = 4.0;
+    else if (totalFinal >= 20000) hpMultiplier = 3.0;
+    else if (totalFinal >= 10000) hpMultiplier = 2.0;
+
+    let totalHP = 10000 + Math.floor(Math.round((rHP + flatBonus.r) * (1 + bonus.r)) * hpMultiplier);
     if (typeof i.lastHPTotal === 'undefined') i.lastHPTotal = totalHP;
     if (totalHP !== i.lastHPTotal) {
         if (i.hpAtual === 0) {
