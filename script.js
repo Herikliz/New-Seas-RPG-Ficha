@@ -1409,10 +1409,6 @@ function renderLogs() {
     });
 
     if (currentChar.logList && currentChar.logList.length > 0) {
-        container.innerHTML += `<button type="button" class="btn btn-outline btn-success" style="width: 100%; margin-bottom: 5px; font-size: 12px; padding: 6px;" onclick="addLog()">+ Adicionar Entrada</button>`;
-    }
-
-    if (currentChar.logList && currentChar.logList.length > 0) {
         container.innerHTML += `<button type="button" class="btn btn-outline btn-success" style="width: 100%; margin-top: 5px; font-size: 12px; padding: 6px;" onclick="addLog()">+ Adicionar Entrada</button>`;
     }
 }
@@ -2375,7 +2371,7 @@ function updateUI() {
     let displayAviso = "none";
     let textAviso = "";
     
-    if(totalBase > 1000) { 
+    if(totalBase > 1000 && totalBase < 5000) { 
         displayAviso = "block"; 
         textAviso = `Atenção: Limite inicial de 1.000 pontos ultrapassado!`; 
     } else if(totalBase < 1000) { 
