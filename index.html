@@ -17,12 +17,12 @@
         <option value="manual">Save Manual</option>
         <option value="auto">Save Auto</option>
     </select>
-    <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--success); border-color: var(--success);" onclick="manualSave()" title="Salvar Ficha">💾Salvar</button>
+    <button id="btn-save-manual" class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--success); border-color: var(--success);" onclick="manualSave()" title="Salvar Ficha">💾Salvar</button>
     <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: #a461ff; border-color: #a461ff;" onclick="saveBackup()" title="Salvar Backup">🗄️Salvar Backup</button>
     <input type="text" id="doc-id" maxlength="4" placeholder="ID (4 Números)" title="Digite 4 números para salvar/puxar na nuvem" onchange="changeDocId(this.value)" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
     <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px;" onclick="loadFromCloud()" title="Puxar dados">⬇️Puxar</button>
     <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: #a461ff; border-color: #a461ff;" onclick="loadBackup()" title="Puxar Backup">📂Puxar Backup</button>
-    <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--success); border-color: var(--success);" onclick="document.getElementById('modal-importar').style.display='flex'" title="Importar texto de ficha colado">📥Importar</button>
+    <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--success); border-color: var(--success);" onclick="document.getElementById('modal-importar-exportar').style.display='flex'" title="Importar ou Exportar Arquivo JSON">🔄Importar/Exportar</button>
     <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--info); border-color: var(--info);" onclick="changeFichaID()" title="Mudar ID da Ficha">🔄Mudar ID</button>
     <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--danger); border-color: var(--danger);" onclick="deleteFichaID()" title="Apagar Ficha Inteira da Nuvem">🗑️Apagar ID</button>
     <button id="btn-senha" class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--warning); border-color: var(--warning);" onclick="managePassword()" title="Definir ou remover senha">🔑Senha</button>
@@ -904,13 +904,17 @@
   </div>
 </div>
 
-<div id="modal-importar" class="modal-overlay">
-  <div class="modal-box" style="width: 600px; max-width: 90vw; max-height: 90vh; display: flex; flex-direction: column;">
-    <div class="modal-msg" style="font-weight:bold; color:var(--success); margin-bottom: 10px;">Importar Ficha</div>
-    <textarea id="import-area" style="width:100%; flex: 1; min-height: 200px; max-height: 60vh; margin-bottom:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:4px; padding:10px; font-size:12px; font-family:monospace; resize: vertical; overflow-y: auto;" placeholder="Cole o texto exportado da ficha aqui..."></textarea>
-    <div style="display: flex; gap: 10px; justify-content: center; flex-shrink: 0;">
-      <button class="btn btn-outline btn-success" onclick="processarImportacao()">Importar</button>
-      <button class="btn btn-outline" style="border-color: #666; color: #ccc;" onclick="document.getElementById('modal-importar').style.display='none'">Fechar</button>
+<div id="modal-importar-exportar" class="modal-overlay">
+  <div class="modal-box" style="width: 400px; text-align: center;">
+    <div class="modal-msg" style="font-weight:bold; color:var(--success); margin-bottom: 15px;">Importar / Exportar Ficha</div>
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <button class="btn btn-outline btn-info" onclick="exportarJSON('tudo')">📤 Exportar TUDO (.json)</button>
+      <button class="btn btn-outline btn-info" onclick="exportarJSON('atual')">📄 Exportar APENAS ATUAL (.json)</button>
+      <label class="btn btn-outline btn-warning" style="cursor: pointer; margin: 0;">
+        📥 Importar Ficha (.json)
+        <input type="file" id="file-import-json" accept=".json" style="display: none;" onchange="importarJSON(event)">
+      </label>
+      <button class="btn btn-outline" style="border-color: #666; color: #ccc; margin-top: 10px;" onclick="document.getElementById('modal-importar-exportar').style.display='none'">Fechar</button>
     </div>
   </div>
 </div>

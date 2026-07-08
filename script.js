@@ -32,7 +32,7 @@ const akumasFixas = {
   "Paramecia": ["Awa Awa no Mi", "Baku Baku no Mi", "Bane Bane no Mi", "Bara Bara no Mi", "Bari Bari no Mi", "Bata Bata no Mi", "Beri Beri no Mi", "Beta Beta no Mi", "Bijo Bijo no Mi", "Bisu Bisu no Mi", "Bomu Bomu no Mi", "Buki Buki no Mi", "Buku Buku no Mi", "Chiyu Chiyu no Mi", "Choki Choki no Mi", "Deka Deka no Mi", "Dero Dero no Mi", "Doa Doa no Mi", "Doku Doku no Mi", "Doru Doru no Mi", "Fude Fude no Mi", "Fuku Fuku no Mi", "Fuwa Fuwa no Mi", "Gabu Gabu no Mi", "Gasha Gasha no Mi", "Gatsu Gatsu no Mi", "Genso Genso no Mi", "Giro Giro no Mi", "Gocha Gocha no Mi", "Goe Goe no Mi", "Gomu Gomu no Mi", "Goru Goru no Mi", "Gura Gura no Mi", "Guru Guru no Mi", "Gutsu Gutsu no Mi", "Hana Hana no Mi", "Hemo Hemo no Mi", "Hira Hira no Mi", "Hiso Hiso no Mi", "Hobi Hobi no Mi", "Hone Hone no Mi", "Horo Horo no Mi", "Horu Horu no Mi", "Hoya Hoya no Mi", "Iro Iro no Mi", "Ishi Ishi no Mi", "Ito Ito no Mi", "Jake Jake no Mi", "Jara Jara no Mi", "Jiki Jiki no Mi", "Juku Juku no Mi", "Kachi Kachi no Mi", "Kage Kage no Mi", "Kama Kama no Mi", "Kegawa Kegawa no Mi", "Kesshō Kesshō no Mi", "Kibi Kibi no Mi", "Kira Kira no Mi", "Kiro Kiro no Mi", "Kobu Kobu no Mi", "Kon Kon no Mi", "Koro Koro no Mi", "Kuku Kuku no Mi", "Kuri Kuri no Mi", "Kyubu Kyubu no Mi", "Maki Maki no Mi", "Mane Mane no Mi", "Masu Masu no Mi", "Mato Mato no Mi", "Memo Memo no Mi", "Mero Mero no Mi", "Mini Mini no Mi", "Mira Mira no Mi", "Moa Moa no Mi", "Modo Modo no Mi", "Mosa Mosa no Mi", "Muchi Muchi no Mi", "Nagi Nagi no Mi", "Nawa Nawa no Mi", "Nemu Nemu no Mi", "Netsu Netsu no Mi", "Nikyu Nikyu no Mi", "Noko Noko no Mi", "Noku Noku no Mi", "Nomi Nomi no Mi", "Nori Nori no Mi", "Noro Noro no Mi", "Nui Nui no Mi", "Nuke Nuke no Mi", "Ope Ope no Mi", "Ori Ori no Mi", "Oshi Oshi no Mi", "Oto Oto no Mi", "Pamu Pamu no Mi", "Pero Pero no Mi", "Peto Peto no Mi", "Poke Poke no Mi", "Rashin Rashin no Mi", "Riki Riki no Mi", "Sabi Sabi no Mi", "Shari Shari no Mi", "Shibo Shibo no Mi", "Shiku Shiku no Mi", "Shima Shima no Mi", "Shiro Shiro no Mi", "Soru Soru no Mi", "Sube Sube no Mi", "Sui Sui no Mi", "Suji Suji no Mi", "Suke Suke no Mi", "Supa Supa no Mi", "Toge Toge no Mi", "Toki Toki no Mi", "Ton Ton no Mi", "Toshi Toshi no Mi", "Tsutsu Tsutsu no Mi", "Uta Uta no Mi", "Wapu Wapu no Mi", "Wara Wara no Mi", "Woshu Woshu no Mi", "Yomi Yomi no Mi", "Zushi Zushi no Mi"],
   "Paramecia Especial": ["Karan Karan no Mi", "Mochi Mochi no Mi"],
   "Logia": ["Ame Ame no Mi", "Chikyū Chikyū no Mi", "Gasu Gasu no Mi", "Goro Goro no Mi", "Hie Hie no Mi", "Kaze Kaze no Mi", "Kumo Kumo no Mi", "Magu Magu no Mi", "Mera Mera no Mi", "Moku Moku no Mi", "Mori Mori no Mi", "Numa Numa no Mi", "Pasa Pasa no Mi", "Pika Pika no Mi", "Suna Suna no Mi", "Susu Susu no Mi", "Toro Toro no Mi", "Yami Yami no Mi", "Yuki Yuki no Mi"],
-  "Zoan": ["Batto Batto no Mi", "Gama Gama no Mi", "Hebi Hebi no Mi, Modelo: Anaconda", "Hebi Hebi no Mi, Modelo: Cobra-Real", "Hito Hito no Mi", "Inu Inu no Mi, Modelo: Cão de Caça", "Inu Inu no Mi, Modelo: Cão-Guaxinim", "Inu Inu no Mi, Modelo: Chacal", "Inu Inu no Mi, Modelo: Dachshund", "Inu Inu no Mi, Modelo: Lobo", "Kame Kame no Mi", "Mogu Mogu no Mi", "Mushi Mushi no Mi, Modelo: Besouro-Rinoceronte", "Mushi Mushi no Mi, Modelo: Vespa-Mandarina", "Neko Neko no Mi, Modelo: Leão", "Neko Neko no Mi, Modelo: Leopardo", "Neko Neko no Mi, Modelo: Pantera Negra", "Neko Neko no Mi, Modelo: Tigre de Bengala", "Rako Rako no Mi", "Sara Sara no Mi, Modelo: Axolote", "Tama Tama no Mi", "Tori Tori no Mi, Modelo: Águia", "Tori Tori no Mi, Modelo: Albatroz", "Tori Tori no Mi, Modelo: Falcão", "Uma Uma no Mi", "Usagi Usagi no Mi", "Ushi Ushi no Mi, Modelo: Bisão", "Ushi Ushi no Mi, Modelo: Girafa", "Ushi Ushi no Mi, Modelo: Rinoceronte", "Zou Zou no Mi"],
+  "Zoan": ["Batto Batto no Mi", "Gama Gama no Mi", "Hebi Hebi no Mi, Modelo: Anaconda", "Hebi Hebi no Mi, Modelo: Cobra-Real", "Hito Hito no Mi", "Inu Inu no Mi, Modelo: Cão de Caça", "Inu Inu no Mi, Modelo: Cão-Guaxinim", "Inu Inu no Mi, Modelo: Chacal", "Inu Inu no Mi, Modelo: Dachshund", "Inu Inu no Mi, Modelo: Lobo", "Kame Kame no Mi", "Mogu Mogu no Mi", "Mushi Mushi no Mi, Modelo: Besouro-Rinoceronte", "Mushi Mushi no Mi, Modelo: Vespa-Mandarina", "Neko Neko no Mi, Modelo: Leão", "Neko Neko no Mi, Modelo: Leopardo", "Neko Neko no Mi, Modelo: Onça-Pintada", "Neko Neko no Mi, Modelo: Tigre-de-BengalaBengala", "Rako Rako no Mi", "Sara Sara no Mi, Modelo: Axolote", "Tama Tama no Mi", "Tori Tori no Mi, Modelo: Águia", "Tori Tori no Mi, Modelo: Albatroz", "Tori Tori no Mi, Modelo: Falcão", "Uma Uma no Mi", "Usagi Usagi no Mi", "Ushi Ushi no Mi, Modelo: Bisão", "Ushi Ushi no Mi, Modelo: Girafa", "Ushi Ushi no Mi, Modelo: Rinoceronte", "Zou Zou no Mi"],
   "Zoan Ancestral": ["Kumo Kumo no Mi, Modelo: Rosamygale grauvogeli", "Neko Neko no Mi, Modelo: Tigre-Dente-de-Sabre", "Ryū Ryū no Mi, Modelo: Alossauro", "Ryū Ryū no Mi, Modelo: Braquiossauro", "Ryū Ryū no Mi, Modelo: Espinossauro", "Ryū Ryū no Mi, Modelo: Paquicefalossauro", "Ryū Ryū no Mi, Modelo: Pteranodonte", "Ryū Ryū no Mi, Modelo: Triceratops", "Zou Zou no Mi, Modelo: Mamute"],
   "Zoan Mítica": ["Batto Batto no Mi, Modelo: Vampiro", "Hebi Hebi no Mi, Modelo: Kaijū", "Hebi Hebi no Mi, Modelo: Yamata no Orochi", "Hito Hito no Mi, Modelo: Daibutsu", "Hito Hito no Mi, Modelo: O Anfitrião", "Hito Hito no Mi, Modelo: Ōnyūdō", "Inu Inu no Mi, Modelo: Bake-Danuki", "Inu Inu no Mi, Modelo: Cérbero", "Inu Inu no Mi, Modelo: Ōkuchi no Makami", "Inu Inu no Mi, Modelo: Raposa de Nove Caudas", "Ryū Ryū no Mi, Modelo: Dragão Ocidental", "Ryū Ryū no Mi, Modelo: Kirin", "Tori Tori no Mi, Modelo: Fênix", "Tori Tori no Mi, Modelo: Nue", "Tori Tori no Mi, Modelo: Pássaro de Cinzas", "Tori Tori no Mi, Modelo: Pássaro de Gelo", "Tori Tori no Mi, Modelo: Thunderbird", "Uma Uma no Mi, Modelo: Pégaso", "Uo Uo no Mi, Modelo: Carpa Seiryū"],
 };
@@ -209,7 +209,7 @@ function renderTabs() {
             let npcActive = (pIdx === activePcIndex && nIdx === activeNpcIndex) ? 'active' : '';
             html += `<button class="btn-tab npc-tab ${npcActive}" onclick="switchChar(${pIdx}, ${nIdx})">${npcName}</button>`;
         });
-        html += `<button class="btn-add" onclick="addNPC(${pIdx})" title="Adicionar NPC">+</button>`;
+        html += `<button class="btn-add" onclick="addNPC(${pIdx})" title="Adicionar NPC">+ NPC</button>`;
         html += `</div>`;
     });
     html += `<div style="display: flex; gap: 10px; margin-top: 5px;">
@@ -617,6 +617,8 @@ function manualSave() {
 
 function updateSaveMode(mode) {
     charData.saveMode = mode;
+    let btnSave = document.getElementById('btn-save-manual');
+    if (btnSave) btnSave.style.display = mode === 'manual' ? 'inline-block' : 'none';
     if (mode === 'auto') {
         document.getElementById('db-status').classList.remove('unsaved');
         let toast = document.getElementById('save-toast');
@@ -719,7 +721,11 @@ function runFallbackChecks() {
   if (typeof charData.saveMode === 'undefined') charData.saveMode = "manual";
   if (typeof charData.layoutMode === 'undefined') charData.layoutMode = "vertical";
   let saveModeEl = document.getElementById('save-mode');
-  if (saveModeEl) saveModeEl.value = charData.saveMode;
+  if (saveModeEl) {
+      saveModeEl.value = charData.saveMode;
+      let btnSave = document.getElementById('btn-save-manual');
+      if (btnSave) btnSave.style.display = charData.saveMode === 'manual' ? 'inline-block' : 'none';
+  }
   
   if (!charData.pcs) {
       charData.pcs = [];
@@ -2371,12 +2377,12 @@ function updateUI() {
     let displayAviso = "none";
     let textAviso = "";
     
-    if(totalBase > 1000 && totalBase < 5000) { 
+    if(totalBase > 10000 && totalBase < 15000) { 
         displayAviso = "block"; 
-        textAviso = `Atenção: Limite inicial de 1.000 pontos ultrapassado!`; 
-    } else if(totalBase < 1000) { 
+        textAviso = `Atenção: Limite inicial de 10.000 pontos ultrapassado!`; 
+    } else if(totalBase < 10000) { 
         displayAviso = "block"; 
-        textAviso = `Atenção: Faltam distribuir ${(1000 - totalBase).toLocaleString("pt-BR")} dos pontos iniciais!`; 
+        textAviso = `Atenção: Faltam distribuir ${(10000 - totalBase).toLocaleString("pt-BR")} dos pontos iniciais!`; 
     }
     
     if(avisoBase) { avisoBase.style.display = displayAviso; avisoBase.textContent = textAviso; }
@@ -4796,6 +4802,14 @@ async function changeFichaID() {
         }
         await db.collection("fichas_op").doc(novoId).set(charData);
         await db.collection("fichas_op").doc(currentDocId).delete();
+        
+        const backupRefOld = db.collection("fichas_op").doc("BACKUP-" + currentDocId);
+        const backupDoc = await backupRefOld.get();
+        if (backupDoc.exists) {
+            await db.collection("fichas_op").doc("BACKUP-" + novoId).set(backupDoc.data());
+            await backupRefOld.delete();
+        }
+
         currentDocId = novoId; document.getElementById('doc-id').value = currentDocId;
         document.getElementById('db-status').classList.remove('syncing');
         await customAlert(`Sucesso! O ID da ficha agora é "${novoId}".`);
@@ -5273,405 +5287,126 @@ window.rebaixarCargo = async function() {
     }
 };
 
-window.processarImportacao = async function() {
-    if(isReadOnly) return;
-    let raw = document.getElementById('import-area').value;
-    if(!raw) return;
+window.exportarJSON = function(modo) {
+    let dataToExport;
+    let fileName = "ficha";
 
-    let remainingText = raw;
-    let i = currentChar.info;
-
-    let limparChave = (str) => {
-        const map = {
-            'ᴀ':'a', 'ʙ':'b', 'ᴄ':'c', 'ᴅ':'d', 'ᴇ':'e', 'ғ':'f', 'ɢ':'g', 'ʜ':'h', 'ɪ':'i', 'ᴊ':'j', 'ᴋ':'k', 'ʟ':'l', 'ᴍ':'m', 'ɴ':'n', 'ᴏ':'o', 'ᴘ':'p', 'ǫ':'q', 'ʀ':'r', 's':'s', 'ꜱ':'s', 'ᴛ':'t', 'ᴜ':'u', 'ᴠ':'v', 'ᴡ':'w', 'x':'x', 'ʏ':'y', 'ᴢ':'z',
-            '𝐀':'A', '𝐁':'B', '𝐂':'C', '𝐃':'D', '𝐄':'E', '𝐅':'F', '𝐆':'G', '𝐇':'H', '𝐈':'I', '𝐉':'J', '𝐊':'K', '𝐋':'L', '𝐌':'M', '𝐍':'N', '𝐎':'O', '𝐏':'P', '𝐐':'Q', '𝐑':'R', '𝐒':'S', '𝐓':'T', '𝐔':'U', '𝐕':'V', '𝐖':'W', '𝐗':'X', '𝐘':'Y', '𝐙':'Z',
-            '𝐚':'a', '𝐛':'b', '𝐜':'c', '𝐝':'d', '𝐞':'e', '𝐟':'f', '𝐠':'g', '𝐡':'h', '𝐢':'i', '𝐣':'j', '𝐤':'k', '𝐥':'l', '𝐦':'m', '𝐧':'n', '𝐨':'o', '𝐩':'p', '𝐪':'q', '𝐫':'r', '𝐬':'s', '𝐭':'t', '𝐮':'u', '𝐯':'v', '𝐰':'w', '𝐱':'x', '𝐲':'y', '𝐳':'z',
-            '𝙰':'A', '𝙱':'B', '𝙲':'C', '𝙳':'D', '𝙴':'E', '𝙵':'F', '𝙶':'G', '𝙷':'H', '𝙸':'I', '𝙹':'J', '𝙺':'K', '𝙻':'L', '𝙼':'M', '𝙽':'N', '𝙾':'O', '𝙿':'P', '𝚀':'Q', '𝚁':'R', '𝚂':'S', '𝚃':'T', '𝚄':'U', '𝚅':'V', '𝚆':'W', '𝚇':'X', '𝚈':'Y', '𝚉':'Z',
-            '𝚊':'a', '𝚋':'b', '𝚌':'c', '𝚍':'d', '𝚎':'e', '𝚏':'f', '𝚐':'g', '𝚑':'h', '𝚒':'i', '𝚓':'j', '𝚔':'k', '𝚕':'l', '𝚖':'m', '𝚗':'n', '𝚘':'o', '𝚙':'p', '𝚚':'q', '𝚛':'r', '𝚜':'s', '𝚝':'t', '𝚞':'u', '𝚟':'v', '𝚠':'w', '𝚡':'x', '𝚢':'y', '𝚣':'z',
-            'ᴄ̧':'ç', 'ᴏ́':'ó', 'ᴀ̂':'â', 'ᴀ̃':'ã', 'ᴇ́':'é', 'ᴍɪ':'mi'
-        };
-        let res = str;
-        for(let k in map) res = res.split(k).join(map[k]);
-        return res.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").trim();
-    };
-
-    let match;
-
-    let chavesStatusStr = "For[çc]a|Destreza|Resist[eê]ncia|Velocidade|Esp[íi]rito|Akuma no mi";
-    let regexStatus = new RegExp(`(?:↠\\s*\\*(.+?)\\*|^[ \\t]*(${chavesStatusStr}))[\\s:]*\\s*([^\\n]+)`, 'gmi');
-    
-    while ((match = regexStatus.exec(remainingText)) !== null) {
-        let statName = limparChave(match[1] || match[2]);
-        let rawVal = match[3].split('+')[0].split('(')[0];
-        let statVal = parseInt(rawVal.replace(/\D/g, ''));
-        let importou = false;
-
-        if(statName.includes("forca")) { currentChar.stats.f = statVal; importou = true; }
-        else if(statName.includes("destreza")) { currentChar.stats.d = statVal; importou = true; }
-        else if(statName.includes("resistencia")) { currentChar.stats.r = statVal; importou = true; }
-        else if(statName.includes("velocidade")) { currentChar.stats.v = statVal; importou = true; }
-        else if(statName.includes("espirito")) { currentChar.stats.esp = statVal; importou = true; }
-        else if(statName.includes("akuma no mi")) { currentChar.stats.ami = statVal; importou = true; }
-
-        if(importou) {
-            remainingText = remainingText.replace(match[0], '');
-            regexStatus.lastIndex = 0;
-        }
-    }
-
-    let regexSubStatus = /(?:>\s*_?([^_\n]+?)_?:\s*([\d\.]+)[^\n]*|-\s*([^\n✓✘]+?)(✓|✘))/gmi;
-    let regexSubStatusNew = /(?:^[ \t]*>\s*_?([^_\n]+?)_?:\s*([^\n]+)|^[ \t]*-\s*([^\n✓✘]+?)(✓|✘))/gmi;
-    let lastHakiSeen = "";
-    while ((match = regexSubStatusNew.exec(remainingText)) !== null) {
-        let subName = match[1] ? limparChave(match[1]) : "";
-        let rawVal = match[2] ? match[2].split('+')[0].split('(')[0] : "0";
-        let subVal = parseInt(rawVal.replace(/\D/g, '')) || 0;
-        let habName = match[3] ? limparChave(match[3]) : "";
-        let habUnlocked = match[4] === '✓';
-        let importou = false;
-        
-        if(subName.includes("reflexo") && !subName.includes("agua")) { currentChar.substats.refl = subVal; importou = true; }
-        else if(subName.includes("velocidade corporal") && !subName.includes("agua")) { currentChar.substats.vcorp = subVal; importou = true; }
-        else if(subName.includes("reflexo") && subName.includes("agua")) { currentChar.substats.reflAgua = subVal; importou = true; }
-        else if(subName.includes("velocidade corporal") && subName.includes("agua")) { currentChar.substats.vcorpAgua = subVal; importou = true; }
-        else if(subName.includes("estamina")) { i.estaminaAtual = subVal; importou = true; }
-        else if(subName.includes("armamento")) { currentChar.substats.hArm = subVal; lastHakiSeen = "HA"; importou = true; }
-        else if(subName.includes("observacao")) { currentChar.substats.hObs = subVal; lastHakiSeen = "HO"; importou = true; }
-        else if(subName.includes("rei")) { currentChar.substats.hRei = subVal; lastHakiSeen = "HR"; importou = true; }
-        else if(subName.includes("alcance")) { currentChar.substats.amiAlc = subVal; importou = true; }
-        else if(subName.includes("durabilidade")) { currentChar.substats.amiDur = subVal; importou = true; }
-        else if(subName.includes("potencia")) { currentChar.substats.amiPot = subVal; importou = true; }
-        else if(subName.includes("velocidade") && !subName.includes("corporal") && !subName.includes("agua")) { currentChar.substats.amiVel = subVal; importou = true; }
-        else if(subName.includes("despertar")) { currentChar.substats.amiDesp = subVal; importou = true; }
-        
-        else if(habName.includes("invisivel")) { i.unlockHA1 = habUnlocked; importou = true; }
-        else if(habName.includes("visivel")) { i.unlockHA2 = habUnlocked; importou = true; }
-        else if(habName.includes("imbuicao")) { i.unlockHA3 = habUnlocked; importou = true; }
-        else if(habName.includes("full body")) { i.unlockHA4 = habUnlocked; importou = true; }
-        else if(habName.includes("emissao")) { i.unlockHA5 = habUnlocked; importou = true; }
-        else if(habName.includes("avancado")) { 
-            if (lastHakiSeen === "HA") { i.unlockHA6 = habUnlocked; importou = true; }
-            else if (lastHakiSeen === "HO") { i.unlockHO4 = habUnlocked; importou = true; }
-        }
-        else if(habName.includes("intencao")) { i.unlockHO2 = habUnlocked; importou = true; }
-        else if(habName.includes("premonicao")) { i.unlockHO3 = habUnlocked; importou = true; }
-        else if(habName.includes("dominacao")) { i.unlockHR2 = habUnlocked; importou = true; }
-        else if(habName.includes("incapacitacao")) { i.unlockHR3 = habUnlocked; importou = true; }
-        else if(habName.includes("pressao")) { i.unlockHR4 = habUnlocked; importou = true; }
-        else if(habName.includes("assassinato de observacao")) { i.unlockHR5 = habUnlocked; importou = true; }
-        else if(habName.includes("infusao")) { i.unlockHR6 = habUnlocked; importou = true; }
-
-        if(importou) {
-            remainingText = remainingText.replace(match[0], '');
-            regexSubStatus.lastIndex = 0;
-        }
-    }
-
-    let tecIndex = remainingText.indexOf("▬▬▬▬  [ 𝐓ᴇ́ᴄɴɪᴄᴀs ]  ▬▬▬▬");
-    if (tecIndex !== -1) {
-        let tecText = remainingText.substring(tecIndex);
-        remainingText = remainingText.substring(0, tecIndex);
-        let matchTreinos = tecText.match(/Treinos Acumulados:\s*([\d\.]+)/i);
-        if (matchTreinos) { i.treinosAcumulados = matchTreinos[1].replace(/\D/g, ''); }
-        let currentStyle = "Sem Estilo";
-        i.ordemTecnicas = "manual";
-        currentChar.tecnicasList = [];
-        let currentTec = null;
-        let linhasTec = tecText.split('\n');
-        for (let j = 0; j < linhasTec.length; j++) {
-            let l = linhasTec[j].trim();
-            if (l === "" || l.includes('𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶') || l.includes('𝐓ᴇ́ᴄɴɪᴄᴀs') || l.includes('Treinos Acumulados:')) continue;
-            let matchStyle = l.match(/^«(.+)»$/);
-            if (matchStyle) { currentStyle = matchStyle[1].trim(); continue; }
-            if (l.startsWith('* ')) {
-                if (currentTec) currentChar.tecnicasList.push(currentTec);
-                let isNaoTreinada = false;
-                let tName = l.replace(/^\*\s*/, '').trim();
-                if (tName.startsWith('~') && tName.endsWith('~')) { isNaoTreinada = true; tName = tName.substring(1, tName.length - 1); }
-                let mappedStyle = "";
-                if (currentStyle !== "Sem Estilo") {
-                    if (currentStyle === "Electro") mappedStyle = "Electro";
-                    else if (currentStyle === i.akumaNome) mappedStyle = "Akuma";
-                    else if (currentStyle === i.estilo1 || currentStyle === (i.freestyle1 ? i.freestyle1 : "Freestyle")) mappedStyle = "estilo1";
-                    else if (currentStyle === i.estilo2 || currentStyle === (i.freestyle2 ? i.freestyle2 : "Freestyle")) mappedStyle = "estilo2";
-                    else if (currentStyle === i.estilo3 || currentStyle === (i.freestyle3 ? i.freestyle3 : "Freestyle")) mappedStyle = "estilo3";
-                    else if (currentStyle === i.estilo4 || currentStyle === (i.freestyle4 ? i.freestyle4 : "Freestyle")) mappedStyle = "estilo4";
-                }
-                currentTec = { nome: tName, desc: "", efeito: "", estilo: mappedStyle, naoTreinada: isNaoTreinada };
-            } else if (l.startsWith('> ')) {
-                let isNaoTreinada = false;
-                let content = l.replace(/^>\s*/, '').trim();
-                if (content.startsWith('~') && content.endsWith('~')) { isNaoTreinada = true; content = content.substring(1, content.length - 1); }
-                if (currentTec) {
-                    currentTec.naoTreinada = currentTec.naoTreinada || isNaoTreinada;
-                    if (content.startsWith('Efeito:')) { currentTec.efeito += (currentTec.efeito ? '\n' : '') + content.substring(7).trim(); }
-                    else {
-                        if (currentTec.efeito === "") { currentTec.desc += (currentTec.desc ? '\n' : '') + content; }
-                        else { currentTec.efeito += (currentTec.efeito ? '\n' : '') + content; }
-                    }
-                }
-            }
-        }
-        if (currentTec) currentChar.tecnicasList.push(currentTec);
-    }
-
-    let chavesStr = "Nome|Idade|Altura|Sexo|Sangue|Nacionalidade|Localiza[çc][aã]o|Apar[eê]ncia|Hist[oó]ria|Personalidade|Invent[aá]rio|Akuma no mi|Ra[çc]a(?:\\s*\\|\\s*Linhagem)?|Organiza[çc][aã]o|NPCs?.*|Alcunhas?(?:\\s*Reservas?)?|Recompensa(?:\\s*Travada)?|Berries|Aliados.*|Classes?|Estilos?.*|Habilidades?.*|ID";
-    let regexCampo = new RegExp(`(?:^[>:\\u14E9 \\t]*_([^_]+)_[\\s:]*\\n|^[ \\t]*(${chavesStr})[\\s:]*\\n)([\\s\\S]*?)(?=(?:^[>:\\u14E9 \\t]*_[^_]+_[\\s:]*\\n|^[ \\t]*(?:${chavesStr})[\\s:]*\\n|▬▬▬▬|(?![\\s\\S])))`, 'gmi');
-
-    while ((match = regexCampo.exec(remainingText)) !== null) {
-        let chaveLimpa = limparChave(match[1] || match[2]);
-        let valorFull = match[3];
-        let linhas = valorFull.split('\n').map(l => l.replace(/^[ \t]*>[ \t]*/, '').trim()).filter(l => l !== '');
-        let valorLimpo = linhas[0] || "";
-        let importou = false;
-
-        if (valorFull.includes('🔒') && !chaveLimpa.includes("habilidade")) { importou = true; }
-        else if (chaveLimpa.includes("nome")) { currentChar.name = valorLimpo; importou = true; }
-        else if (chaveLimpa.includes("idade")) { i.idade = valorLimpo; importou = true; }
-        else if (chaveLimpa.includes("altura")) { i.altura = valorLimpo; importou = true; }
-        else if (chaveLimpa.includes("sexo")) { i.sexo = valorLimpo; importou = true; }
-        else if (chaveLimpa.includes("sangue")) { i.sangue = valorLimpo; importou = true; }
-        else if (chaveLimpa.includes("nacionalidade")) { i.nacionalidade = valorLimpo; importou = true; }
-        else if (chaveLimpa.includes("localizacao")) { i.localizacao = valorLimpo; importou = true; }
-        else if (chaveLimpa.includes("aparencia")) { i.aparencia = valorLimpo; importou = true; }
-        else if (chaveLimpa.includes("historia")) { i.historia = valorFull.split('\n').map(l => l.replace(/^[ \t]*>[ \t]*/, '')).join('\n').trim(); importou = true; }
-        else if (chaveLimpa.includes("personalidade")) { i.personalidade = valorFull.split('\n').map(l => l.replace(/^[ \t]*>[ \t]*/, '')).join('\n').trim(); importou = true; }
-        else if (chaveLimpa.includes("inventario")) { i.inventario = valorFull.split('\n').map(l => l.replace(/^[ \t]*>[ \t]*/, '').replace(/^\*\s*/, '')).join('\n').trim(); importou = true; }
-        else if (chaveLimpa.includes("akuma no mi")) { i.akumaNome = valorLimpo; importou = true; }
-        else if (chaveLimpa.includes("raca")) { 
-            let partes = valorLimpo.split('|').map(p => p.trim());
-            i.raca = partes[0] || ""; 
-            if(partes[1]) i.linhagem = partes[1]; 
-            importou = true; 
-        }
-        else if (chaveLimpa.includes("alcunha")) {
-            if (!chaveLimpa.includes("reserva")) {
-                let alcStr = valorLimpo;
-                if (alcStr) {
-                    let matchBuff = alcStr.match(/(.+) \[(.+)\]/);
-                    let nomeAlc = matchBuff ? matchBuff[1].trim() : alcStr;
-                    i.alcunhaAtiva = nomeAlc;
-                    if (!i.alcunhasList) i.alcunhasList = [];
-                    if (!i.alcunhasList.find(a => a.nome === nomeAlc)) i.alcunhasList.push({nome: nomeAlc, buffs: []});
-                    importou = true;
-                }
-            } else {
-                if (!i.alcunhasList) i.alcunhasList = [];
-                linhas.forEach(linha => {
-                    let alcStr = linha;
-                    if (alcStr) {
-                        let matchBuff = alcStr.match(/(.+) \[(.+)\]/);
-                        let nomeAlc = matchBuff ? matchBuff[1].trim() : alcStr;
-                        if (!i.alcunhasList.find(a => a.nome === nomeAlc)) i.alcunhasList.push({nome: nomeAlc, buffs: []});
-                    }
-                });
-                importou = true;
-            }
-        }
-        else if (chaveLimpa.includes("organizacao")) {
-            let partesOrg = valorFull.split('\n').map(l => l.replace(/^[ \t]*[*>-][ \t]*/, '').trim()).filter(l => l !== '');
-            let primeiraLinha = partesOrg[0] || "";
-            if (primeiraLinha.startsWith("Pirata") || primeiraLinha.startsWith("Supernova") || primeiraLinha.startsWith("Shichibukai") || primeiraLinha.startsWith("Yonkou") || primeiraLinha.startsWith("Caçador de Recompensa") || primeiraLinha.startsWith("Cacador de Recompensa")) {
-                if (primeiraLinha.startsWith("Caçador") || primeiraLinha.startsWith("Cacador")) {
-                    i.orgTipo = "Caçador de Recompensa";
-                    i.tripulacao = primeiraLinha.includes(":") ? primeiraLinha.split(":").slice(1).join(":").trim() : "";
-                } else {
-                    i.orgTipo = "Pirata";
-                    let tipoStatus = primeiraLinha.split(":")[0].trim();
-                    if (["Supernova", "Shichibukai", "Yonkou"].includes(tipoStatus)) {
-                        i.pirataStatus = tipoStatus;
-                    } else {
-                        i.pirataStatus = "Normal";
-                    }
-                    i.tripulacao = primeiraLinha.includes(":") ? primeiraLinha.split(":").slice(1).join(":").trim() : "";
-                }
-            } else {
-                i.orgTipo = partesOrg[0] || "";
-                i.patente = partesOrg[1] || "";
-            }
-            importou = true;
-        }
-        else if (chaveLimpa.includes("npcs comun")) {
-            i.npcsComunsList = [];
-            let linhasNpcC = valorFull.split('\n').map(l => l.replace(/^[ \t]*[*>-][ \t]*/, '').trim()).filter(l => l !== '');
-            linhasNpcC.forEach(linha => {
-                if (linha === '🔒') return;
-                let matchNpcC = linha.match(/^(\d+[\.\d]*)\s+([a-zA-Záéíóúãõç]+)(?:\s+\[([\d.]+) pontos\])?/i);
-                if (matchNpcC) {
-                    let racaStr = matchNpcC[2].toLowerCase();
-                    if (racaStr === "humanos") racaStr = "Humano";
-                    else if (racaStr === "tritões" || racaStr === "tritoes") racaStr = "Tritão";
-                    else if (racaStr === "sereianos") racaStr = "Sereiano";
-                    else if (racaStr === "gigantes") racaStr = "Gigante";
-                    else if (racaStr === "minks") racaStr = "Mink";
-                    else if (racaStr === "bucaneiros") racaStr = "Bucaneiro";
-                    else if (racaStr === "lunarianos") racaStr = "Lunariano";
-                    else if (racaStr === "onis") racaStr = "Oni";
-                    else if (racaStr === "tontattas") racaStr = "Tontatta";
-                    else racaStr = racaStr.charAt(0).toUpperCase() + racaStr.slice(1);
-
-                    i.npcsComunsList.push({
-                        quantidade: matchNpcC[1].replace(/\D/g, ''),
-                        raca: racaStr,
-                        pontos: matchNpcC[3] ? matchNpcC[3].replace(/\D/g, '') : ""
-                    });
-                }
-            });
-            importou = true;
-        }
-        else if (chaveLimpa.includes("npcs especiai")) {
-            i.npcsEspeciaisList = [];
-            let origemAtual = "Evento";
-            let linhasNpcE = valorFull.split('\n').map(l => l.trim()).filter(l => l !== '');
-            linhasNpcE.forEach(linha => {
-                if (linha === '🔒') return;
-                let origemMatch = limparChave(linha);
-                if (origemMatch.includes("dominacao")) origemAtual = "Dominação";
-                else if (origemMatch.includes("extra-narrada") || origemMatch.includes("extranarrada")) origemAtual = "Extra-Narrada";
-                else if (origemMatch.includes("evento")) origemAtual = "Evento";
-                else {
-                    let regexNpcE = /^(?:\d+\.\s*)?([^\[]+)(?:\[(.*?)\])?$/;
-                    let matchNpcE = linha.match(regexNpcE);
-                    if (matchNpcE) {
-                        let nome = matchNpcE[1].replace(/^[>:\u14E9\s]+/, '').trim();
-                        let pontos = "";
-                        let c1 = "";
-                        if (matchNpcE[2]) {
-                            let ptsMatch = matchNpcE[2].match(/([\d.]+)\s*pontos/i);
-                            if (ptsMatch) pontos = ptsMatch[1].replace(/\D/g, '');
-                            let classeExtract = matchNpcE[2].replace(ptsMatch ? ptsMatch[0] : '', '').replace(/-/, '').trim();
-                            if (classeExtract) {
-                                let clp = limparChave(classeExtract);
-                                if (clp.includes("arqueolog") || clp.includes("historiador") || clp.includes("artefato") || clp.includes("guru")) c1 = "Arqueólogo 1";
-                                else if (clp.includes("artista") || clp.includes("ilustrador") || clp.includes("empresari") || clp.includes("estilista") || clp.includes("escultor") || clp.includes("patron")) c1 = "Artista 1";
-                                else if (clp.includes("atirador") || clp.includes("criador belico") || clp.includes("rambo")) c1 = "Atirador 1";
-                                else if (clp.includes("carpinteiro") || clp.includes("construtor") || clp.includes("engenheir") || clp.includes("obra")) c1 = "Carpinteiro 1";
-                                else if (clp.includes("cientista") || clp.includes("estudios") || clp.includes("biolog") || clp.includes("bioengenheir") || clp.includes("alquimist") || clp.includes("genio")) c1 = "Cientista 1";
-                                else if (clp.includes("combatente") || clp.includes("guerreiro") || clp.includes("discipulo") || clp.includes("colosso")) c1 = "Combatente 1";
-                                else if (clp.includes("cozinheiro") || clp.includes("chef") || clp.includes("garcom") || clp.includes("garconete") || clp.includes("especialista culinari") || clp.includes("nutricionist") || clp.includes("paladar")) c1 = "Cozinheiro 1";
-                                else if (clp.includes("ferreiro") || clp.includes("artesao") || clp.includes("artesa") || clp.includes("forjador") || clp.includes("laminas")) c1 = "Ferreiro 1";
-                                else if (clp.includes("inventor") || clp.includes("improvisador") || clp.includes("mecanico") || clp.includes("arquitetonic") || clp.includes("condutor") || clp.includes("artifice")) c1 = "Inventor 1";
-                                else if (clp.includes("medico") || clp.includes("clinico") || clp.includes("cirurgiao") || clp.includes("biomedic") || clp.includes("cura") || clp.includes("vida")) c1 = "Médico 1";
-                                else if (clp.includes("musicista") || clp.includes("sonante") || clp.includes("celebridade") || clp.includes("pop") || clp.includes("idolo") || clp.includes("imperador")) c1 = "Musicista 1";
-                                else if (clp.includes("navegador") || clp.includes("marujo") || clp.includes("maruja") || clp.includes("cartograf") || clp.includes("timoneir") || clp.includes("capita") || clp.includes("semipeixe")) c1 = "Navegador 1";
-                            }
-                        }
-                        i.npcsEspeciaisList.push({
-                            nome: nome,
-                            origem: origemAtual,
-                            sexo: "Masculino",
-                            pontos: pontos,
-                            classe: c1, classe2: "", classe3: ""
-                        });
-                    }
-                }
-            });
-            importou = true;
-        }
-        else if (chaveLimpa.includes("recompensa")) { 
-            if (chaveLimpa.includes("travada")) {
-                i.recompensaTravada = valorLimpo.replace(/[^\d]/g, '');
-            } else {
-                i.recompensa = valorLimpo.replace(/[^\d]/g, ''); 
-            }
-            importou = true; 
-        }
-        else if (chaveLimpa.includes("berries")) { i.berries = valorLimpo.replace(/[^\d]/g, ''); importou = true; }
-        else if (chaveLimpa === "id" || chaveLimpa === "id:") { importou = true; }
-        else if (chaveLimpa.includes("aliados")) { i.aliadosEspiritoContagiante = valorLimpo.replace(/[^\d]/g, ''); importou = true; }
-        else if (chaveLimpa.includes("classe")) {
-            let linhasClasses = valorFull.split('\n').map(l => l.replace(/^[ \t]*\d+\.[ \t]*\*/, '').replace(/\*$/, '').trim()).filter(l => l !== '');
-            linhasClasses.forEach((linha, idx) => {
-                let slot = idx === 0 ? 'classe' : 'classe' + (idx + 1);
-                let found = "";
-                if(linha !== "Inicial" && linha !== "(Vazio)" && !linha.includes("Libera") && linha !== "") {
-                    for (let c of baseClassesList) {
-                        for (let lvl = 1; lvl <= 5; lvl++) {
-                            if (linha === getClassDisplayName(`${c} ${lvl}`, "Masculino") || linha === getClassDisplayName(`${c} ${lvl}`, "Feminino")) {
-                                found = `${c} ${lvl}`;
-                            }
-                        }
-                    }
-                }
-                i[slot] = found;
-            });
-            importou = true;
-        }
-        else if (chaveLimpa.includes("estilo")) {
-            let linhasEstilos = valorFull.split('\n').map(l => l.replace(/^[ \t]*\*[ \t]*/, '').trim()).filter(l => l !== '' && l !== 'Electro');
-            linhasEstilos.forEach((linha, idx) => {
-                if (idx < 4) {
-                    let slot = 'estilo' + (idx + 1);
-                    let freeSlot = 'freestyle' + (idx + 1);
-                    if(linha === "𝙲𝚕𝚊𝚜𝚜𝚎" || linha === "𝙸𝚗𝚒𝚌𝚒𝚊𝚕" || linha === "(Vazio)" || linha.includes("Libera") || linha.includes("Sem Estilo")) {
-                        i[slot] = "";
-                        i[freeSlot] = "";
-                    } else if(linha.startsWith("Freestyle:")) {
-                        i[slot] = "Freestyle";
-                        i[freeSlot] = linha.replace("Freestyle:", "").trim();
-                    } else {
-                        i[slot] = linha;
-                        i[freeSlot] = "";
-                    }
-                }
-            });
-            importou = true;
-        }
-        else if (chaveLimpa.includes("habilidade")) {
-            i.habilidadesExclusivas = [];
-            let linhasHab = valorFull.split('\n').map(l => l.replace(/^[ \t]*>[ \t]*/, '').trim()).filter(l => l !== '');
-            linhasHab.forEach(linha => {
-                let nomeHab = linha.split(':')[0].trim();
-                if (nomeHab === "Filha do Mar") nomeHab = "Filho do Mar";
-                else if (nomeHab === "A Escolhida") nomeHab = "O Escolhido";
-                else if (nomeHab === "Batedora de Carteiras") nomeHab = "Batedor de Carteiras";
-                if (nomeHab && !nomeHab.includes('🔒')) {
-                    i.habilidadesExclusivas.push(nomeHab);
-                }
-            });
-            importou = true;
-        }
-
-        if(importou) {
-            remainingText = remainingText.replace(match[0], '');
-            regexCampo.lastIndex = 0;
-        }
-    }
-
-    let textoParaChecagem = remainingText
-        .replace(/\*Nᴇᴡ sᴇᴀs\*/gi, '')
-        .replace(/— ロールプレイングゲーム - 𝚁𝙿𝙶 \[𝙾𝙽𝙴 𝙿𝙸𝙴𝙲𝙴\]/gi, '')
-        .replace(/— 新しい海 - 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 ~\*[ɴN][ꜱS]\*~/gi, '')
-        .replace(/ᖴIᑕᕼᗩ(?: ᗞᕮ ᘉᑭᑕ)?/gi, '')
-        .replace(/[Iີີ່້ິູຸ໌ຼ໋໊]+/g, '')
-        .replace(/▬▬▬▬+/g, '')
-        .replace(/\[ 𝐒ᴛᴀᴛᴜs \]/gi, '')
-        .replace(/\[ 𝐓ᴇ́ᴄɴɪᴄᴀs \]/gi, '')
-        .replace(/«\s*\[ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 \]\s*»/gi, '')
-        .replace(/HP:.*?\n/gi, '')
-        .replace(/↠\s*\*𝐀ᴛʀɪʙᴜᴛᴏs\*/gi, '')
-        .replace(/\*\s*Base:.*?\n/gi, '')
-        .replace(/\*\s*Total:.*?\n/gi, '')
-        .replace(/>\s*_?𝙲𝚘𝚗𝚝𝚛ᴏ𝚕𝚎_?:.*?\n/gi, '')
-        .replace(/[ \t\n]/g, '');
-
-    if (textoParaChecagem === '') {
-        remainingText = '';
-    }
-
-    remainingText = remainingText.trim();
-    if (remainingText === '') {
-        document.getElementById('import-area').value = "";
-        document.getElementById('import-area').placeholder = "Importação concluída! Os campos reconhecidos foram preenchidos.";
-        setTimeout(() => { document.getElementById('import-area').placeholder = "Cole o texto da ficha aqui..."; }, 3500);
+    if (modo === 'tudo') {
+        dataToExport = JSON.parse(JSON.stringify(charData));
+        delete dataToExport.password;
+        delete dataToExport.backupPassword;
+        fileName = "backup_completo";
     } else {
-        document.getElementById('import-area').value = remainingText;
-        document.getElementById('modal-importar').style.display = 'none';
-        await customAlert("Atenção: Algumas partes não puderam ser importadas automaticamente. Essas partes específicas que não puderem ser importadas ainda estão na caixa de texto, corrija-as.");
-        document.getElementById('modal-importar').style.display = 'flex';
+        let charClone = JSON.parse(JSON.stringify(currentChar));
+        dataToExport = { isSingleCharacter: true, data: charClone };
+        fileName = currentChar && currentChar.name ? currentChar.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() : "personagem";
     }
 
-    saveData();
-    updateUI();
-    renderTabs();
+    let dataStr = JSON.stringify(dataToExport, null, 2);
+    let blob = new Blob([dataStr], { type: "application/json" });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = `ficha_${fileName}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    document.getElementById('modal-importar-exportar').style.display = 'none';
+};
+
+window.importarJSON = function(event) {
+    if (isReadOnly) {
+        customAlert("A ficha atual está em Modo Leitura. Desbloqueie-a ou carregue um ID em branco antes de importar.");
+        event.target.value = "";
+        return;
+    }
+    let file = event.target.files[0];
+    if (!file) return;
+
+    document.getElementById('modal-importar-exportar').style.display = 'none';
+    
+    let reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            let json = JSON.parse(e.target.result);
+            let resp = await customPrompt("Digite 1 para SUBSTITUIR TUDO, 2 para ADICIONAR COMO NOVO, ou 3 para SUBSTITUIR O ATUAL:", true);
+            
+            if (resp !== "1" && resp !== "2" && resp !== "3") {
+                event.target.value = ""; 
+                return;
+            }
+            
+            let isSingle = json.isSingleCharacter;
+            let incomingData = isSingle ? json.data : json;
+
+            if (!isSingle) {
+                delete incomingData.password;
+                delete incomingData.backupPassword;
+            }
+
+            if (resp === "1") {
+                let currentPassword = charData.password;
+                let currentBackupPassword = charData.backupPassword;
+                
+                if (isSingle) {
+                    charData.pcs = [{ pc: incomingData, npcs: [] }];
+                } else {
+                    charData = incomingData;
+                }
+                
+                charData.password = currentPassword;
+                if (currentBackupPassword !== undefined) charData.backupPassword = currentBackupPassword;
+                
+                activePcIndex = 0;
+                activeNpcIndex = -1;
+            } else if (resp === "2") {
+                if (isSingle) {
+                    incomingData.isNPC = false;
+                    charData.pcs.push({ pc: incomingData, npcs: [] });
+                } else {
+                    if (incomingData.pcs) {
+                        incomingData.pcs.forEach(p => charData.pcs.push(p));
+                    } else {
+                        await customAlert("O arquivo não possui formato válido para adicionar múltiplos personagens.");
+                        event.target.value = "";
+                        return;
+                    }
+                }
+                activePcIndex = charData.pcs.length - 1;
+                activeNpcIndex = -1;
+            } else if (resp === "3") {
+                if (isSingle) {
+                    incomingData.isNPC = currentChar.isNPC;
+                    if (activeNpcIndex === -1) {
+                        charData.pcs[activePcIndex].pc = incomingData;
+                    } else {
+                        charData.pcs[activePcIndex].npcs[activeNpcIndex] = incomingData;
+                    }
+                } else {
+                    await customAlert("O arquivo possui múltiplos personagens. Só é possível substituir o atual usando um arquivo de personagem único.");
+                    event.target.value = "";
+                    return;
+                }
+            }
+            
+            runFallbackChecks();
+            currentChar = activeNpcIndex === -1 ? charData.pcs[activePcIndex].pc : charData.pcs[activePcIndex].npcs[activeNpcIndex];
+            
+            renderTabs();
+            renderTecnicas();
+            renderNpcsComuns();
+            renderNpcsEspeciais();
+            renderLogs();
+            updateUI();
+            toggleEditability();
+            saveData(true);
+            
+            await customAlert("Importação concluída com sucesso!");
+        } catch(err) {
+            await customAlert("Erro ao ler o arquivo JSON. Certifique-se de que é um arquivo válido.");
+        }
+        event.target.value = ""; 
+    };
+    reader.readAsText(file);
 };
