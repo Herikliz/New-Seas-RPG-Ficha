@@ -19,7 +19,7 @@
     </select>
     <button id="btn-save-manual" class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--success); border-color: var(--success);" onclick="manualSave()" title="Salvar Ficha">💾Salvar</button>
     <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: #a461ff; border-color: #a461ff;" onclick="saveBackup()" title="Salvar Backup">🗄️Salvar Backup</button>
-    <input type="text" id="doc-id" maxlength="4" placeholder="ID (4 Números)" title="Digite 4 números para salvar/puxar na nuvem" onchange="changeDocId(this.value)" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+    <input type="text" id="doc-id" maxlength="4" placeholder="ID" title="Digite 4 números (ou os IDs especiais) para salvar/puxar na nuvem" onchange="changeDocId(this.value)" oninput="this.value = this.value.replace(/[^0-9A-Z]/gi, '').toUpperCase()">
     <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px;" onclick="loadFromCloud()" title="Puxar dados">⬇️Puxar</button>
     <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: #a461ff; border-color: #a461ff;" onclick="loadBackup()" title="Puxar Backup">📂Puxar Backup</button>
     <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--success); border-color: var(--success);" onclick="document.getElementById('modal-importar-exportar').style.display='flex'" title="Importar ou Exportar Arquivo JSON">🔄Importar/Exportar</button>

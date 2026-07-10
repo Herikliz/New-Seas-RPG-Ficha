@@ -212,9 +212,10 @@ function renderTabs() {
         html += `<button class="btn-add" onclick="addNPC(${pIdx})" title="Adicionar NPC">+ NPC</button>`;
         html += `</div>`;
     });
-    html += `<div style="display: flex; gap: 10px; margin-top: 5px;">
+    html += `<div style="display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap;">
                 <button class="btn-add btn-add-pc" onclick="addPC()">+ Personagem</button>
                 <button class="btn-add btn-add-pc" style="border-color: var(--danger); color: var(--danger);" onclick="deleteCurrentChar()">🗑️ Apagar Selecionado</button>
+                <button class="btn-add btn-add-pc" style="border-color: var(--warning); color: var(--warning);" onclick="travarFichaCombate()" title="Duplica o personagem e seus NPCs com os status congelados no momento">⚔️ Travar Combate</button>
              </div>`;
     container.innerHTML = html;
 }
@@ -260,6 +261,49 @@ async function deleteCurrentChar() {
     updateUI();
     toggleEditability();
     await customAlert("Apagado com sucesso!");
+}
+
+async function travarFichaCombate() {
+    if (isReadOnly) {
+        await customAlert("Você está no modo de leitura. Não é possível travar a ficha.");
+        return;
+    }
+
+    let conf = await customPrompt("Deseja criar uma cópia de sua ficha para usar no combate enquanto a ficha original continua evoluindo? Digite 'SIM' para confirmar:");
+    if (conf !== "SIM" && conf !== "sim" && conf !== "Sim") {
+        return;
+    }
+
+    let currentPcObj = charData.pcs[activePcIndex];
+    
+    let clonedPcObj = JSON.parse(JSON.stringify(currentPcObj));
+    
+    let baseName = (clonedPcObj.pc.name || `Personagem ${activePcIndex + 1}`).trim();
+    clonedPcObj.pc.name = baseName + " [COMBATE]";
+    
+    if (clonedPcObj.npcs && clonedPcObj.npcs.length > 0) {
+        clonedPcObj.npcs.forEach((npc, nIdx) => {
+            let npcBaseName = (npc.name || `NPC ${nIdx + 1}`).trim();
+            npc.name = npcBaseName + " [COMBATE]";
+        });
+    }
+
+    charData.pcs.push(clonedPcObj);
+    
+    activePcIndex = charData.pcs.length - 1;
+    activeNpcIndex = -1;
+    currentChar = charData.pcs[activePcIndex].pc;
+    
+    saveData();
+    renderTabs();
+    renderTecnicas();
+    renderNpcsComuns();
+    renderNpcsEspeciais();
+    renderLogs();
+    updateUI();
+    toggleEditability();
+    
+    await customAlert("Ficha travada com sucesso! A aba de combate congelada foi criada e selecionada.");
 }
 
 function getClassDisplayName(baseClassWithLevel, sexo) {
@@ -518,7 +562,12 @@ async function changeDocId(newId) {
   }
   newId = newId.trim();
   
-  if (!/^\d{4}$/.test(newId)) {
+  if (currentDocId === "NPCS" || currentDocId === "NPCI") {
+      await customAlert("Esse ID especial é permanente e não pode ser alterado.");
+      document.getElementById('doc-id').value = currentDocId;
+      return;
+  }
+  if (!/^\d{4}$/.test(newId) && newId !== "NPCS" && newId !== "NPCI") {
       await customAlert("O ID da ficha deve conter EXATAMENTE 4 NÚMEROS (ex: 1234).");
       document.getElementById('doc-id').value = currentDocId;
       return;
@@ -540,6 +589,11 @@ async function loadFromCloud() {
           let data = doc.data(); 
           isReadOnly = false;
           isSuperAdmin = false;
+
+          if (currentDocId === "NPCS" || currentDocId === "NPCI") {
+              data.password = ADMIN_PASSWORD;
+              data.saveMode = "manual";
+          }
 
           if (data.password && data.password.trim() !== '') {
               let entered = await customPrompt("Esta ficha é protegida por senha. Digite a senha para editar (ou cancele para apenas visualizar a ficha):");
@@ -564,6 +618,10 @@ async function loadFromCloud() {
           toggleEditability();
       } 
       else { 
+          if (currentDocId === "NPCS" || currentDocId === "NPCI") {
+              charData.password = ADMIN_PASSWORD;
+              charData.saveMode = "manual";
+          }
           isReadOnly = false;
           saveData(); 
           toggleEditability();
@@ -616,6 +674,11 @@ function manualSave() {
 }
 
 function updateSaveMode(mode) {
+    if ((currentDocId === "NPCS" || currentDocId === "NPCI") && mode !== "manual") {
+        customAlert("Este ID especial deve estar sempre no modo de Save Manual.");
+        document.getElementById('save-mode').value = "manual";
+        mode = "manual";
+    }
     charData.saveMode = mode;
     let btnSave = document.getElementById('btn-save-manual');
     if (btnSave) btnSave.style.display = mode === 'manual' ? 'inline-block' : 'none';
@@ -632,6 +695,10 @@ function updateSaveMode(mode) {
 async function managePassword() {
     if (currentDocId === '') {
         await customAlert("Digite um ID na nuvem e puxe ou crie uma ficha primeiro!");
+        return;
+    }
+    if (currentDocId === "NPCS" || currentDocId === "NPCI") {
+        await customAlert("A senha dos IDs de NPC não pode ser alterada.");
         return;
     }
     if (isReadOnly) {
@@ -718,10 +785,20 @@ function toggleEditability() {
 
 function runFallbackChecks() {
   if (typeof charData.password === 'undefined') charData.password = "";
+  if (currentDocId === "NPCS" || currentDocId === "NPCI") {
+      charData.password = ADMIN_PASSWORD;
+      charData.saveMode = "manual";
+  }
   if (typeof charData.saveMode === 'undefined') charData.saveMode = "manual";
   if (typeof charData.layoutMode === 'undefined') charData.layoutMode = "vertical";
   let saveModeEl = document.getElementById('save-mode');
   if (saveModeEl) {
+      if (currentDocId === "NPCS" || currentDocId === "NPCI") {
+          saveModeEl.disabled = true;
+          charData.saveMode = "manual";
+      } else {
+          saveModeEl.disabled = false;
+      }
       saveModeEl.value = charData.saveMode;
       let btnSave = document.getElementById('btn-save-manual');
       if (btnSave) btnSave.style.display = charData.saveMode === 'manual' ? 'inline-block' : 'none';
@@ -4784,10 +4861,14 @@ async function changeFichaID() {
     if (currentDocId === '') { await customAlert("Você precisa carregar ou salvar uma ficha primeiro para poder mudar o ID dela."); return; }
     if (isReadOnly) { await customAlert("Você está no modo de leitura. Insira a senha da ficha atual para provar que é o dono e poder mudar o ID."); return; }
 
+    if (currentDocId === "NPCS" || currentDocId === "NPCI") {
+        await customAlert("Esse ID especial é permanente e não pode ser alterado.");
+        return;
+    }
     let novoId = await customPrompt(`O ID atual é "${currentDocId}". Digite o NOVO ID desejado (Exatamente 4 números):`);
     if (!novoId || novoId.trim() === "" || novoId.trim() === currentDocId) { return; }
-    novoId = novoId.trim();
-    if (!/^\d{4}$/.test(novoId)) { await customAlert("O NOVO ID deve conter EXATAMENTE 4 NÚMEROS (ex: 1234)."); return; }
+    novoId = novoId.trim().toUpperCase();
+    if (!/^\d{4}$/.test(novoId) && novoId !== "NPCS" && novoId !== "NPCI") { await customAlert("O NOVO ID deve conter EXATAMENTE 4 NÚMEROS (ex: 1234)."); return; }
     document.getElementById('db-status').classList.add('syncing');
 
     try {
@@ -5295,9 +5376,32 @@ window.exportarJSON = function(modo) {
         dataToExport = JSON.parse(JSON.stringify(charData));
         delete dataToExport.password;
         delete dataToExport.backupPassword;
+        delete dataToExport.saveMode;
+        
+        if (dataToExport.pcs) {
+            dataToExport.pcs.forEach(pcObj => {
+                if (pcObj.pc && pcObj.pc.info) {
+                    delete pcObj.pc.info.id;
+                    delete pcObj.pc.info.jogadorTelefone;
+                }
+                if (pcObj.npcs) {
+                    pcObj.npcs.forEach(npc => {
+                        if (npc.info) {
+                            delete npc.info.id;
+                            delete npc.info.jogadorTelefone;
+                        }
+                    });
+                }
+            });
+        }
         fileName = "backup_completo";
     } else {
         let charClone = JSON.parse(JSON.stringify(currentChar));
+        delete charClone.saveMode;
+        if (charClone.info) {
+            delete charClone.info.id;
+            delete charClone.info.jogadorTelefone;
+        }
         dataToExport = { isSingleCharacter: true, data: charClone };
         fileName = currentChar && currentChar.name ? currentChar.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() : "personagem";
     }
@@ -5343,11 +5447,13 @@ window.importarJSON = function(event) {
             if (!isSingle) {
                 delete incomingData.password;
                 delete incomingData.backupPassword;
+                delete incomingData.saveMode;
             }
 
             if (resp === "1") {
                 let currentPassword = charData.password;
                 let currentBackupPassword = charData.backupPassword;
+                let currentSaveMode = charData.saveMode;
                 
                 if (isSingle) {
                     charData.pcs = [{ pc: incomingData, npcs: [] }];
@@ -5356,6 +5462,7 @@ window.importarJSON = function(event) {
                 }
                 
                 charData.password = currentPassword;
+                if (currentSaveMode !== undefined) charData.saveMode = currentSaveMode;
                 if (currentBackupPassword !== undefined) charData.backupPassword = currentBackupPassword;
                 
                 activePcIndex = 0;
@@ -5400,7 +5507,7 @@ window.importarJSON = function(event) {
             renderLogs();
             updateUI();
             toggleEditability();
-            saveData(true);
+            saveData();
             
             await customAlert("Importação concluída com sucesso!");
         } catch(err) {
