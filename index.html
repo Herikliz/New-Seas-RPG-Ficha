@@ -661,6 +661,10 @@
                         <label>Res. Ignorada (%)</label>
                         <input type="text" id="info-calcResIgnorada" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'calcResIgnorada', this)">
                     </div>
+                    <div class="input-group">
+                        <label>Dano Ignorado (%)</label>
+                        <input type="text" id="info-calcDanoIgnorado" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'calcDanoIgnorado', this)">
+                    </div>
                 </div>
                 <div class="input-row">
                     <div class="input-group">
@@ -676,15 +680,23 @@
                         <input type="text" id="info-calcBuffDanoFinalPct" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'calcBuffDanoFinalPct', this)">
                     </div>
                     <div class="input-group" id="box-calcUseHaki">
-                        <label>Somar Haki?</label>
+                        <label>Somar Armamento?</label>
                         <select id="info-calcUseHaki" onchange="updateField('info', 'calcUseHaki', this.value)">
                             <option value="nao">Não</option>
-                            <option value="invisivel">Haki do Armamento Invisível</option>
-                            <option value="visivel">Haki do Armamento Visível</option>
-                            <option value="imbuicao">Haki do Armamento: Imbuição</option>
-                            <option value="fullbody">Haki do Armamento: Full Body</option>
-                            <option value="emissao">Haki do Armamento: Emissão</option>
-                            <option value="avancado">Haki do Armamento: Avançado</option>
+                            <option value="invisivel">Invisível</option>
+                            <option value="visivel">Visível</option>
+                            <option value="imbuicao">Imbuição</option>
+                            <option value="fullbody">Full Body</option>
+                            <option value="emissao">Emissão</option>
+                            <option value="avancado">Avançado</option>
+                        </select>
+                    </div>
+                    <div class="input-group" id="box-calcUseHakiRei">
+                        <label>Somar Rei?</label>
+                        <select id="info-calcUseHakiRei" onchange="updateField('info', 'calcUseHakiRei', this.value)">
+                            <option value="nao">Não</option>
+                            <option value="pressao">Pressão</option>
+                            <option value="infusao">Infusão</option>
                         </select>
                     </div>
                 </div>

@@ -969,7 +969,7 @@ function runFallbackChecks() {
               telefone: "", orgTipo: "", tripulacao: "", pirataStatus: "Normal", patente: "", salario: "", estilo1: "", freestyle1: "", estilo2: "", freestyle2: "",
               estilo3: "", freestyle3: "", estilo4: "", freestyle4: "", berries: 5000000, npcsComunsList: [], npcsEspeciaisList: [], akumaNome: "", 
               personalidade: "", historia: "", aparencia: "", inventario: "", naviosList: [], armasEquipadasList: [], hasAmiAlc: true, hasAmiDur: true, hasAmiPot: true, hasAmiVel: true, hasAmiDesp: false,
-              amiResPct: "", amiAlcMult: "1", calcUseAttr: "", calcInimigoRes: "", calcResIgnorada: "", calcBuffFlat: "", calcBuffPct: "", calcBuffDanoFinalPct: "", calcUseAmi: "sim", amiPotBuff: "", calcUseHaki: "nao", sceneType: "Treino Padrão", sceneText: "", hpAtual: -1,
+              amiResPct: "", amiAlcMult: "1", calcUseAttr: "", calcInimigoRes: "", calcResIgnorada: "", calcDanoIgnorado: "", calcBuffFlat: "", calcBuffPct: "", calcBuffDanoFinalPct: "", calcUseAmi: "sim", amiPotBuff: "", calcUseHaki: "nao", calcUseHakiRei: "nao", sceneType: "Treino Padrão", sceneText: "", hpAtual: -1,
               boxIden: false, boxMec: false, boxSoc: false, boxBase: false, boxEsp: false, boxAmi: false, boxHist: false, 
               boxInv: false, boxCalc: false, boxEstamina: false, estaminaAtual: -1, estaminaVelocidade: "", estaminaDano: "", estaminaBuffPct: "", estaminaHakiArm: "nao", estaminaHakiObs: "nao", boxScene: false, akumaId: "", selCharR1: "", selCharR2: "", treinosAcumulados: 0, ordemTecnicas: "alfabetica", hideHistoria: false, hidePersonality: false, hideTecNome: false, hideTecDesc: false, hideTecEfeito: false, hiddenStyles: [], exaustaoCompleta: false, habilidadesExclusivas: [], habCaminhoAtiradorAtivo: false, habFavArmistaAtivo: "nenhum", habFavArmistaAttr: "d", habFuriaArdenteAttr: "f", habQIAvancadoAtivo: false, linhagemBeckmanArma: false, habRetornoUso: 1, merito: 0, aliadosEspiritoContagiante: 0,
               unlockHA1: false, unlockHA2: false, unlockHA3: false, unlockHA4: false, unlockHA5: false, unlockHA6: false,
@@ -2178,7 +2178,7 @@ function updateUI() {
     let pcNameEl = document.getElementById('pc-name');
     if (pcNameEl && pcNameEl.value !== currentChar.name) pcNameEl.value = currentChar.name || "";
     
-    const textFields = ['selClasseDF', 'selDF', 'selRV', 'selLinDF', 'selLinRV', 'selLin4', 'selLinEspAmi', 'altura', 'idade', 'sexo', 'genero', 'sangue', 'telefone', 'nacionalidade', 'localizacao', 'tripulacao', 'pirataStatus', 'akumaNome', 'personalidade', 'historia', 'aparencia', 'inventario', 'animal', 'animal2', 'calcUseAmi', 'calcUseHaki', 'amiAlcMult', 'ordemTecnicas', 'estaminaHakiArm', 'estaminaHakiObs'];
+    const textFields = ['selClasseDF', 'selDF', 'selRV', 'selLinDF', 'selLinRV', 'selLin4', 'selLinEspAmi', 'altura', 'idade', 'sexo', 'genero', 'sangue', 'telefone', 'nacionalidade', 'localizacao', 'tripulacao', 'pirataStatus', 'akumaNome', 'personalidade', 'historia', 'aparencia', 'inventario', 'animal', 'animal2', 'calcUseAmi', 'calcUseHaki', 'calcUseHakiRei', 'amiAlcMult', 'ordemTecnicas', 'estaminaHakiArm', 'estaminaHakiObs'];
     textFields.forEach(f => { 
         let el = document.getElementById('info-'+f); 
         if(el) {
@@ -2267,6 +2267,10 @@ function updateUI() {
     let calcResIgnEl = document.getElementById('info-calcResIgnorada');
     let fmtCalcResIgn = i.calcResIgnorada ? i.calcResIgnorada.toLocaleString("pt-BR") : "";
     if(calcResIgnEl && calcResIgnEl.value !== fmtCalcResIgn) calcResIgnEl.value = fmtCalcResIgn;
+
+    let calcDanoIgnEl = document.getElementById('info-calcDanoIgnorado');
+    let fmtCalcDanoIgn = i.calcDanoIgnorado ? i.calcDanoIgnorado.toLocaleString("pt-BR") : "";
+    if(calcDanoIgnEl && calcDanoIgnEl.value !== fmtCalcDanoIgn) calcDanoIgnEl.value = fmtCalcDanoIgn;
 
     let calcBuffFlatEl = document.getElementById('info-calcBuffFlat');
     let fmtCalcBuffFlat = i.calcBuffFlat ? i.calcBuffFlat.toLocaleString("pt-BR") : "";
@@ -3570,12 +3574,12 @@ function updateUI() {
     let elCalcUseHaki = document.getElementById('info-calcUseHaki');
     if (elCalcUseHaki) {
         let htmlHaki = '<option value="nao">Não</option>';
-        if (i.unlockHA1) htmlHaki += '<option value="invisivel">Haki do Armamento Invisível</option>';
-        if (i.unlockHA2) htmlHaki += '<option value="visivel">Haki do Armamento Visível</option>';
-        if (i.unlockHA3) htmlHaki += '<option value="imbuicao">Haki do Armamento: Imbuição</option>';
-        if (i.unlockHA4) htmlHaki += '<option value="fullbody">Haki do Armamento: Full Body</option>';
-        if (i.unlockHA5) htmlHaki += '<option value="emissao">Haki do Armamento: Emissão</option>';
-        if (i.unlockHA6) htmlHaki += '<option value="avancado">Haki do Armamento: Avançado</option>';
+        if (i.unlockHA1) htmlHaki += '<option value="invisivel">Invisível</option>';
+        if (i.unlockHA2) htmlHaki += '<option value="visivel">Visível</option>';
+        if (i.unlockHA3) htmlHaki += '<option value="imbuicao">Imbuição</option>';
+        if (i.unlockHA4) htmlHaki += '<option value="fullbody">Full Body</option>';
+        if (i.unlockHA5) htmlHaki += '<option value="emissao">Emissão</option>';
+        if (i.unlockHA6) htmlHaki += '<option value="avancado">Avançado</option>';
         if (elCalcUseHaki.innerHTML !== htmlHaki) elCalcUseHaki.innerHTML = htmlHaki;
         if (Array.from(elCalcUseHaki.options).some(o => o.value === i.calcUseHaki)) {
             elCalcUseHaki.value = i.calcUseHaki;
@@ -3584,6 +3588,22 @@ function updateUI() {
             i.calcUseHaki = "nao";
         }
     }
+
+    let calcHR = Math.round((HR + flatBonus.hr) * (1 + bonus.hr));
+    let elCalcUseHakiRei = document.getElementById('info-calcUseHakiRei');
+    if (elCalcUseHakiRei) {
+        let htmlHakiRei = '<option value="nao">Não</option>';
+        if (i.unlockHR4) htmlHakiRei += '<option value="pressao">Pressão</option>';
+        if (i.unlockHR6) htmlHakiRei += '<option value="infusao">Infusão</option>';
+        if (elCalcUseHakiRei.innerHTML !== htmlHakiRei) elCalcUseHakiRei.innerHTML = htmlHakiRei;
+        if (Array.from(elCalcUseHakiRei.options).some(o => o.value === i.calcUseHakiRei)) {
+            elCalcUseHakiRei.value = i.calcUseHakiRei;
+        } else {
+            elCalcUseHakiRei.value = "nao";
+            i.calcUseHakiRei = "nao";
+        }
+    }
+
     let danoHaki = 0;
     let hakiIgnRes = 0;
     if (calcHA > 0) {
@@ -3598,6 +3618,20 @@ function updateUI() {
         }
     }
 
+    let danoHakiRei = 0;
+    let hakiReiIgnRes = 0;
+    let textRei = "";
+    if (calcHR > 0) {
+        if (i.calcUseHakiRei === 'pressao') {
+            danoHakiRei = Math.floor(calcHR * 0.50);
+            textRei = "Rei: Pressão";
+        } else if (i.calcUseHakiRei === 'infusao') {
+            danoHakiRei = Math.floor(calcHR * 1.25);
+            textRei = "Rei: Infusão";
+            hakiReiIgnRes = 35;
+        }
+    }
+
     let calcResInimiga = parseInt(i.calcInimigoRes) || 0;
     let calcResIgnManual = parseInt(i.calcResIgnorada) || 0;
     
@@ -3607,6 +3641,10 @@ function updateUI() {
     if (hakiIgnRes > 0) {
         totalIgnRes += hakiIgnRes;
         ignResSourcesTexts.push(`${hakiIgnRes}% de Armamento Avançado`);
+    }
+    if (hakiReiIgnRes > 0) {
+        totalIgnRes += hakiReiIgnRes;
+        ignResSourcesTexts.push(`${hakiReiIgnRes}% de Haki do Rei Infusão`);
     }
 
     if (i.alcunhasList && i.alcunhaAtiva) {
@@ -3650,7 +3688,7 @@ function updateUI() {
     }
 
     let calcAttrSemAmi = calcAttrVal;
-    calcAttrVal += danoHaki + danoAmi;
+    calcAttrVal += danoHaki + danoHakiRei + danoAmi;
 
     let favArmDano = 0;
     if (hasHab("Favoritismo Armista") && totalBase >= 15000) {
@@ -3674,11 +3712,21 @@ function updateUI() {
     if (totalPctDano !== 0) {
         calcDanoFinal = baseComFlat + Math.floor(baseComFlat * (totalPctDano / 100));
     }
+
+    let calcDanoIgnorado = parseInt(i.calcDanoIgnorado) || 0;
+    let valDanoIgnorado = 0;
+    let calcDanoAntesIgnorado = calcDanoFinal;
+    
+    if (calcDanoIgnorado > 0) {
+        if (calcDanoIgnorado > 100) calcDanoIgnorado = 100;
+        valDanoIgnorado = Math.floor(calcDanoFinal * (calcDanoIgnorado / 100));
+        calcDanoFinal = calcDanoFinal - valDanoIgnorado;
+    }
     
     document.getElementById('calc-dano-final').textContent = calcDanoFinal.toLocaleString("pt-BR");
     
     let calcFormTexto = "";
-    if (buffFlat > 0 || buffPct !== 0 || danoAmi > 0 || danoHaki > 0 || totalPctDano !== 0 || extraFlatDano !== 0) {
+    if (buffFlat > 0 || buffPct !== 0 || danoAmi > 0 || danoHaki > 0 || danoHakiRei > 0 || totalPctDano !== 0 || extraFlatDano !== 0) {
         calcFormTexto += `<span style="color:#0dcaf0;">${baseCalcAttr.toLocaleString("pt-BR")} (Atributo)</span>`;
         if (buffFlat > 0) calcFormTexto += ` <span style="color:#ffc107;">+ ${buffFlat.toLocaleString("pt-BR")} (Bônus de Estilo) = ${step1Attr.toLocaleString("pt-BR")}</span>`;
         if (buffPct !== 0) calcFormTexto += ` <span style="color:#198754;">+ ${buffPct}% (Buff Ativo) = ${calcAttrSemAmi.toLocaleString("pt-BR")}</span>`;
@@ -3694,7 +3742,20 @@ function updateUI() {
         }
         if (danoHaki > 0) {
             somaAtual += danoHaki;
-            calcFormTexto += ` <span style="color:#a461ff;">+ ${danoHaki.toLocaleString("pt-BR")} (Haki) = ${somaAtual.toLocaleString("pt-BR")}</span>`;
+            let armLabels = {
+                "invisivel": "Armamento: Invisível",
+                "visivel": "Armamento: Visível",
+                "imbuicao": "Armamento: Imbuição",
+                "fullbody": "Armamento: Full Body",
+                "emissao": "Armamento: Emissão",
+                "avancado": "Armamento: Avançado"
+            };
+            let labelArm = armLabels[i.calcUseHaki] || "Armamento";
+            calcFormTexto += ` <span style="color:#a461ff;">+ ${danoHaki.toLocaleString("pt-BR")} (${labelArm}) = ${somaAtual.toLocaleString("pt-BR")}</span>`;
+        }
+        if (danoHakiRei > 0) {
+            somaAtual += danoHakiRei;
+            calcFormTexto += ` <span style="color:#a461ff;">+ ${danoHakiRei.toLocaleString("pt-BR")} (${textRei}) = ${somaAtual.toLocaleString("pt-BR")}</span>`;
         }
         calcFormTexto += `<br>`;
     }
@@ -3713,7 +3774,11 @@ function updateUI() {
         calcFormTexto += `<br><span style="color:#0dcaf0;">Bônus Fixo (Itens/Alcunha): ${baseSomaText.toLocaleString("pt-BR")} + ${extraFlatDano.toLocaleString("pt-BR")} = ${baseComFlat.toLocaleString("pt-BR")}</span>`;
     }
     if (totalPctDano !== 0) {
-        calcFormTexto += `<br><span style="color:#ffc107;">Dano com Buff Final: ${baseComFlat.toLocaleString("pt-BR")} + ${totalPctDano}% = ${calcDanoFinal.toLocaleString("pt-BR")}</span>`;
+        let valToPrint = typeof calcDanoAntesIgnorado !== 'undefined' ? calcDanoAntesIgnorado : calcDanoFinal;
+        calcFormTexto += `<br><span style="color:#ffc107;">Dano com Buff Final: ${baseComFlat.toLocaleString("pt-BR")} + ${totalPctDano}% = ${valToPrint.toLocaleString("pt-BR")}</span>`;
+    }
+    if (typeof calcDanoIgnorado !== 'undefined' && calcDanoIgnorado > 0) {
+        calcFormTexto += `<br><span style="color:#dc3545;">Dano Ignorado: ${calcDanoAntesIgnorado.toLocaleString("pt-BR")} - ${calcDanoIgnorado}% = ${calcDanoFinal.toLocaleString("pt-BR")}</span>`;
     }
     document.getElementById('calc-formula').innerHTML = calcFormTexto;
 
@@ -4636,10 +4701,8 @@ ${sexoGeneroOut}
 > ${i.sangue || ''}
 ${histPersOut}
   : ᓩ _𝐀ᴘᴀʀᴇ̂ɴᴄɪᴀ:_
-> ${i.aparencia || ''}
+> ${i.aparencia || ''}${(currentDocId === "NPCS" || currentDocId === "NPCI") ? "" : `\n\n  : ᓩ _𝐈ᴅ:_ ${currentDocId || ''}`}${(parseInt(i.aliadosEspiritoContagiante) || 0) > 0 ? `\n\n  : ᓩ _𝐀ʟɪᴀᴅᴏs ᴄᴏᴍ 𝐄sᴘɪ́ʀɪᴛᴏ 𝐂ᴏɴᴛᴀɢɪᴀɴᴛᴇ:_\n> ${parseInt(i.aliadosEspiritoContagiante)}` : ''}
 
-  : ᓩ _𝐈ᴅ:_ ${currentDocId || ''}
-${(parseInt(i.aliadosEspiritoContagiante) || 0) > 0 ? `\n  : ᓩ _𝐀ʟɪᴀᴅᴏs ᴄᴏᴍ 𝐄sᴘɪ́ʀɪᴛᴏ 𝐂ᴏɴᴛᴀɢɪᴀɴᴛᴇ:_\n> ${parseInt(i.aliadosEspiritoContagiante)}\n` : ''}
   : ᓩ _𝐍ᴀᴄɪᴏɴᴀʟɪᴅᴀᴅᴇ:_
 > ${i.nacionalidade || 'Desconhecida'}
 
@@ -4860,10 +4923,8 @@ ${recompensaOutText}
 > ${i.sangue || ''}
 ${manualHistPersOut}
   : ᓩ _𝐀ᴘᴀʀᴇ̂ɴᴄɪᴀ:_
-> ${i.aparencia || ''}
+> ${i.aparencia || ''}${(currentDocId === "NPCS" || currentDocId === "NPCI") ? "" : `\n\n  : ᓩ _𝐈ᴅ:_ ${currentDocId || ''}`}${(parseInt(i.aliadosEspiritoContagiante) || 0) > 0 ? `\n\n  : ᓩ _𝐀ʟɪᴀᴅᴏs ᴄᴏᴍ 𝐄sᴘɪ́ʀɪᴛᴏ 𝐂ᴏɴᴛᴀɢɪᴀɴᴛᴇ:_\n> ${parseInt(i.aliadosEspiritoContagiante)}` : ''}
 
-  : ᓩ _𝐈ᴅ:_ ${currentDocId || ''}
-${(parseInt(i.aliadosEspiritoContagiante) || 0) > 0 ? `\n  : ᓩ _𝐀ʟɪᴀᴅᴏs ᴄᴏᴍ 𝐄sᴘɪ́ʀɪᴛᴏ 𝐂ᴏɴᴛᴀɢɪᴀɴᴛᴇ:_\n> ${parseInt(i.aliadosEspiritoContagiante)}\n` : ''}
   : ᓩ _𝐍ᴀᴄɪᴏɴᴀʟɪᴅᴀᴅᴇ:_
 > ${i.nacionalidade || ''}
 
