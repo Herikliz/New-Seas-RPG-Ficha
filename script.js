@@ -202,18 +202,18 @@ function renderTabs() {
         html += `<div class="char-row">`;
         let pcName = pcObj.pc.name.trim() === "" ? `Personagem ${pIdx + 1}` : pcObj.pc.name;
         let pcActive = (pIdx === activePcIndex && activeNpcIndex === -1) ? 'active' : '';
-        html += `<button class="btn-tab ${pcActive}" onclick="switchChar(${pIdx}, -1)">${pcName}</button>`;
+        html += `<button class="btn-tab ${pcActive}" draggable="true" ondragstart="dragStart(event, ${pIdx}, -1)" ondragend="dragEnd(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondragover="allowDrop(event)" ondrop="dropOnTab(event, ${pIdx}, -1)" onclick="switchChar(${pIdx}, -1)">${pcName}</button>`;
         
         pcObj.npcs.forEach((npc, nIdx) => {
             let npcName = npc.name.trim() === "" ? `NPC ${nIdx + 1}` : npc.name;
             let npcActive = (pIdx === activePcIndex && nIdx === activeNpcIndex) ? 'active' : '';
-            html += `<button class="btn-tab npc-tab ${npcActive}" onclick="switchChar(${pIdx}, ${nIdx})">${npcName}</button>`;
+            html += `<button class="btn-tab npc-tab ${npcActive}" draggable="true" ondragstart="dragStart(event, ${pIdx}, ${nIdx})" ondragend="dragEnd(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondragover="allowDrop(event)" ondrop="dropOnTab(event, ${pIdx}, ${nIdx})" onclick="switchChar(${pIdx}, ${nIdx})">${npcName}</button>`;
         });
-        html += `<button class="btn-add" onclick="addNPC(${pIdx})" title="Adicionar NPC">+ NPC</button>`;
+        html += `<button class="btn-add" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondragover="allowDrop(event)" ondrop="dropOnAddNpc(event, ${pIdx})" onclick="addNPC(${pIdx})" title="Adicionar NPC">+ NPC</button>`;
         html += `</div>`;
     });
     html += `<div style="display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap;">
-                <button class="btn-add btn-add-pc" onclick="addPC()">+ Personagem</button>
+                <button class="btn-add btn-add-pc" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondragover="allowDrop(event)" ondrop="dropOnAddPc(event)" onclick="addPC()">+ Personagem</button>
                 <button class="btn-add btn-add-pc" style="border-color: var(--danger); color: var(--danger);" onclick="deleteCurrentChar()">🗑️ Apagar Selecionado</button>
                 <button class="btn-add btn-add-pc" style="border-color: var(--warning); color: var(--warning);" onclick="travarFichaCombate()" title="Duplica o personagem e seus NPCs com os status congelados no momento">⚔️ Travar Combate</button>
              </div>`;
@@ -304,6 +304,119 @@ async function travarFichaCombate() {
     toggleEditability();
     
     await customAlert("Ficha travada com sucesso! A aba de combate congelada foi criada e selecionada.");
+}
+
+window.dragStart = function(event, pIdx, nIdx) {
+    if(isReadOnly) { event.preventDefault(); return; }
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("pIdx", pIdx);
+    event.dataTransfer.setData("nIdx", nIdx);
+    setTimeout(() => event.target.classList.add('dragging'), 0);
+};
+
+window.dragEnd = function(event) {
+    event.target.classList.remove('dragging');
+    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+};
+
+window.dragEnter = function(event) {
+    event.preventDefault();
+    let t = event.target;
+    if (t.tagName === 'BUTTON' && (t.classList.contains('btn-tab') || t.classList.contains('btn-add'))) {
+        t.classList.add('drag-over');
+    }
+};
+
+window.dragLeave = function(event) {
+    let t = event.target;
+    if (t.tagName === 'BUTTON' && (t.classList.contains('btn-tab') || t.classList.contains('btn-add'))) {
+        t.classList.remove('drag-over');
+    }
+};
+
+window.allowDrop = function(event) {
+    event.preventDefault();
+};
+
+window.dropOnTab = function(event, targetPIdx, targetNIdx) {
+    event.preventDefault(); event.stopPropagation(); if(isReadOnly) return;
+    let sP = parseInt(event.dataTransfer.getData("pIdx")); let sN = parseInt(event.dataTransfer.getData("nIdx"));
+    if (isNaN(sP) || isNaN(sN)) return;
+    if (sP === targetPIdx && sN === targetNIdx) return;
+
+    if (sN === -1 && targetNIdx === -1) {
+        let rowToMove = charData.pcs.splice(sP, 1)[0];
+        let insertIdx = targetPIdx; if (sP < targetPIdx) insertIdx--; 
+        charData.pcs.splice(insertIdx, 0, rowToMove);
+        activePcIndex = insertIdx; activeNpcIndex = -1; saveAndRenderDrag(); return;
+    }
+
+    let charToMove; let rowWasRemoved = false;
+    if (sN === -1) {
+        charToMove = charData.pcs[sP].pc;
+        if (charData.pcs[sP].npcs.length === 0) { charData.pcs.splice(sP, 1); rowWasRemoved = true; } 
+        else { let firstNpc = charData.pcs[sP].npcs.shift(); firstNpc.isNPC = false; charData.pcs[sP].pc = firstNpc; }
+    } else { charToMove = charData.pcs[sP].npcs.splice(sN, 1)[0]; }
+
+    if (rowWasRemoved && sP < targetPIdx) targetPIdx--;
+
+    if (targetNIdx === -1) {
+        charToMove.isNPC = false;
+        charData.pcs.splice(targetPIdx, 0, { pc: charToMove, npcs: [] });
+        activePcIndex = targetPIdx; activeNpcIndex = -1;
+    } else {
+        if (sP === targetPIdx && sN !== -1 && sN < targetNIdx && !rowWasRemoved) targetNIdx--;
+        charToMove.isNPC = true;
+        charData.pcs[targetPIdx].npcs.splice(targetNIdx, 0, charToMove);
+        activePcIndex = targetPIdx; activeNpcIndex = targetNIdx;
+    }
+    if (charData.pcs.length === 0) { charData.pcs.push({ pc: createEmptyChar(false), npcs: [] }); activePcIndex = 0; activeNpcIndex = -1; }
+    saveAndRenderDrag();
+};
+
+window.dropOnAddNpc = function(event, targetPIdx) {
+    event.preventDefault(); event.stopPropagation(); if(isReadOnly) return;
+    let sP = parseInt(event.dataTransfer.getData("pIdx")); let sN = parseInt(event.dataTransfer.getData("nIdx"));
+    if (isNaN(sP) || isNaN(sN)) return;
+
+    let charToMove; let rowWasRemoved = false;
+    if (sN === -1) {
+        charToMove = charData.pcs[sP].pc;
+        if (charData.pcs[sP].npcs.length === 0) { charData.pcs.splice(sP, 1); rowWasRemoved = true; } 
+        else { let firstNpc = charData.pcs[sP].npcs.shift(); firstNpc.isNPC = false; charData.pcs[sP].pc = firstNpc; }
+    } else { charToMove = charData.pcs[sP].npcs.splice(sN, 1)[0]; }
+
+    if (rowWasRemoved && sP < targetPIdx) targetPIdx--;
+
+    charToMove.isNPC = true;
+    charData.pcs[targetPIdx].npcs.push(charToMove);
+    activePcIndex = targetPIdx; activeNpcIndex = charData.pcs[targetPIdx].npcs.length - 1;
+    if (charData.pcs.length === 0) { charData.pcs.push({ pc: createEmptyChar(false), npcs: [] }); activePcIndex = 0; activeNpcIndex = -1; }
+    saveAndRenderDrag();
+};
+
+window.dropOnAddPc = function(event) {
+    event.preventDefault(); event.stopPropagation(); if(isReadOnly) return;
+    let sP = parseInt(event.dataTransfer.getData("pIdx")); let sN = parseInt(event.dataTransfer.getData("nIdx"));
+    if (isNaN(sP) || isNaN(sN)) return;
+
+    if (sN === -1) {
+        let rowToMove = charData.pcs.splice(sP, 1)[0];
+        charData.pcs.push(rowToMove);
+        activePcIndex = charData.pcs.length - 1; activeNpcIndex = -1;
+    } else {
+        let charToMove = charData.pcs[sP].npcs.splice(sN, 1)[0];
+        charToMove.isNPC = false;
+        charData.pcs.push({ pc: charToMove, npcs: [] });
+        activePcIndex = charData.pcs.length - 1; activeNpcIndex = -1;
+    }
+    if (charData.pcs.length === 0) { charData.pcs.push({ pc: createEmptyChar(false), npcs: [] }); activePcIndex = 0; activeNpcIndex = -1; }
+    saveAndRenderDrag();
+};
+
+function saveAndRenderDrag() {
+    currentChar = activeNpcIndex === -1 ? charData.pcs[activePcIndex].pc : charData.pcs[activePcIndex].npcs[activeNpcIndex];
+    saveData(); renderTabs(); renderTecnicas(); renderNpcsComuns(); renderNpcsEspeciais(); renderLogs(); updateUI(); toggleEditability();
 }
 
 function getClassDisplayName(baseClassWithLevel, sexo) {

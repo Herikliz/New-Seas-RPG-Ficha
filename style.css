@@ -127,3 +127,15 @@ option { color: var(--text); font-family: 'Lora', serif; font-weight: normal; }
   font-size: 14px;
   font-family: 'Lora', serif;
 }
+
+.btn-tab.dragging {
+    opacity: 0.4;
+    border: 1px dashed var(--warning) !important;
+}
+
+.btn-tab.drag-over, .btn-add.drag-over {
+    transform: scale(1.05);
+    border: 1px dashed var(--info) !important;
+    background: rgba(13, 202, 240, 0.2) !important;
+    box-shadow: 0 0 8px rgba(13, 202, 240, 0.5);
+}
