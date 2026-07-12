@@ -2571,12 +2571,14 @@ function updateUI() {
     let displayAviso = "none";
     let textAviso = "";
     
-    if(totalBase > 10000 && totalBase < 15000) { 
-        displayAviso = "block"; 
-        textAviso = `Atenção: Limite inicial de 10.000 pontos ultrapassado!`; 
-    } else if(totalBase < 10000) { 
-        displayAviso = "block"; 
-        textAviso = `Atenção: Faltam distribuir ${(10000 - totalBase).toLocaleString("pt-BR")} dos pontos iniciais!`; 
+    if (!isNPC) {
+        if(totalBase > 10000 && totalBase < 15000) { 
+            displayAviso = "block"; 
+            textAviso = `Atenção: Limite inicial de 10.000 pontos ultrapassado!`; 
+        } else if(totalBase < 10000) { 
+            displayAviso = "block"; 
+            textAviso = `Atenção: Faltam distribuir ${(10000 - totalBase).toLocaleString("pt-BR")} dos pontos iniciais!`; 
+        }
     }
     
     if(avisoBase) { avisoBase.style.display = displayAviso; avisoBase.textContent = textAviso; }
