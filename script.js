@@ -2399,16 +2399,19 @@ function updateUI() {
         }
         if(hHas("Constituição Única")) { tBonus.f += 0.10; tBonus.r += 0.15; }
         if(hHas("Contração Muscular")) { if(totalBase >= 10000) { tBonus.f += 0.20; tBonus.r += 0.20; } else if(totalBase >= 5000) { tBonus.f += 0.10; tBonus.r += 0.10; } }
-        if(hHas("Favoritismo Armista")) {
-            if(totalBase >= 15000) {
-                if(i.habFavArmistaAtivo === "favorita") { tBonus.r += 0.15; tBonus.v += 0.15; }
-                else if(i.habFavArmistaAtivo === "criacao") { tBonus.r += 0.20; tBonus.v += 0.20; }
-                else if(i.habFavArmistaAtivo === "criacao_favorita") { tBonus.r += 0.25; tBonus.v += 0.25; }
-            } else if(totalBase >= 10000) {
-                if(i.habFavArmistaAtivo === "criacao" || i.habFavArmistaAtivo === "criacao_favorita") {
-                    tBonus.r += 0.10; tBonus.v += 0.10;
-                    if(i.habFavArmistaAttr === 'f') tBonus.f += 0.10; else tBonus.d += 0.10;
-                }
+        if(hHas("Favoritismo Armista") && totalBase >= 5000) {
+            let isFav = (i.habFavArmistaAtivo === "favorita" || i.habFavArmistaAtivo === "criacao_favorita");
+            let isCria = (i.habFavArmistaAtivo === "criacao" || i.habFavArmistaAtivo === "criacao_favorita");
+            let attrCh = i.habFavArmistaAttr === 'f' ? 'f' : 'd';
+            if (isFav) {
+                tBonus[attrCh] += 0.10;
+                if (totalBase >= 15000) { tBonus.r += 0.15; tBonus.v += 0.15; }
+                else { tBonus.r += 0.10; }
+            }
+            if (isCria) {
+                tBonus[attrCh] += 0.10;
+                if (totalBase >= 15000) { tBonus.r += 0.20; tBonus.v += 0.20; }
+                else if (totalBase >= 10000) { tBonus.r += 0.10; }
             }
         }
         if(hHas("Filho do Mar")) { if(totalBase >= 15000) { tBonus.r += 0.15; } else if(totalBase >= 10000) { tBonus.r += 0.10; } else if(totalBase >= 5000) { tBonus.r += 0.05; } }
@@ -3040,16 +3043,19 @@ function updateUI() {
         }
         if(hasHab("Constituição Única")) { bonus.f += 0.10; bonus.r += 0.15; }
         if(hasHab("Contração Muscular")) { if(totalBase >= 10000) { bonus.f += 0.20; bonus.r += 0.20; } else if(totalBase >= 5000) { bonus.f += 0.10; bonus.r += 0.10; } }
-        if(hasHab("Favoritismo Armista")) {
-            if(totalBase >= 15000) {
-                if(i.habFavArmistaAtivo === "favorita") { bonus.r += 0.15; bonus.v += 0.15; }
-                else if(i.habFavArmistaAtivo === "criacao") { bonus.r += 0.20; bonus.v += 0.20; }
-                else if(i.habFavArmistaAtivo === "criacao_favorita") { bonus.r += 0.25; bonus.v += 0.25; }
-            } else if(totalBase >= 10000) {
-                if(i.habFavArmistaAtivo === "criacao" || i.habFavArmistaAtivo === "criacao_favorita") { 
-                    bonus.r += 0.10; bonus.v += 0.10; 
-                    if(i.habFavArmistaAttr === 'f') bonus.f += 0.10; else bonus.d += 0.10;
-                }
+        if(hasHab("Favoritismo Armista") && totalBase >= 5000) {
+            let isFav = (i.habFavArmistaAtivo === "favorita" || i.habFavArmistaAtivo === "criacao_favorita");
+            let isCria = (i.habFavArmistaAtivo === "criacao" || i.habFavArmistaAtivo === "criacao_favorita");
+            let attrCh = i.habFavArmistaAttr === 'f' ? 'f' : 'd';
+            if (isFav) {
+                bonus[attrCh] += 0.10;
+                if (totalBase >= 15000) { bonus.r += 0.15; bonus.v += 0.15; }
+                else { bonus.r += 0.10; }
+            }
+            if (isCria) {
+                bonus[attrCh] += 0.10;
+                if (totalBase >= 15000) { bonus.r += 0.20; bonus.v += 0.20; }
+                else if (totalBase >= 10000) { bonus.r += 0.10; }
             }
         }
         if(hasHab("Filho do Mar")) { if(totalBase >= 15000) { bonus.refl += 0.15; bonus.r += 0.15; } else if(totalBase >= 10000) { bonus.refl += 0.10; bonus.r += 0.10; } else if(totalBase >= 5000) { bonus.refl += 0.05; bonus.r += 0.05; } }
@@ -3696,7 +3702,7 @@ function updateUI() {
     if (hasHab("Favoritismo Armista") && totalBase >= 15000) {
         if(i.habFavArmistaAtivo === "favorita") favArmDano = 0.10;
         else if(i.habFavArmistaAtivo === "criacao") favArmDano = 0.15;
-        else if(i.habFavArmistaAtivo === "criacao_favorita") favArmDano = 0.20;
+        else if(i.habFavArmistaAtivo === "criacao_favorita") favArmDano = 0.25;
     }
     if (favArmDano > 0) calcAttrVal += Math.floor(calcAttrVal * favArmDano);
 
@@ -3716,6 +3722,11 @@ function updateUI() {
     }
 
     let calcDanoIgnorado = parseInt(i.calcDanoIgnorado) || 0;
+    if (hasHab("Favoritismo Armista") && totalBase >= 15000) {
+        if (i.habFavArmistaAtivo === "criacao" || i.habFavArmistaAtivo === "criacao_favorita") {
+            calcDanoIgnorado += 15;
+        }
+    }
     let valDanoIgnorado = 0;
     let calcDanoAntesIgnorado = calcDanoFinal;
     
@@ -4435,7 +4446,7 @@ function updateUI() {
             if (hab === "Constituição Única") return "+10% Força, +15% Resistência.";
             if (hab === "Contração Muscular") { if (tb >= 10000) return "+20% Força e Resistência."; if (tb >= 5000) return "+10% Força e Resistência."; return ""; }
             if (hab === "Espírito Contagiante") return "Aliados recebem +5% em todos os atributos.";
-            if (hab === "Favoritismo Armista") { if (tb >= 15000) return "Bônus massivos em Resistência, Velocidade, Dano e Red. de Dano (Arma/Criações)."; if (tb >= 10000) return "+10% Resistência e Velocidade, +10% Força/Destreza (Criações)."; return ""; }
+            if (hab === "Favoritismo Armista") { if (tb >= 15000) return "Bônus cumulativos de níveis aplicados (For/Des, Res, Vel, Dano, Red. Dano)."; if (tb >= 10000) return "Bônus cumulativos de níveis aplicados (For/Des, Res)."; if (tb >= 5000) return "Bônus cumulativos de níveis aplicados (For/Des, Res)."; return ""; }
             if (hab === "Filho do Mar") { if (tb >= 15000) return "+15% Reflexo e Resistência."; if (tb >= 10000) return "+10% Reflexo e Resistência."; if (tb >= 5000) return "+5% Reflexo e Resistência."; return ""; }
             if(hasHab("Flexibilidade")) { if(totalBase >= 10000) bonus.v += 0.20; else if(totalBase >= 5000) bonus.v += 0.10; }
         if(hasHab("Fúria Ardente")) { let fA = i.habFuriaArdenteAttr || 'f'; if(totalBase >= 15000) bonus[fA] += 0.15; else if(totalBase >= 10000) bonus[fA] += 0.10; else if(totalBase >= 5000) bonus[fA] += 0.05; }
