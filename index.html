@@ -634,6 +634,13 @@
                     <span style="font-family: 'Cinzel', serif; font-weight: bold; color: var(--danger); font-size: 16px;">HP: <input type="text" id="hp-atual" value="0" class="no-sum" oninput="formatAndSave('info', 'hpAtual', this)" style="width: 70px; text-align: center; font-size: 16px; font-weight: bold; font-family: 'Cinzel', serif; background: transparent; border: none; border-bottom: 1px dashed var(--danger); color: var(--danger); padding: 0; outline: none;"> / <span id="hp-total">0</span></span>
                 </div>
                 <div class="input-row">
+                    <div class="input-group" id="box-calcQuemAtaca" style="flex: 1;">
+                        <label>Quem ataca?</label>
+                        <select id="info-calcQuemAtaca" onchange="updateField('info', 'calcQuemAtaca', this.value)">
+                            <option value="eu">Eu</option>
+                            <option value="inimigo">Inimigo</option>
+                        </select>
+                    </div>
                     <div class="input-group" style="flex: 1.5;">
                         <label>Atributo Físico <span style="font-size:8px;text-transform:none;">(Sem buffs de técnicas)</span></label>
                         <div style="display: flex; gap: 5px;">
@@ -643,11 +650,12 @@
                         </div>
                     </div>
                     <div class="input-group" id="box-calcUseAmi" style="flex: 1;">
-                        <label>Somar Akuma?</label>
+                        <label id="label-calcUseAmi">Somar Akuma?</label>
                         <select id="info-calcUseAmi" onchange="updateField('info', 'calcUseAmi', this.value)">
                             <option value="sim">Sim</option>
                             <option value="nao">Não</option>
                         </select>
+                        <input type="text" id="info-calcAmiManual" placeholder="0" class="no-sum" style="display: none;" oninput="formatAndSave('info', 'calcAmiManual', this)">
                     </div>
                 </div>
                 <div class="input-row">
@@ -681,7 +689,7 @@
                         <input type="text" id="info-calcBuffDanoFinalPct" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'calcBuffDanoFinalPct', this)">
                     </div>
                     <div class="input-group" id="box-calcUseHaki">
-                        <label>Somar Armamento?</label>
+                        <label id="label-calcUseHaki">Somar Armamento?</label>
                         <select id="info-calcUseHaki" onchange="updateField('info', 'calcUseHaki', this.value)">
                             <option value="nao">Não</option>
                             <option value="invisivel">Invisível</option>
@@ -691,14 +699,16 @@
                             <option value="emissao">Emissão</option>
                             <option value="avancado">Avançado</option>
                         </select>
+                        <input type="text" id="info-calcHakiManual" placeholder="0" class="no-sum" style="display: none;" oninput="formatAndSave('info', 'calcHakiManual', this)">
                     </div>
                     <div class="input-group" id="box-calcUseHakiRei">
-                        <label>Somar Rei?</label>
+                        <label id="label-calcUseHakiRei">Somar Rei?</label>
                         <select id="info-calcUseHakiRei" onchange="updateField('info', 'calcUseHakiRei', this.value)">
                             <option value="nao">Não</option>
                             <option value="pressao">Pressão</option>
                             <option value="infusao">Infusão</option>
                         </select>
+                        <input type="text" id="info-calcHakiReiManual" placeholder="0" class="no-sum" style="display: none;" oninput="formatAndSave('info', 'calcHakiReiManual', this)">
                     </div>
                 </div>
                 <div style="background: rgba(0,0,0,0.3); padding: 15px; border: 1px dashed #555; border-radius: 6px; text-align: center; margin-top: 5px;">
