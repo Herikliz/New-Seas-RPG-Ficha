@@ -1892,7 +1892,11 @@ function formatAmiAlcMult(el) {
 async function handlePatenteChange(val) {
     currentChar.info.patente = val;
     if (val !== "" && typeof salarios[val] !== 'undefined') {
-        currentChar.info.salario = salarios[val] === 0 ? "0" : salarios[val].toLocaleString("pt-BR");
+        let baseSalario = salarios[val];
+        if (currentChar.info.orgTipo === "Marinha" && currentChar.info.linhagem === "Kong") {
+            baseSalario += 50000000;
+        }
+        currentChar.info.salario = baseSalario === 0 ? "0" : baseSalario.toLocaleString("pt-BR");
     } else {
         currentChar.info.salario = "";
     }
@@ -2612,7 +2616,15 @@ function updateUI() {
 
         document.getElementById('info-merito').value = i.merito || 0;
         
-        i.salario = typeof salarios[i.patente] !== 'undefined' ? (salarios[i.patente] === 0 ? "0" : salarios[i.patente].toLocaleString("pt-BR")) : "";
+        let baseSalario = typeof salarios[i.patente] !== 'undefined' ? salarios[i.patente] : null;
+        if (baseSalario !== null) {
+            if (i.orgTipo === "Marinha" && i.linhagem === "Kong") {
+                baseSalario += 50000000;
+            }
+            i.salario = baseSalario === 0 ? "0" : baseSalario.toLocaleString("pt-BR");
+        } else {
+            i.salario = "";
+        }
         
         let selPatente = document.getElementById('info-patente');
         if (selPatente) {
