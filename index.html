@@ -1,948 +1,947 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=1400">
-<title>Ficha New Seas OP RPG</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-<script src="https://unpkg.com/drag-drop-touch"></script>
-</head>
-<body>
-
-<header>
-  <div class="cloud-controls">
-    <select id="save-mode" onchange="updateSaveMode(this.value)" style="width: auto; padding: 6px; font-size: 13px; font-family: 'Segoe UI', sans-serif; border-radius: 4px;">
-        <option value="manual">Save Manual</option>
-        <option value="auto">Save Auto</option>
-    </select>
-    <button id="btn-save-manual" class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--success); border-color: var(--success);" onclick="manualSave()" title="Salvar Ficha">💾Salvar</button>
-    <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: #a461ff; border-color: #a461ff;" onclick="saveBackup()" title="Salvar Backup">🗄️Salvar Backup</button>
-    <input type="text" id="doc-id" maxlength="4" placeholder="ID" title="Digite 4 números (ou os IDs especiais) para salvar/puxar na nuvem" onchange="changeDocId(this.value)" oninput="this.value = this.value.replace(/[^0-9A-Z]/gi, '').toUpperCase()">
-    <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px;" onclick="loadFromCloud()" title="Puxar dados">⬇️Puxar</button>
-    <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: #a461ff; border-color: #a461ff;" onclick="loadBackup()" title="Puxar Backup">📂Puxar Backup</button>
-    <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--success); border-color: var(--success);" onclick="document.getElementById('modal-importar-exportar').style.display='flex'" title="Importar ou Exportar Arquivo JSON">🔄Importar/Exportar</button>
-    <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--info); border-color: var(--info);" onclick="changeFichaID()" title="Mudar ID da Ficha">🔄Mudar ID</button>
-    <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--danger); border-color: var(--danger);" onclick="deleteFichaID()" title="Apagar Ficha Inteira da Nuvem">🗑️Apagar ID</button>
-    <button id="btn-senha" class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--warning); border-color: var(--warning);" onclick="managePassword()" title="Definir ou remover senha">🔑Senha</button>
-    <button id="btn-layout" class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: #ff8c00; border-color: #ff8c00;" onclick="toggleLayout()" title="Alternar entre visualização em colunas ou lista">📱Modo Lista</button>
-  </div>
-  <span style="display:flex; align-items:center; gap:10px;">
-    <button class="btn btn-outline" style="font-size: 12px; padding: 4px 8px;" onclick="toggleAllBoxes(true)">⬆️Colapsar Tudo</button>
-    🏴‍☠️Ficha: New Seas🏴‍☠️
-    <button class="btn btn-outline" style="font-size: 12px; padding: 4px 8px;" onclick="toggleAllBoxes(false)">⬇️Descolapsar Tudo</button>
-    <div id="db-status" class="status-dot" title="Status do Banco de Dados"></div>
-    <span id="save-toast" style="opacity: 0; transition: opacity 0.3s; font-size: 14px; color: var(--success); font-weight: bold; margin-left: 8px;">Salvo!</span>
-  </span>
-</header>
-
-<div class="container">
-
-  <div id="char-tabs-container" class="char-tabs-container"></div>
-
-  <div class="three-col-grid">
-      <div class="box">
-          <div class="box-title" id="title-boxIden" style="color: var(--info);" onclick="toggleBox('boxIden')">
-              <span>Identidade <span onclick="openInfoModal('Identidade', 'Preencha os campos básicos do personagem. Para a alcunha, clique no botão + para adicionar e na engrenagem ou lápis para editar e aplicar buffs globais. A Localização Atual deve ser sincronizada com a ilha em que você está narrando no momento. Não deixe os campos obrigatórios vazios para evitar falhas na contagem da ficha.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxIden" class="toggle-icon">▼</span>
-          </div>
-          <div id="wrapper-boxIden" class="box-content">
-              <div class="input-group"><label>Nome do Personagem</label><input type="text" id="pc-name" oninput="updateField('name', null, this.value)"></div>
-              <div class="input-row">
-                  <div class="input-group">
-                    <label>Alcunha</label>
-                    <div style="display:flex; gap:5px;">
-                        <select id="info-alcunha" onchange="updateField('info', 'alcunhaAtiva', this.value)" style="flex:1;"></select>
-                        <button type="button" class="btn btn-outline btn-success" style="padding:4px 8px; font-size:14px; display:flex; align-items:center;" onclick="openAlcunhaModal()" title="Criar Nova Alcunha">+</button>
-                        <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:14px; display:flex; align-items:center;" onclick="editAlcunhaModal()" title="Editar Alcunha Ativa">✏️</button>
-                    </div>
-                    <div id="alcunha-condicoes-container" style="margin-top: 5px; display: flex; flex-wrap: wrap; gap: 5px;"></div>
-                </div>
-                  <div class="input-group"><label>Idade</label><input type="text" id="info-idade" placeholder="Mín: 15" onchange="formatIdade(this.value)"></div>
-              </div>
-              <div class="input-row">
-                  <div class="input-group">
-                      <label style="display:flex; justify-content:space-between; align-items:center;">
-                          Sexo
-                          <label style="margin:0; font-size:10px; color:var(--warning); text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center; width:fit-content;">
-                              <input type="checkbox" id="info-hideSexo" onchange="toggleHideSexoGenero('sexo', this.checked)" style="width:auto; margin:0;"> Ocultar
-                          </label>
-                      </label>
-                      <select id="info-sexo" onchange="updateSexo(this.value)">
-                          <option value="">-- Selecione --</option>
-                          <option value="Masculino">Masculino</option>
-                          <option value="Feminino">Feminino</option>
-                          <option value="Assexuado">Assexuado</option>
-                      </select>
-                  </div>
-                  <div class="input-group">
-                      <label style="display:flex; justify-content:space-between; align-items:center;">
-                          Gênero
-                          <label style="margin:0; font-size:10px; color:var(--warning); text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center; width:fit-content;">
-                              <input type="checkbox" id="info-hideGenero" onchange="toggleHideSexoGenero('genero', this.checked)" style="width:auto; margin:0;"> Ocultar
-                          </label>
-                      </label>
-                      <select id="info-genero" onchange="updateField('info', 'genero', this.value)">
-                          <option value="">-- Selecione --</option>
-                          <option value="Homem">Homem</option>
-                          <option value="Mulher">Mulher</option>
-                          <option value="Não-binário">Não-binário</option>
-                      </select>
-                  </div>
-              </div>
-              <div class="input-row">
-                  <div class="input-group">
-                      <label>Sangue</label>
-                      <select id="info-sangue" onchange="updateField('info', 'sangue', this.value)">
-                          <option value="">-- Selecione --</option>
-                          <option value="A+">A+</option><option value="A-">A-</option>
-                          <option value="B+">B+</option><option value="B-">B-</option>
-                          <option value="AB+">AB+</option><option value="AB-">AB-</option>
-                          <option value="O+">O+</option><option value="O-">O-</option>
-                      </select>
-                  </div>
-                  <div class="input-group"><label>Altura</label><input type="text" id="info-altura" onchange="formatAltura(this.value)"></div>
-              </div>
-              <div class="input-row">
-                  <div class="input-group">
-                      <label>Nacionalidade</label>
-                      <select id="info-nacionalidade" onchange="updateField('info', 'nacionalidade', this.value)"></select>
-                  </div>
-                  <div class="input-group">
-                      <label>Localização Atual</label>
-                      <select id="info-localizacao" onchange="updateField('info', 'localizacao', this.value)"></select>
-                  </div>
-              </div>
-              <div class="input-group">
-                  <label>Telefone do Jogador (Oculto na Ficha)</label>
-                  <input type="text" id="info-telefone" placeholder="(DD) 9XXXX-XXXX" oninput="formatPhone(this)">
-              </div>
-          </div>
-      </div>
-
-      <div class="box">
-          <div class="box-title" id="title-boxMec" style="color: var(--warning);" onclick="toggleBox('boxMec')">
-              <span>Mecânicas Principais <span onclick="openInfoModal('Mecânicas Principais', 'Selecione primeiro sua Raça e Linhagem, pois elas modificam seus multiplicadores automaticamente. Ao escolher uma raça híbrida ou linhagem Charlotte, selecione nos campos que aparecerão qual atributo receberá o foco do buff. As classes são liberadas pelos seus Pontos Totais. Você deve trocar para a próxima classe correspondente ao seu nível assim que a ficha acusar o alcance de 5.000, 10.000, 20.000 ou 35.000 pontos.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxMec" class="toggle-icon">▼</span>
-          </div>
-          <div id="wrapper-boxMec" class="box-content">
-              <div class="input-group" style="margin-bottom: 10px;">
-                  <label>Expectativa de Vida</label>
-                  <input type="text" id="info-expectativaVida" placeholder="100 anos" oninput="formatExpectativa(this.value)">
-              </div>
-              <div class="input-row">
-                  <div class="input-group">
-                      <label>Raça</label>
-                      <select id="info-raca" onchange="handleRacaChange('raca', this.value)"></select>
-                      <div id="box-racaCustom" style="display:none; margin-top:5px; flex-direction:column; gap:5px; background:rgba(0,0,0,0.2); padding:8px; border-radius:4px; border:1px solid var(--danger);">
-                          <input type="text" id="info-racaNomeCustom" placeholder="Nome da Raça Customizada" oninput="updateField('info', 'racaNomeCustom', this.value)">
-                          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
-                              <div><label style="font-size:9px;">Buff F (%)</label><input type="number" id="info-customBuffF" placeholder="Ex: 20" oninput="updateField('info', 'customBuffF', this.value)"></div>
-                              <div><label style="font-size:9px;">Buff D (%)</label><input type="number" id="info-customBuffD" placeholder="Ex: 20" oninput="updateField('info', 'customBuffD', this.value)"></div>
-                              <div><label style="font-size:9px;">Buff R (%)</label><input type="number" id="info-customBuffR" placeholder="Ex: 20" oninput="updateField('info', 'customBuffR', this.value)"></div>
-                              <div><label style="font-size:9px;">Buff V (%)</label><input type="number" id="info-customBuffV" placeholder="Ex: 20" oninput="updateField('info', 'customBuffV', this.value)"></div>
-                          </div>
-                      </div>
-                      <div id="box-racaCustom2" style="display:none; margin-top:5px; flex-direction:column; gap:5px; background:rgba(0,0,0,0.2); padding:8px; border-radius:4px; border:1px solid var(--info);">
-                          <input type="text" id="info-racaNomeCustom2" placeholder="Nome da 2ª Raça Customizada" oninput="updateField('info', 'racaNomeCustom2', this.value)">
-                          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
-                              <div><label style="font-size:9px;">Buff F (%)</label><input type="number" id="info-customBuffF2" placeholder="Ex: 20" oninput="updateField('info', 'customBuffF2', this.value)"></div>
-                              <div><label style="font-size:9px;">Buff D (%)</label><input type="number" id="info-customBuffD2" placeholder="Ex: 20" oninput="updateField('info', 'customBuffD2', this.value)"></div>
-                              <div><label style="font-size:9px;">Buff R (%)</label><input type="number" id="info-customBuffR2" placeholder="Ex: 20" oninput="updateField('info', 'customBuffR2', this.value)"></div>
-                              <div><label style="font-size:9px;">Buff V (%)</label><input type="number" id="info-customBuffV2" placeholder="Ex: 20" oninput="updateField('info', 'customBuffV2', this.value)"></div>
-                          </div>
-                      </div>
-                      <input type="text" id="info-animal" placeholder="Qual animal?" style="display:none; margin-top:5px;" oninput="updateField('info', 'animal', this.value)">
-                      <select id="info-raca2" style="display:none; margin-top:5px;" onchange="handleRacaChange('raca2', this.value)"></select>
-                      <div id="box-charlotteRacas" class="conditional-selects" style="display: none; flex-direction: row; gap: 5px;">
-                          <select id="info-selCharR1" onchange="updateField('info', 'selCharR1', this.value)" style="flex: 1;"><option value="">- Buff Raça 1 -</option></select>
-                          <select id="info-selCharR2" onchange="updateField('info', 'selCharR2', this.value)" style="flex: 1;"><option value="">- Buff Raça 2 -</option></select>
-                      </div>
-                      <input type="text" id="info-animal2" placeholder="Qual animal?" style="display:none; margin-top:5px;" oninput="updateField('info', 'animal2', this.value)">
-                      
-                      <div id="box-extraRaca" class="conditional-selects" style="display: none; flex-direction: row; gap: 5px;">
-                          <select id="info-selDF" onchange="updateField('info', 'selDF', this.value)" style="flex: 1;"><option value="d">Destreza</option><option value="f">Força</option></select>
-                          <select id="info-selRV" onchange="updateField('info', 'selRV', this.value)" style="display:none; flex: 1;"><option value="r">Resistência</option><option value="v">Velocidade</option></select>
-                      </div>
-                  </div>
-                  <div class="input-group" id="container-linhagem">
-                      <label>Linhagem</label>
-                      <select id="info-linhagem" onchange="updateField('info', 'linhagem', this.value)"></select>
-                      <div id="box-extraLin" class="conditional-selects" style="display: none; flex-direction: row; gap: 5px;">
-                          <select id="info-selLinDF" onchange="updateField('info', 'selLinDF', this.value)" style="display:none; flex: 1;"><option value="d">Destreza</option><option value="f">Força</option></select>
-                          <select id="info-selLinRV" onchange="updateField('info', 'selLinRV', this.value)" style="display:none; flex: 1;"><option value="r">Resistência</option><option value="v">Velocidade</option></select>
-                          <select id="info-selLin4" onchange="updateField('info', 'selLin4', this.value)" style="display:none; flex: 1;"><option value="d">Destreza</option><option value="f">Força</option><option value="r">Resistência</option><option value="v">Velocidade</option></select>
-                          <select id="info-selLinEspAmi" onchange="updateField('info', 'selLinEspAmi', this.value)" style="display:none; flex: 1;"><option value="esp">Espírito</option><option value="ami">Akuma no Mi</option></select>
-                      </div>
-                  </div>
-              </div>
-              
-              <div class="input-row" style="border-top: 1px dashed #444; padding-top: 12px; margin-top: 5px;">
-                  <div class="input-group">
-                      <label>Classe Inicial</label>
-                      <select id="info-classe" onchange="updateField('info', 'classe', this.value)"></select>
-                  </div>
-                  <div class="input-group" id="box-selClasseDF" style="display: none;">
-                      <label>Buff Combatente (+)</label>
-                      <select id="info-selClasseDF" onchange="updateField('info', 'selClasseDF', this.value)">
-                          <option value="d">Destreza</option><option value="f">Força</option>
-                      </select>
-                  </div>
-              </div>
-              <div class="input-row" style="margin-bottom:0;">
-                  <div class="input-group"><label>Classe Nível 2</label><select id="info-classe2" onchange="updateField('info', 'classe2', this.value)"></select></div>
-                  <div class="input-group"><label>Classe Nível 3</label><select id="info-classe3" onchange="updateField('info', 'classe3', this.value)"></select></div>
-              </div>
-              <div class="input-row">
-                  <div class="input-group"><label>Classe Nível 4</label><select id="info-classe4" onchange="updateField('info', 'classe4', this.value)"></select></div>
-                  <div class="input-group"><label>Classe Nível 5</label><select id="info-classe5" onchange="updateField('info', 'classe5', this.value)"></select></div>
-              </div>
-          </div>
-      </div>
-
-      <div class="box">
-          <div class="box-title" id="title-boxSoc" style="color: var(--success);" onclick="toggleBox('boxSoc')">
-              <span>Social e Estilos <span onclick="openInfoModal('Social e Estilos', 'Selecione a sua Organização no menu. Se escolher Marinha ou Governo, o campo de Patente irá atualizar e travar baseado nos seus pontos totais, preenchendo seu salário sozinho. Para Estilos de Luta, você pode selecionar Estilos base ou Freestyle. O terceiro e quarto slots são travados até que a ficha chegue nos marcos de poder, não tente forçar a escolha antes da hora.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxSoc" class="toggle-icon">▼</span>
-          </div>
-          <div id="wrapper-boxSoc" class="box-content">
-              <div class="input-row">
-                  <div class="input-group">
-                      <label>Recompensa</label>
-                      <div class="currency-input">
-                          <span>฿</span><input type="text" id="info-recompensa" placeholder="Vazio = 🔒" oninput="formatCurrency('info', 'recompensa', this)">
-                      </div>
-                  </div>
-                  <div class="input-group">
-                      <label>Berries</label>
-                      <div class="currency-input">
-                          <span>฿</span><input type="text" id="info-berries" placeholder="Vazio = 0" oninput="formatCurrency('info', 'berries', this)">
-                      </div>
-                  </div>
-              </div>
-
-              <div class="input-row">
-                  <div class="input-group">
-                      <label>Organização</label>
-                      <select id="info-orgTipo" onchange="updateField('info', 'orgTipo', this.value)">
-                          <option value="">-- Selecione --</option>
-                          <option value="Pirata">Pirata</option>
-                          <option value="Caçador de Recompensa">Caçador de Recompensa</option>
-                          <option value="Marinha">Marinha</option>
-                          <option value="Governo Mundial">Governo Mundial</option>
-                          <option value="Vanguarda Popular Revolucionária">Vanguarda Popular Revolucionária</option>
-                      </select>
-                  </div>
-                  <div class="input-group" id="box-tripulacao">
-                      <label id="label-tripulacao">Nome da Tripulação</label>
-                      <input type="text" id="info-tripulacao" oninput="updateField('info', 'tripulacao', this.value)">
-                  </div>
-              </div>
-              <div class="input-group" id="box-pirataStatus" style="display: none;">
-                  <label>Status Pirata</label>
-                  <select id="info-pirataStatus" onchange="updateField('info', 'pirataStatus', this.value)">
-                      <option value="Normal">Normal</option>
-                      <option value="Supernova">Supernova</option>
-                      <option value="Shichibukai">Shichibukai</option>
-                      <option value="Yonkou">Yonkou</option>
-                  </select>
-              </div>
-              <div class="input-group" id="box-recompensaTravada" style="display: none; margin-top: 10px;">
-                  <label>Recompensa Travada</label>
-                  <div class="currency-input">
-                      <span>฿</span><input type="text" id="info-recompensaTravada" placeholder="Vazio = 🔒" oninput="formatCurrency('info', 'recompensaTravada', this)">
-                  </div>
-              </div>
-              <div class="input-row" id="box-patente-salario" style="display: none; margin-top: -5px;">
-                  <div class="input-group">
-                      <label>Patente</label>
-                      <input type="text" id="info-patente" disabled>
-                      <div style="display:flex; gap:5px; margin-top:5px;">
-                          <button id="btn-rebaixar" class="btn btn-outline btn-danger" style="display:none; font-size:10px; flex:1; padding:4px;" onclick="rebaixarCargo()">⬇️Rebaixar</button>
-                          <button id="btn-promover" class="btn btn-outline btn-success" style="display:none; font-size:10px; flex:1; padding:4px;" onclick="promoverCargo()">🎖️Promover</button>
-                      </div>
-                  </div>
-                  <div class="input-group"><label>Mérito</label><input type="text" id="info-merito" oninput="formatAndSave('info', 'merito', this)"></div>
-                  <div class="input-group"><label>Salário</label><input type="text" id="info-salario" disabled></div>
-              </div>
-              
-              <label style="font-size: 10px; font-weight: bold; text-transform: uppercase; margin-bottom: 3px; display: block; border-top: 1px dashed #444; padding-top: 10px;">Estilos de Luta</label>
-              <div id="box-estilo-mink" class="input-row" style="display: none; margin-bottom: 5px;">
-                  <input type="text" value="Electro" disabled style="color: var(--warning); font-weight: bold; background-color: #1a1a1a; cursor: not-allowed; text-align: center;">
-              </div>
-              
-              <div class="input-row" style="margin-bottom: 5px;">
-                  <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
-                      <select id="info-estilo1" onchange="updateField('info', 'estilo1', this.value)"></select>
-                      <input type="text" id="info-freestyle1" placeholder="Nome do Freestyle" oninput="updateField('info', 'freestyle1', this.value)">
-                  </div>
-                  <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
-                      <select id="info-estilo2" onchange="updateField('info', 'estilo2', this.value)"></select>
-                      <input type="text" id="info-freestyle2" placeholder="Nome do Freestyle" oninput="updateField('info', 'freestyle2', this.value)">
-                  </div>
-              </div>
-              <div class="input-row">
-                  <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
-                      <select id="info-estilo3" onchange="updateField('info', 'estilo3', this.value)"></select>
-                      <input type="text" id="info-freestyle3" placeholder="Nome do Freestyle" oninput="updateField('info', 'freestyle3', this.value)">
-                  </div>
-                  <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
-                      <select id="info-estilo4" onchange="updateField('info', 'estilo4', this.value)"></select>
-                      <input type="text" id="info-freestyle4" placeholder="Nome do Freestyle" oninput="updateField('info', 'freestyle4', this.value)">
-                  </div>
-              </div>
-          </div>
-      </div>
-  </div>
-
-  <div class="main-grid">
-    <div>
-        <div class="box">
-            <div class="box-title" id="title-boxHab" style="color: var(--primary);" onclick="toggleBox('boxHab')">
-                <span>Habilidades Únicas <span onclick="openInfoModal('Habilidades Únicas', 'Clique no botão com o sinal de soma para buscar as habilidades que seu personagem comprou ou conquistou. Habilidades ligadas à sua Raça ou Linhagem aparecerão sozinhas e não podem ser apagadas. Abaixo da lista, surgirão caixas de seleção. Use-as DURANTE o combate para ligar ou desligar buffs dinâmicos que modificam seus status na mesma hora.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxHab" class="toggle-icon">▼</span>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=1400">
+        <title>Ficha New Seas OP RPG</title>
+        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="style.css">
+        <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+        <script src="https://unpkg.com/drag-drop-touch"></script>
+    </head>
+    <body>
+        <header>
+            <div class="cloud-controls">
+                <select id="save-mode" onchange="updateSaveMode(this.value)" style="width: auto; padding: 6px; font-size: 13px; font-family: 'Segoe UI', sans-serif; border-radius: 4px;">
+                    <option value="manual">Save Manual</option>
+                    <option value="auto">Save Auto</option>
+                </select>
+                <button id="btn-save-manual" class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--success); border-color: var(--success);" onclick="manualSave()" title="Salvar Ficha">💾Salvar</button>
+                <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: #a461ff; border-color: #a461ff;" onclick="saveBackup()" title="Salvar Backup">🗄️Salvar Backup</button>
+                <input type="text" id="doc-id" maxlength="4" placeholder="ID" title="Digite 4 números (ou os IDs especiais) para salvar/puxar na nuvem" onchange="changeDocId(this.value)" oninput="this.value = this.value.replace(/[^0-9A-Z]/gi, '').toUpperCase()">
+                <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px;" onclick="loadFromCloud()" title="Puxar dados">⬇️Puxar</button>
+                <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: #a461ff; border-color: #a461ff;" onclick="loadBackup()" title="Puxar Backup">📂Puxar Backup</button>
+                <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--success); border-color: var(--success);" onclick="document.getElementById('modal-importar-exportar').style.display='flex'" title="Importar ou Exportar Arquivo JSON">🔄Importar/Exportar</button>
+                <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--info); border-color: var(--info);" onclick="changeFichaID()" title="Mudar ID da Ficha">🔄Mudar ID</button>
+                <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--danger); border-color: var(--danger);" onclick="deleteFichaID()" title="Apagar Ficha Inteira da Nuvem">🗑️Apagar ID</button>
+                <button id="btn-senha" class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--warning); border-color: var(--warning);" onclick="managePassword()" title="Definir ou remover senha">🔑Senha</button>
+                <button id="btn-layout" class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: #ff8c00; border-color: #ff8c00;" onclick="toggleLayout()" title="Alternar entre visualização em colunas ou lista">📱Modo Lista</button>
             </div>
-            <div id="wrapper-boxHab" class="box-content">
-                <div class="input-group">
-                    <div style="display:flex; gap: 5px;">
-                        <select id="hab-select" style="flex: 1; background-color: #2a2a2a; color: var(--text); border: 1px solid #444; border-radius: 4px; padding: 6px; font-size: 13px;">
-                            <option value="">-- Adicionar Habilidade --</option>
-                        </select>
-                        <button class="btn btn-outline btn-success" onclick="addHabilidade()">+</button>
-                    </div>
-                </div>
-                <div id="hab-list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 5px;"></div>
-                
-                <div style="margin-top: 15px; border-top: 1px dashed #444; padding-top: 10px; display: flex; align-items: center; justify-content: space-between;">
-                    <label style="font-size: 11px; color: var(--text);">Buff: Aliados c/ Espírito Contagiante</label>
-                    <div style="display: flex; gap: 5px; align-items: center;">
-                        <input type="text" id="info-aliadosEspiritoContagiante" placeholder="0" oninput="formatAndSave('info', 'aliadosEspiritoContagiante', this)" style="width: 50px; text-align: center; padding: 4px; font-size: 12px; background-color: #2a2a2a; color: var(--text); border: 1px solid #444; border-radius: 4px;">
-                    </div>
-                </div>
+            <span style="display:flex; align-items:center; gap:10px;">
+                <button class="btn btn-outline" style="font-size: 12px; padding: 4px 8px;" onclick="toggleAllBoxes(true)">⬆️Colapsar Tudo</button>
+                🏴‍☠️Ficha: New Seas🏴‍☠️
+                <button class="btn btn-outline" style="font-size: 12px; padding: 4px 8px;" onclick="toggleAllBoxes(false)">⬇️Descolapsar Tudo</button>
+                <div id="db-status" class="status-dot" title="Status do Banco de Dados"></div>
+                <span id="save-toast" style="opacity: 0; transition: opacity 0.3s; font-size: 14px; color: var(--success); font-weight: bold; margin-left: 8px;">Salvo!</span>
+            </span>
+        </header>
 
-                <div id="hab-ativos" style="margin-top: 15px; border-top: 1px dashed #444; padding-top: 10px; display: none;">
-                    <label style="color: var(--primary); font-size: 11px;">Buffs Ativos</label>
-                    <div id="hab-ativo-atirador" style="display:none; margin-top:5px;">
-                        <label style="font-size:11px; display:flex; align-items:center; gap:5px; width:fit-content;"><input type="checkbox" id="chk-atirador" onchange="updateField('info', 'habCaminhoAtiradorAtivo', this.checked)"> Caminho do Atirador: Atirando com arma de fogo</label>
-                    </div>
-                    <div id="hab-ativo-qi" style="display:none; margin-top:5px;">
-                        <label style="font-size:11px; display:flex; align-items:center; gap:5px; width:fit-content;"><input type="checkbox" id="chk-qi" onchange="updateField('info', 'habQIAvancadoAtivo', this.checked)"> QI Avançado: Mais de 3 turnos na batalha</label>
-                    </div>
-                    <div id="hab-ativo-beckman" style="display:none; margin-top:5px;">
-                        <label style="font-size:11px; display:flex; align-items:center; gap:5px; width:fit-content;"><input type="checkbox" id="chk-beckman" onchange="updateField('info', 'linhagemBeckmanArma', this.checked)"> Linhagem Beckman: Segurando arma de fogo</label>
-                    </div>
-                    <div id="hab-ativo-retorno" style="display:none; margin-top:5px; flex-direction:column; gap:5px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px;">
-                        <label style="font-size:10px; color:#aaa; width:fit-content;">Golpe de Retorno (Usos no dia)</label>
-                        <select id="sel-retorno-uso" onchange="updateField('info', 'habRetornoUso', parseInt(this.value))" style="font-size: 11px; background-color: #222; color: #fff; border: 1px solid #444;">
-                            <option value="1">1º Uso (Nenhum debuff)</option>
-                            <option value="2">Já usou 2 vezes (-10% Res)</option>
-                            <option value="3">Já usou 3 vezes (-20% Res)</option>
-                        </select>
-                    </div>
-                    <div id="hab-ativo-armista" style="display:none; margin-top:5px; flex-direction:column; gap:5px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px;">
-                        <label style="font-size:10px; color:#aaa;">Favoritismo Armista</label>
-                        <select id="sel-armista-ativo" onchange="updateField('info', 'habFavArmistaAtivo', this.value)" style="font-size: 11px; background-color: #222; color: #fff; border: 1px solid #444;">
-                            <option value="nenhum">Nenhum Buff</option>
-                            <option value="criacao">Empunhando suas criações</option>
-                            <option value="favorita">Empunhando arma favorita</option>
-                            <option value="criacao_favorita">Criação + Arma Favorita</option>
-                        </select>
-                        <select id="sel-armista-attr" onchange="updateField('info', 'habFavArmistaAttr', this.value)" style="font-size: 11px; background-color: #222; color: #fff; border: 1px solid #444;">
-                            <option value="d">Bônus em Destreza</option>
-                            <option value="f">Bônus em Força</option>
-                        </select>
-                    </div>
-                    <div id="hab-ativo-furia" style="display:none; margin-top:5px; flex-direction:column; gap:5px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px;">
-                        <label style="font-size:10px; color:#aaa;">Fúria Ardente (Atributo a Buffar)</label>
-                        <select id="sel-furia-attr" onchange="updateField('info', 'habFuriaArdenteAttr', this.value)" style="font-size: 11px; background-color: #222; color: #fff; border: 1px solid #444;">
-                            <option value="f">Força</option>
-                            <option value="d">Destreza</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="container">
 
-        <div class="box">
-            <div class="box-title" id="title-boxBase" onclick="toggleBox('boxBase')">
-                <span>Atributos Base <span onclick="openInfoModal('Atributos Base', 'Digite os pontos brutos que você ganhou em Força, Destreza, Resistência e Velocidade nas caixas de input. O sistema calcula o Total ao lado baseado nos seus buffs. Se o seu total de Velocidade for maior que zero, um painel inferior abrirá. Você precisa dividir EXATAMENTE o valor Total da Velocidade entre Reflexos e Velocidade Corporal, ou o sistema bloqueará com um aviso vermelho.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px; color: var(--info);">ⓘ</span></span><span id="icon-boxBase" class="toggle-icon">▼</span>
-            </div>
-            <div id="wrapper-boxBase" class="box-content">
-                <div id="totalBaseDisplay" style="text-align: center; font-size: 22px; font-weight: bold; font-family: 'Cinzel', serif; color: var(--info); margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; border: 1px solid var(--info);">Total: 0</div>
-                
-                <div class="attr-row">
-                    <span class="attr-label">Força</span>
-                    <div class="attr-input-group"><input type="text" class="attr-input" id="stat-f" placeholder="0" oninput="formatAndSave('stats', 'f', this)"><span class="attr-total" id="total-f">Total: 0</span></div>
-                </div>
-                <div class="attr-row">
-                    <span class="attr-label">Destreza</span>
-                    <div class="attr-input-group"><input type="text" class="attr-input" id="stat-d" placeholder="0" oninput="formatAndSave('stats', 'd', this)"><span class="attr-total" id="total-d">Total: 0</span></div>
-                </div>
-                <div class="attr-row">
-                    <span class="attr-label">Resistência</span>
-                    <div class="attr-input-group"><input type="text" class="attr-input" id="stat-r" placeholder="0" oninput="formatAndSave('stats', 'r', this)"><span class="attr-total" id="total-r">Total: 0</span></div>
-                </div>
-                <div class="attr-row" style="margin-bottom: 0;">
-                    <span class="attr-label">Velocidade</span>
-                    <div class="attr-input-group"><input type="text" class="attr-input" id="stat-v" placeholder="0" oninput="formatAndSave('stats', 'v', this)"><span class="attr-total" id="total-v">Total: 0</span></div>
-                </div>
-                <div id="container-boxVel" style="display:none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #444;">
-                    <div style="display:flex; gap: 10px;">
-                        <div style="flex:1"><label style="font-size: 10px;">Reflexo</label><input type="text" id="sub-refl" placeholder="0" oninput="formatAndSave('substats', 'refl', this)"></div>
-                        <div style="flex:1"><label style="font-size: 10px;">Velocidade Corporal</label><input type="text" id="sub-vcorp" placeholder="0" oninput="formatAndSave('substats', 'vcorp', this)"></div>
-                    </div>
-                    <div id="avisoVel" class="avisoErro"></div>
-                </div>
-                <div id="container-boxVelAgua" style="display:none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #444;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                        <span style="font-family:'Cinzel', serif; font-size:14px; font-weight:bold; color:var(--info);">Velocidade na Água</span>
-                    </div>
-                    <div style="display:flex; gap: 10px;">
-                        <div style="flex:1"><label style="font-size: 10px;">Reflexo (Água)</label><input type="text" id="sub-reflAgua" placeholder="0" oninput="formatAndSave('substats', 'reflAgua', this)"></div>
-                        <div style="flex:1"><label style="font-size: 10px;">Vel. Corporal (Água)</label><input type="text" id="sub-vcorpAgua" placeholder="0" oninput="formatAndSave('substats', 'vcorpAgua', this)"></div>
-                    </div>
-                    <div id="avisoVelAgua" class="avisoErro"></div>
-                    <span class="attr-total" id="total-vAgua" style="display:block; text-align:right; margin-top:5px; color:var(--info); font-weight:bold;">Total na Água: 0</span>
-                </div>
-                <div id="container-boxVelAkuma" style="display:none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #444;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                        <span style="font-family:'Cinzel', serif; font-size:14px; font-weight:bold; color:var(--danger);">Velocidade Adicional (Akuma no Mi)</span>
-                    </div>
-                    <div style="display:flex; gap: 10px;">
-                        <div style="flex:1"><label style="font-size: 10px;">Reflexo Adicional</label><input type="text" id="sub-reflAkuma" placeholder="0" oninput="formatAndSave('substats', 'reflAkuma', this)"></div>
-                        <div style="flex:1"><label style="font-size: 10px;">Vel. Corp. Adicional</label><input type="text" id="sub-vcorpAkuma" placeholder="0" oninput="formatAndSave('substats', 'vcorpAkuma', this)"></div>
-                    </div>
-                    <div id="avisoVelAkuma" class="avisoErro"></div>
-                    <span class="attr-total" id="total-vAkuma" style="display:block; text-align:right; margin-top:5px; color:var(--danger); font-weight:bold;">Adicional: 0</span>
-                </div>
-                <div id="avisoBase" class="avisoErro"></div>
-            </div>
-        </div>
+            <div id="char-tabs-container" class="char-tabs-container"></div>
 
-        <div class="box">
-            <div class="box-title" id="title-boxEsp" style="color: #a461ff;" onclick="toggleBox('boxEsp')">
-                <span>Espírito <span onclick="openInfoModal('Espírito', 'A caixa só abre quando você atinge o mínimo de pontos totais. Coloque os pontos no campo Espírito Base. Em seguida, desça para as caixas de Armamento, Observação e Rei. Você precisa pegar o Total do seu Espírito e fragmentar ele nestes três Hakis. Ao colocar pontos neles, caixas de marcação aparecerão abaixo; clique para ligar a capacidade de usar níveis avançados quando você obtiver a aprovação.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxEsp" class="toggle-icon">▼</span>
-            </div>
-            <div id="wrapper-boxEsp" class="box-content">
-                <div style="margin-bottom: 10px;">
-                    <label style="font-size: 10px;">Espírito Base</label>
-                    <input type="text" id="stat-esp" placeholder="🔒 Bloqueado" disabled oninput="formatAndSave('stats', 'esp', this)" style="font-size: 16px; font-weight: bold; font-family: 'Cinzel', serif; text-align: right;">
-                    <span id="total-esp" class="attr-total" style="display:block; text-align:right;">Total: 0</span>
-                </div>
-                <div id="box-haki" style="display:none; padding-top:10px; border-top: 1px dashed #444;">
-                    <div style="display:flex; gap: 10px; margin-bottom: 5px;">
-                        <div style="flex:1"><label style="font-size: 10px;">Armamento</label><input type="text" id="sub-hArm" placeholder="0" oninput="formatAndSave('substats', 'hArm', this)"></div>
-                        <div style="flex:1"><label style="font-size: 10px;">Observação</label><input type="text" id="sub-hObs" placeholder="0" oninput="formatAndSave('substats', 'hObs', this)"></div>
-                        <div style="flex:1"><label style="font-size: 10px;">Rei</label><input type="text" id="sub-hRei" placeholder="0" oninput="formatAndSave('substats', 'hRei', this)"></div>
+            <div class="three-col-grid">
+                <div class="box">
+                    <div class="box-title" id="title-boxIden" style="color: var(--info);" onclick="toggleBox('boxIden')">
+                        <span>Identidade <span onclick="openInfoModal('Identidade', 'Preencha os campos básicos do personagem. Para a alcunha, clique no botão + para adicionar e na engrenagem ou lápis para editar e aplicar buffs globais. A Localização Atual deve ser sincronizada com a ilha em que você está narrando no momento. Não deixe os campos obrigatórios vazios para evitar falhas na contagem da ficha.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxIden" class="toggle-icon">▼</span>
                     </div>
-                    <div id="avisoEsp" class="avisoErro"></div>
-                    <div style="margin-top:15px; display:grid; grid-template-columns: 1fr 1fr 1fr; font-size:11px; border-top: 1px dashed #444; padding-top: 15px;">
-                        <div style="padding: 0 10px; border-right: 1px solid #444; display: flex; flex-direction: column; align-items: center;">
-                            <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start;">
-                                <div id="cont-ha1" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHA1" onchange="updateField('info', 'unlockHA1', this.checked)"> Invisível</label></div>
-                                <div id="cont-ha2" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHA2" onchange="updateField('info', 'unlockHA2', this.checked)"> Visível</label></div>
-                                <div id="cont-ha3" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHA3" onchange="updateField('info', 'unlockHA3', this.checked)"> Imbuição</label></div>
-                                <div id="cont-ha4" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHA4" onchange="updateField('info', 'unlockHA4', this.checked)"> Full Body</label></div>
-                                <div id="cont-ha5" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHA5" onchange="updateField('info', 'unlockHA5', this.checked)"> Emissão</label></div>
-                                <div id="cont-ha6" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHA6" onchange="updateField('info', 'unlockHA6', this.checked)"> Avançado</label></div>
+                    <div id="wrapper-boxIden" class="box-content">
+                        <div class="input-group"><label>Nome do Personagem</label><input type="text" id="pc-name" oninput="updateField('name', null, this.value)"></div>
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Alcunha</label>
+                                <div style="display:flex; gap:5px;">
+                                    <select id="info-alcunha" onchange="updateField('info', 'alcunhaAtiva', this.value)" style="flex:1;"></select>
+                                    <button type="button" class="btn btn-outline btn-success" style="padding:4px 8px; font-size:14px; display:flex; align-items:center;" onclick="openAlcunhaModal()" title="Criar Nova Alcunha">+</button>
+                                    <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:14px; display:flex; align-items:center;" onclick="editAlcunhaModal()" title="Editar Alcunha Ativa">✏️</button>
+                                </div>
+                                <div id="alcunha-condicoes-container" style="margin-top: 5px; display: flex; flex-wrap: wrap; gap: 5px;"></div>
                             </div>
+                            <div class="input-group"><label>Idade</label><input type="text" id="info-idade" placeholder="Mín: 15" onchange="formatIdade(this.value)"></div>
                         </div>
-                        <div style="padding: 0 10px; border-right: 1px solid #444; display: flex; flex-direction: column; align-items: center;">
-                            <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start;">
-                                <div id="cont-ho2" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHO2" onchange="updateField('info', 'unlockHO2', this.checked)"> Intenção</label></div>
-                                <div id="cont-ho3" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHO3" onchange="updateField('info', 'unlockHO3', this.checked)"> Premonição</label></div>
-                                <div id="cont-ho4" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHO4" onchange="updateField('info', 'unlockHO4', this.checked)"> Avançado</label></div>
-                            </div>
-                        </div>
-                        <div style="padding: 0 10px; display: flex; flex-direction: column; align-items: center;">
-                            <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start;">
-                                <div id="cont-hr2" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHR2" onchange="updateField('info', 'unlockHR2', this.checked)"> Dominação</label></div>
-                                <div id="cont-hr3" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHR3" onchange="updateField('info', 'unlockHR3', this.checked)"> Incapacitação</label></div>
-                                <div id="cont-hr4" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHR4" onchange="updateField('info', 'unlockHR4', this.checked)"> Pressão</label></div>
-                                <div id="cont-hr5" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHR5" onchange="updateField('info', 'unlockHR5', this.checked)"> Assassinato de Observação</label></div>
-                                <div id="cont-hr6" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHR6" onchange="updateField('info', 'unlockHR6', this.checked)"> Infusão</label></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="box" id="container-boxAmi">
-            <div class="box-title" id="title-boxAmi" style="color: var(--danger);" onclick="toggleBox('boxAmi')">
-                <span>Akuma no Mi <span onclick="openInfoModal('Akuma no Mi', 'Este campo é vinculado com a Fruta selecionada. Deposite seus pontos na caixa principal. Embaixo, ative apenas as caixas que sua fruta engloba. O sistema vai pegar o valor Total e te obrigar a dividir com perfeição entre as capacidades. Se a barra de Controle de Habilidade chegar em cem por cento, o painel do Despertar vai acender indicando a liberação.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxAmi" class="toggle-icon">▼</span>
-            </div>
-            <div id="wrapper-boxAmi" class="box-content">
-                <div class="input-group">
-                    <label style="color: var(--danger); font-family: 'Cinzel', serif;">Fruta Consumida</label>
-                    <select id="select-akuma" onchange="selecionarAkuma(this.value)" style="width: 100%; padding: 10px; background-color: #1a1a1a; color: var(--text); border: 1px solid var(--danger); border-radius: 4px; font-weight: bold;"></select>
-                </div>
-                
-                <div id="box-zoan-buffs" style="display:none; margin-bottom: 15px; background: rgba(220, 53, 69, 0.1); padding: 10px; border-radius: 6px; border: 1px dashed var(--danger);">
-                    <label style="font-size: 11px; color: var(--danger); text-transform: uppercase; font-weight: bold;">Buffs Extras da Fruta (%)</label>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 5px; margin-top: 5px;">
-                        <div><label style="font-size: 9px; color: #aaa;">Força</label><input type="number" id="info-zoanBuffF" placeholder="0" oninput="formatAndSave('info', 'zoanBuffF', this)" style="font-size: 12px; text-align: center; background-color: #222;"></div>
-                        <div><label style="font-size: 9px; color: #aaa;">Destreza</label><input type="number" id="info-zoanBuffD" placeholder="0" oninput="formatAndSave('info', 'zoanBuffD', this)" style="font-size: 12px; text-align: center; background-color: #222;"></div>
-                        <div><label style="font-size: 9px; color: #aaa;">Resistência</label><input type="number" id="info-zoanBuffR" placeholder="0" oninput="formatAndSave('info', 'zoanBuffR', this)" style="font-size: 12px; text-align: center; background-color: #222;"></div>
-                        <div><label style="font-size: 9px; color: #aaa;">Velocidade</label><input type="number" id="info-zoanBuffV" placeholder="0" oninput="formatAndSave('info', 'zoanBuffV', this)" style="font-size: 12px; text-align: center; background-color: #222;"></div>
-                    </div>
-                    <div id="box-zoan-forms" style="display:flex; justify-content: space-between; margin-top: 10px; gap: 5px;">
-                        <button id="btn-forma-comum" class="btn btn-outline" style="flex: 1; font-size: 10px; padding: 4px;" onclick="updateField('info', 'zoanForma', 'Comum')">Comum</button>
-                        <button id="btn-forma-instavel" class="btn btn-outline" style="flex: 1; font-size: 10px; padding: 4px;" onclick="updateField('info', 'zoanForma', 'Instável')">Instável</button>
-                        <button id="btn-forma-hibrida" class="btn btn-outline" style="flex: 1; font-size: 10px; padding: 4px;" onclick="updateField('info', 'zoanForma', 'Híbrida')">Híbrida</button>
-                        <button id="btn-forma-completa" class="btn btn-outline" style="flex: 1; font-size: 10px; padding: 4px;" onclick="updateField('info', 'zoanForma', 'Completa')">Completa</button>
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 15px; background: rgba(220, 53, 69, 0.1); padding: 10px; border-radius: 6px; border: 1px dashed var(--danger);">
-                    <label style="font-size: 11px; color: var(--danger); text-transform: uppercase; font-weight: bold;">Pontos da Akuma</label>
-                    <input type="text" id="stat-ami" placeholder="0" oninput="formatAndSave('stats', 'ami', this)" style="font-size: 18px; font-weight: bold; font-family: 'Cinzel', serif; text-align: right; color: var(--danger); border-color: var(--danger);">
-                    <div style="display:flex; justify-content:space-between; margin-top:5px;">
-                        <span id="ami-distribuiveis" style="font-size: 12px; font-weight: bold; color: var(--info);">Disponível: 0</span>
-                        <span id="total-ami" class="attr-total" style="color: var(--danger); font-weight: bold;">Total: 0</span>
-                    </div>
-                </div>
-
-                <div id="box-amiSub" style="display:none; padding-top:10px;">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                        <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; border: 1px solid #444;">
-                            <label style="font-size: 11px; display:flex; align-items:center; gap:5px; color: #ddd; margin-bottom: 5px; width:fit-content;"><input type="checkbox" id="chk-amiAlc" onchange="toggleAmi('amiAlc', this.checked)"> Alcance</label>
-                            <input type="text" id="sub-amiAlc" placeholder="0" oninput="formatAndSave('substats', 'amiAlc', this)" style="font-size: 14px; text-align: right; font-weight: bold;">
-                            <div style="display:flex; align-items:center; justify-content: space-between; margin-top:5px;">
-                              <label style="font-size:9px; margin:0; text-transform:none; color:#aaa;">Multiplicador (m):</label>
-                              <input type="text" id="info-amiAlcMult" placeholder="Ex: 1.8x" onchange="formatAmiAlcMult(this)" style="width:45px; padding:2px; font-size:10px; text-align:center; background: #222; border: 1px solid #555;">
-                            </div>
-                        </div>
-
-                        <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; border: 1px solid #444;">
-                            <label style="font-size: 11px; display:flex; align-items:center; gap:5px; color: #ddd; margin-bottom: 5px; width:fit-content;"><input type="checkbox" id="chk-amiDur" onchange="toggleAmi('amiDur', this.checked)"> Durabilidade</label>
-                            <input type="text" id="sub-amiDur" placeholder="0" oninput="formatAndSave('substats', 'amiDur', this)" style="font-size: 14px; text-align: right; font-weight: bold;">
-                        </div>
-
-                        <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; border: 1px solid #444;">
-                            <label style="font-size: 11px; display:flex; align-items:center; gap:5px; color: #ddd; margin-bottom: 5px; width:fit-content;"><input type="checkbox" id="chk-amiPot" onchange="toggleAmi('amiPot', this.checked)"> Potência</label>
-                            <input type="text" id="sub-amiPot" placeholder="0" oninput="formatAndSave('substats', 'amiPot', this)" style="font-size: 14px; text-align: right; font-weight: bold;">
-                            <div id="box-amiPotBuff" style="display:none; flex-direction:column; gap:2px; margin-top:5px;">
-                              <div style="display:flex; align-items:center; justify-content: space-between;">
-                                <label style="font-size:9px; margin:0; text-transform:none; color:#aaa;">Dano Adicional (%):</label>
-                                <input type="text" id="info-amiPotBuff" placeholder="Ex: 50" oninput="formatAndSave('info', 'amiPotBuff', this)" style="width:45px; padding:2px; font-size:10px; text-align:center; background: #222; border: 1px solid #555;">
-                              </div>
-                              <div style="display:flex; align-items:center; justify-content: space-between;">
-                                <label style="font-size:9px; margin:0; text-transform:none; color:#aaa;">Resistência (%):</label>
-                                <input type="text" id="info-amiResPct" placeholder="Ex: 50" oninput="formatAndSave('info', 'amiResPct', this)" style="width:45px; padding:2px; font-size:10px; text-align:center; background: #222; border: 1px solid #555;">
-                              </div>
-                            </div>
-                            <span id="ami-res-total" style="font-size:10px; color:var(--warning); display:block; margin-top:3px; text-align:right;"></span>
-                        </div>
-
-                        <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; border: 1px solid #444;">
-                            <label style="font-size: 11px; display:flex; align-items:center; gap:5px; color: #ddd; margin-bottom: 5px; width:fit-content;"><input type="checkbox" id="chk-amiVel" onchange="toggleAmi('amiVel', this.checked)"> Velocidade</label>
-                            <input type="text" id="sub-amiVel" placeholder="0" oninput="formatAndSave('substats', 'amiVel', this)" style="font-size: 14px; text-align: right; font-weight: bold;">
-                            <div id="box-amiVelBuff" style="display:none; flex-direction:column; gap:2px; margin-top:5px;">
-                              <div style="display:flex; align-items:center; justify-content: space-between;">
-                                <label style="font-size:9px; margin:0; text-transform:none; color:#aaa; display:flex; align-items:center; gap:3px;">
-                                  <input type="checkbox" id="chk-amiVelAtivo" onchange="updateField('info', 'amiVelAtivo', this.checked)" style="width:auto; margin:0;"> Ativar (%)
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label style="display:flex; justify-content:space-between; align-items:center;">
+                                    Sexo
+                                    <label style="margin:0; font-size:10px; color:var(--warning); text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center; width:fit-content;">
+                                        <input type="checkbox" id="info-hideSexo" onchange="toggleHideSexoGenero('sexo', this.checked)" style="width:auto; margin:0;"> Ocultar
+                                    </label>
                                 </label>
-                                <input type="text" id="info-amiVelBuff" placeholder="Ex: 75" oninput="formatAndSave('info', 'amiVelBuff', this)" style="width:45px; padding:2px; font-size:10px; text-align:center; background: #222; border: 1px solid #555;">
-                              </div>
+                                <select id="info-sexo" onchange="updateSexo(this.value)">
+                                    <option value="">-- Selecione --</option>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Feminino">Feminino</option>
+                                    <option value="Assexuado">Assexuado</option>
+                                </select>
                             </div>
-                            <span id="ami-vel-total" style="font-size:10px; color:var(--warning); display:block; margin-top:3px; text-align:right;"></span>
+                            <div class="input-group">
+                                <label style="display:flex; justify-content:space-between; align-items:center;">
+                                    Gênero
+                                    <label style="margin:0; font-size:10px; color:var(--warning); text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center; width:fit-content;">
+                                        <input type="checkbox" id="info-hideGenero" onchange="toggleHideSexoGenero('genero', this.checked)" style="width:auto; margin:0;"> Ocultar
+                                    </label>
+                                </label>
+                                <select id="info-genero" onchange="updateField('info', 'genero', this.value)">
+                                    <option value="">-- Selecione --</option>
+                                    <option value="Homem">Homem</option>
+                                    <option value="Mulher">Mulher</option>
+                                    <option value="Não-binário">Não-binário</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
-
-                    <div id="box-despertar" style="margin-top: 12px; background: rgba(164, 97, 255, 0.1); padding: 10px; border-radius: 6px; border: 1px dashed #a461ff; transition: opacity 0.3s;">
-                        <label style="font-size: 12px; display:flex; align-items:center; gap:5px; color: #a461ff; font-weight:bold; margin-bottom: 5px; font-family: 'Cinzel', serif; width:fit-content;">
-                            <input type="checkbox" id="chk-amiDesp" onchange="toggleAmi('amiDesp', this.checked)"> 🌟 Despertar
-                        </label>
-                        <input type="text" id="sub-amiDesp" placeholder="0" oninput="formatAndSave('substats', 'amiDesp', this)" style="font-size: 16px; text-align: right; font-weight: bold; border-color: #a461ff; color: #a461ff;">
-                        <div style="font-size: 10px; color: #aaa; text-align: right; margin-top: 4px;">Requer 100% de Controle</div>
-                    </div>
-
-                    <div id="avisoAmi" class="avisoErro"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="box">
-            <div class="box-title" id="title-boxEstamina" onclick="toggleBox('boxEstamina')">
-                <span>Calculadora de Estamina <span onclick="openInfoModal('Calculadora de Estamina', 'Na hora do turno de combate, não diminua sua estamina de cabeça. Puxe os dados usando os botões Puxar. O sistema calcula a dedução correta automaticamente com base nos seus multiplicadores e buffs engatilhados. Quando o gasto total estiver certo, clique em Gastar Estamina para reduzir a barra vermelha. Use os botões de Repouso quando o mestre liberar turnos de descanso.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px; color: var(--info);">ⓘ</span></span><span id="icon-boxEstamina" class="toggle-icon">▼</span>
-            </div>
-            <div id="wrapper-boxEstamina" class="box-content">
-                <div style="text-align: center; margin-bottom: 15px;">
-                    <span style="font-family: 'Cinzel', serif; font-weight: bold; color: var(--success); font-size: 16px;">Estamina: <input type="text" id="estamina-atual" value="0" class="no-sum" oninput="formatAndSave('info', 'estaminaAtual', this)" style="width: 70px; text-align: center; font-size: 16px; font-weight: bold; font-family: 'Cinzel', serif; background: transparent; border: none; border-bottom: 1px dashed var(--success); color: var(--success); padding: 0; outline: none;"> / <span id="estamina-total">0</span></span>
-                    <div style="margin-top: 10px; display: flex; justify-content: center; gap: 10px;">
-                        <button class="btn btn-outline" style="color:var(--info); border-color:var(--info); font-size: 11px; padding: 4px 8px;" onclick="recuperarEstamina(0.10)">Em Movimento (+10%)</button>
-                        <button class="btn btn-outline" style="color:var(--success); border-color:var(--success); font-size: 11px; padding: 4px 8px;" onclick="recuperarEstamina(0.30)">Repouso Total (+30%)</button>
-                    </div>
-                    <div style="margin-top: 10px; display: flex; justify-content: center;">
-                        <label style="font-size:11px; color:var(--danger); font-weight:bold; cursor:pointer; display:flex; gap:5px; align-items:center; width:fit-content; margin:0 auto;">
-                            <input type="checkbox" id="info-exaustaoCompleta" onchange="updateField('info', 'exaustaoCompleta', this.checked)" style="width:auto; margin:0;"> Exaustão Completa (-20% Todos os Atributos)
-                        </label>
-                    </div>
-                </div>
-                <div class="input-row">
-                    <div class="input-group">
-                        <label>Velocidade da Ação</label>
-                        <div style="display: flex; gap: 5px;">
-                            <input type="text" id="info-estaminaVelocidade" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'estaminaVelocidade', this)">
-                            <button class="btn btn-outline btn-warning" style="padding: 4px 8px;" onclick="puxarVelocidade()">Puxar</button>
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Sangue</label>
+                                <select id="info-sangue" onchange="updateField('info', 'sangue', this.value)">
+                                    <option value="">-- Selecione --</option>
+                                    <option value="A+">A+</option><option value="A-">A-</option>
+                                    <option value="B+">B+</option><option value="B-">B-</option>
+                                    <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                                    <option value="O+">O+</option><option value="O-">O-</option>
+                                </select>
+                            </div>
+                            <div class="input-group"><label>Altura</label><input type="text" id="info-altura" onchange="formatAltura(this.value)"></div>
                         </div>
-                    </div>
-                    <div class="input-group">
-                        <label>Dano Causado</label>
-                        <div style="display: flex; gap: 5px;">
-                            <input type="text" id="info-estaminaDano" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'estaminaDano', this)">
-                            <button class="btn btn-outline btn-danger" style="padding: 4px 8px;" onclick="puxarDano()">Puxar</button>
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Nacionalidade</label>
+                                <select id="info-nacionalidade" onchange="updateField('info', 'nacionalidade', this.value)"></select>
+                            </div>
+                            <div class="input-group">
+                                <label>Localização Atual</label>
+                                <select id="info-localizacao" onchange="updateField('info', 'localizacao', this.value)"></select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Telefone do Jogador (Oculto na Ficha)</label>
+                            <input type="text" id="info-telefone" placeholder="(DD) 9XXXX-XXXX" oninput="formatPhone(this)">
                         </div>
                     </div>
                 </div>
-                <div class="input-row">
-                    <div class="input-group">
-                        <label>Buff Ativo (%)</label>
-                        <input type="text" id="info-estaminaBuffPct" placeholder="0" oninput="formatAndSave('info', 'estaminaBuffPct', this)">
-                    </div>
-                    <div class="input-group">
-                        <label>Haki Armamento?</label>
-                        <select id="info-estaminaHakiArm" onchange="updateField('info', 'estaminaHakiArm', this.value)">
-                            <option value="nao">Não</option>
-                            <option value="sim">Sim</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>Haki Observação?</label>
-                        <select id="info-estaminaHakiObs" onchange="updateField('info', 'estaminaHakiObs', this.value)">
-                            <option value="nao">Não</option>
-                            <option value="sim">Sim</option>
-                        </select>
-                    </div>
-                </div>
-                <div style="background: rgba(0,0,0,0.3); padding: 15px; border: 1px dashed #555; border-radius: 6px; text-align: center; margin-top: 5px;">
-                    <div style="font-size: 18px; font-family: 'Cinzel', serif; font-weight: bold; color: var(--warning);">Custo de Estamina: <span id="estamina-custo-final">0</span></div>
-                    <div style="font-size: 11px; color: #aaa; margin-top: 8px; line-height: 1.4;" id="estamina-formula"></div>
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <button class="btn btn-outline" style="color:var(--info); border-color:var(--info); flex: 1; font-size: 14px;" onclick="copiarEstamina()">📋Copiar</button>
-                        <button class="btn btn-outline" style="color:var(--danger); border-color:var(--danger); flex: 1; font-size: 14px;" onclick="gastarEstamina()">🔥Gastar Estamina</button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="box">
-            <div class="box-title" id="title-boxCalc" onclick="toggleBox('boxCalc')">
-                <span>Calculadora de Dano <span onclick="openInfoModal('Calculadora de Dano', 'Durante o embate, coloque a resistência adversária no primeiro campo. Selecione se seu golpe foi de Destreza ou Força, e adicione bônus brutos ou porcentagens ativas que declarou. O sistema puxará sua Potência de Fruta e seu nível de Haki marcado, formulando a matemática de dano físico embaixo. Clique no botão de Receber Dano só se você for o alvo do ataque.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px; color: var(--info);">ⓘ</span></span><span id="icon-boxCalc" class="toggle-icon">▼</span>
-            </div>
-            <div id="wrapper-boxCalc" class="box-content">
-                <div style="text-align: center; margin-bottom: 15px;">
-                    <span style="font-family: 'Cinzel', serif; font-weight: bold; color: var(--danger); font-size: 16px;">HP: <input type="text" id="hp-atual" value="0" class="no-sum" oninput="formatAndSave('info', 'hpAtual', this)" style="width: 70px; text-align: center; font-size: 16px; font-weight: bold; font-family: 'Cinzel', serif; background: transparent; border: none; border-bottom: 1px dashed var(--danger); color: var(--danger); padding: 0; outline: none;"> / <span id="hp-total">0</span></span>
-                </div>
-                <div class="input-row">
-                    <div class="input-group" id="box-calcQuemAtaca" style="flex: 1;">
-                        <label>Quem ataca?</label>
-                        <select id="info-calcQuemAtaca" onchange="updateField('info', 'calcQuemAtaca', this.value)">
-                            <option value="eu">Eu</option>
-                            <option value="inimigo">Inimigo</option>
-                        </select>
+                <div class="box">
+                    <div class="box-title" id="title-boxMec" style="color: var(--warning);" onclick="toggleBox('boxMec')">
+                        <span>Mecânicas Principais <span onclick="openInfoModal('Mecânicas Principais', 'Selecione primeiro sua Raça e Linhagem, pois elas modificam seus multiplicadores automaticamente. Ao escolher uma raça híbrida ou linhagem Charlotte, selecione nos campos que aparecerão qual atributo receberá o foco do buff. As classes são liberadas pelos seus Pontos Totais. Você deve trocar para a próxima classe correspondente ao seu nível assim que a ficha acusar o alcance de 5.000, 10.000, 20.000 ou 35.000 pontos.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxMec" class="toggle-icon">▼</span>
                     </div>
-                    <div class="input-group" style="flex: 1.5;">
-                        <label>Atributo Físico <span style="font-size:8px;text-transform:none;">(Sem buffs de técnicas)</span></label>
-                        <div style="display: flex; gap: 5px;">
-                            <input type="text" id="info-calcUseAttr" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'calcUseAttr', this)">
-                            <button class="btn btn-outline btn-info" style="padding: 4px 8px;" onclick="puxarDestrezaDano()">D</button>
-                            <button class="btn btn-outline btn-danger" style="padding: 4px 8px;" onclick="puxarForcaDano()">F</button>
+                    <div id="wrapper-boxMec" class="box-content">
+                        <div class="input-group" style="margin-bottom: 10px;">
+                            <label>Expectativa de Vida</label>
+                            <input type="text" id="info-expectativaVida" placeholder="100 anos" oninput="formatExpectativa(this.value)">
+                        </div>
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Raça</label>
+                                <select id="info-raca" onchange="handleRacaChange('raca', this.value)"></select>
+                                <div id="box-racaCustom" style="display:none; margin-top:5px; flex-direction:column; gap:5px; background:rgba(0,0,0,0.2); padding:8px; border-radius:4px; border:1px solid var(--danger);">
+                                    <input type="text" id="info-racaNomeCustom" placeholder="Nome da Raça Customizada" oninput="updateField('info', 'racaNomeCustom', this.value)">
+                                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                                        <div><label style="font-size:9px;">Buff F (%)</label><input type="number" id="info-customBuffF" placeholder="Ex: 20" oninput="updateField('info', 'customBuffF', this.value)"></div>
+                                        <div><label style="font-size:9px;">Buff D (%)</label><input type="number" id="info-customBuffD" placeholder="Ex: 20" oninput="updateField('info', 'customBuffD', this.value)"></div>
+                                        <div><label style="font-size:9px;">Buff R (%)</label><input type="number" id="info-customBuffR" placeholder="Ex: 20" oninput="updateField('info', 'customBuffR', this.value)"></div>
+                                        <div><label style="font-size:9px;">Buff V (%)</label><input type="number" id="info-customBuffV" placeholder="Ex: 20" oninput="updateField('info', 'customBuffV', this.value)"></div>
+                                    </div>
+                                </div>
+                                <div id="box-racaCustom2" style="display:none; margin-top:5px; flex-direction:column; gap:5px; background:rgba(0,0,0,0.2); padding:8px; border-radius:4px; border:1px solid var(--info);">
+                                    <input type="text" id="info-racaNomeCustom2" placeholder="Nome da 2ª Raça Customizada" oninput="updateField('info', 'racaNomeCustom2', this.value)">
+                                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                                        <div><label style="font-size:9px;">Buff F (%)</label><input type="number" id="info-customBuffF2" placeholder="Ex: 20" oninput="updateField('info', 'customBuffF2', this.value)"></div>
+                                        <div><label style="font-size:9px;">Buff D (%)</label><input type="number" id="info-customBuffD2" placeholder="Ex: 20" oninput="updateField('info', 'customBuffD2', this.value)"></div>
+                                        <div><label style="font-size:9px;">Buff R (%)</label><input type="number" id="info-customBuffR2" placeholder="Ex: 20" oninput="updateField('info', 'customBuffR2', this.value)"></div>
+                                        <div><label style="font-size:9px;">Buff V (%)</label><input type="number" id="info-customBuffV2" placeholder="Ex: 20" oninput="updateField('info', 'customBuffV2', this.value)"></div>
+                                    </div>
+                                </div>
+                                <input type="text" id="info-animal" placeholder="Qual animal?" style="display:none; margin-top:5px;" oninput="updateField('info', 'animal', this.value)">
+                                <select id="info-raca2" style="display:none; margin-top:5px;" onchange="handleRacaChange('raca2', this.value)"></select>
+                                <div id="box-charlotteRacas" class="conditional-selects" style="display: none; flex-direction: row; gap: 5px;">
+                                    <select id="info-selCharR1" onchange="updateField('info', 'selCharR1', this.value)" style="flex: 1;"><option value="">- Buff Raça 1 -</option></select>
+                                    <select id="info-selCharR2" onchange="updateField('info', 'selCharR2', this.value)" style="flex: 1;"><option value="">- Buff Raça 2 -</option></select>
+                                </div>
+                                <input type="text" id="info-animal2" placeholder="Qual animal?" style="display:none; margin-top:5px;" oninput="updateField('info', 'animal2', this.value)">
+                                
+                                <div id="box-extraRaca" class="conditional-selects" style="display: none; flex-direction: row; gap: 5px;">
+                                    <select id="info-selDF" onchange="updateField('info', 'selDF', this.value)" style="flex: 1;"><option value="d">Destreza</option><option value="f">Força</option></select>
+                                    <select id="info-selRV" onchange="updateField('info', 'selRV', this.value)" style="display:none; flex: 1;"><option value="r">Resistência</option><option value="v">Velocidade</option></select>
+                                </div>
+                            </div>
+                            <div class="input-group" id="container-linhagem">
+                                <label>Linhagem</label>
+                                <select id="info-linhagem" onchange="updateField('info', 'linhagem', this.value)"></select>
+                                <div id="box-extraLin" class="conditional-selects" style="display: none; flex-direction: row; gap: 5px;">
+                                    <select id="info-selLinDF" onchange="updateField('info', 'selLinDF', this.value)" style="display:none; flex: 1;"><option value="d">Destreza</option><option value="f">Força</option></select>
+                                    <select id="info-selLinRV" onchange="updateField('info', 'selLinRV', this.value)" style="display:none; flex: 1;"><option value="r">Resistência</option><option value="v">Velocidade</option></select>
+                                    <select id="info-selLin4" onchange="updateField('info', 'selLin4', this.value)" style="display:none; flex: 1;"><option value="d">Destreza</option><option value="f">Força</option><option value="r">Resistência</option><option value="v">Velocidade</option></select>
+                                    <select id="info-selLinEspAmi" onchange="updateField('info', 'selLinEspAmi', this.value)" style="display:none; flex: 1;"><option value="esp">Espírito</option><option value="ami">Akuma no Mi</option></select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="input-row" style="border-top: 1px dashed #444; padding-top: 12px; margin-top: 5px;">
+                            <div class="input-group">
+                                <label>Classe Inicial</label>
+                                <select id="info-classe" onchange="updateField('info', 'classe', this.value)"></select>
+                            </div>
+                            <div class="input-group" id="box-selClasseDF" style="display: none;">
+                                <label>Buff Combatente (+)</label>
+                                <select id="info-selClasseDF" onchange="updateField('info', 'selClasseDF', this.value)">
+                                    <option value="d">Destreza</option><option value="f">Força</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-row" style="margin-bottom:0;">
+                            <div class="input-group"><label>Classe Nível 2</label><select id="info-classe2" onchange="updateField('info', 'classe2', this.value)"></select></div>
+                            <div class="input-group"><label>Classe Nível 3</label><select id="info-classe3" onchange="updateField('info', 'classe3', this.value)"></select></div>
+                        </div>
+                        <div class="input-row">
+                            <div class="input-group"><label>Classe Nível 4</label><select id="info-classe4" onchange="updateField('info', 'classe4', this.value)"></select></div>
+                            <div class="input-group"><label>Classe Nível 5</label><select id="info-classe5" onchange="updateField('info', 'classe5', this.value)"></select></div>
                         </div>
                     </div>
-                    <div class="input-group" id="box-calcUseAmi" style="flex: 1;">
-                        <label id="label-calcUseAmi">Somar Akuma?</label>
-                        <select id="info-calcUseAmi" onchange="updateField('info', 'calcUseAmi', this.value)">
-                            <option value="sim">Sim</option>
-                            <option value="nao">Não</option>
-                        </select>
-                        <input type="text" id="info-calcAmiManual" placeholder="0" class="no-sum" style="display: none;" oninput="formatAndSave('info', 'calcAmiManual', this)">
-                    </div>
                 </div>
-                <div class="input-row">
-                    <div class="input-group">
-                        <label>Resistência</label>
-                        <div style="display: flex; gap: 5px;">
-                            <input type="text" id="info-calcInimigoRes" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'calcInimigoRes', this)">
-                            <button class="btn btn-outline btn-warning" style="padding: 4px 8px;" onclick="puxarResistenciaDano()">Puxar</button>
+
+                <div class="box">
+                    <div class="box-title" id="title-boxSoc" style="color: var(--success);" onclick="toggleBox('boxSoc')">
+                        <span>Social e Estilos <span onclick="openInfoModal('Social e Estilos', 'Selecione a sua Organização no menu. Se escolher Marinha ou Governo, o campo de Patente irá atualizar e travar baseado nos seus pontos totais, preenchendo seu salário sozinho. Para Estilos de Luta, você pode selecionar Estilos base ou Freestyle. O terceiro e quarto slots são travados até que a ficha chegue nos marcos de poder, não tente forçar a escolha antes da hora.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxSoc" class="toggle-icon">▼</span>
+                    </div>
+                    <div id="wrapper-boxSoc" class="box-content">
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Recompensa</label>
+                                <div class="currency-input">
+                                    <span>฿</span><input type="text" id="info-recompensa" placeholder="Vazio = 🔒" oninput="formatCurrency('info', 'recompensa', this)">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>Berries</label>
+                                <div class="currency-input">
+                                    <span>฿</span><input type="text" id="info-berries" placeholder="Vazio = 0" oninput="formatCurrency('info', 'berries', this)">
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="input-group">
-                        <label>Res. Ignorada (%)</label>
-                        <input type="text" id="info-calcResIgnorada" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'calcResIgnorada', this)">
-                    </div>
-                    <div class="input-group">
-                        <label>Dano Ignorado (%)</label>
-                        <input type="text" id="info-calcDanoIgnorado" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'calcDanoIgnorado', this)">
-                    </div>
-                </div>
-                <div class="input-row">
-                    <div class="input-group">
-                        <label>Bônus de Estilo</label>
-                        <input type="text" id="info-calcBuffFlat" placeholder="0" oninput="formatAndSave('info', 'calcBuffFlat', this)">
-                    </div>
-                    <div class="input-group">
-                        <label>Buff Ativo (%)</label>
-                        <input type="text" id="info-calcBuffPct" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'calcBuffPct', this)">
-                    </div>
-                    <div class="input-group">
-                        <label>Buff Dano (%)</label>
-                        <input type="text" id="info-calcBuffDanoFinalPct" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'calcBuffDanoFinalPct', this)">
-                    </div>
-                    <div class="input-group" id="box-calcUseHaki">
-                        <label id="label-calcUseHaki">Somar Armamento?</label>
-                        <select id="info-calcUseHaki" onchange="updateField('info', 'calcUseHaki', this.value)">
-                            <option value="nao">Não</option>
-                            <option value="invisivel">Invisível</option>
-                            <option value="visivel">Visível</option>
-                            <option value="imbuicao">Imbuição</option>
-                            <option value="fullbody">Full Body</option>
-                            <option value="emissao">Emissão</option>
-                            <option value="avancado">Avançado</option>
-                        </select>
-                        <input type="text" id="info-calcHakiManual" placeholder="0" class="no-sum" style="display: none;" oninput="formatAndSave('info', 'calcHakiManual', this)">
-                    </div>
-                    <div class="input-group" id="box-calcUseHakiRei">
-                        <label id="label-calcUseHakiRei">Somar Rei?</label>
-                        <select id="info-calcUseHakiRei" onchange="updateField('info', 'calcUseHakiRei', this.value)">
-                            <option value="nao">Não</option>
-                            <option value="pressao">Pressão</option>
-                            <option value="infusao">Infusão</option>
-                        </select>
-                        <input type="text" id="info-calcHakiReiManual" placeholder="0" class="no-sum" style="display: none;" oninput="formatAndSave('info', 'calcHakiReiManual', this)">
-                    </div>
-                </div>
-                <div style="background: rgba(0,0,0,0.3); padding: 15px; border: 1px dashed #555; border-radius: 6px; text-align: center; margin-top: 5px;">
-                    <div style="font-size: 18px; font-family: 'Cinzel', serif; font-weight: bold; color: var(--danger);">Dano Final: <span id="calc-dano-final">0</span></div>
-                    <div style="font-size: 11px; color: #aaa; margin-top: 8px; line-height: 1.4;" id="calc-formula"></div>
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <button class="btn btn-outline" style="color:var(--info); border-color:var(--info); flex: 1; font-size: 14px;" onclick="copiarDano()">📋Copiar</button>
-                        <button class="btn btn-outline" style="color:var(--danger); border-color:var(--danger); flex: 1; font-size: 14px;" onclick="sofrerDano()">🩸Receber Dano</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="box">
-            <div class="box-title" id="title-boxHist" onclick="toggleBox('boxHist')">
-                <span>História e Personalidade <span onclick="openInfoModal('História e Personalidade', 'Digite sua biografia e comportamento nessas caixas. Caso seu passado envolva dados sigilosos na trama do RPG que não podem ser vistos por metagaming em resumos, deixe marcada a opção Ocultar na Ficha. Dessa forma o texto é salvo no banco, mas ignorado ao pressionar o botão Copiar Ficha.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px; color: var(--info);">ⓘ</span></span><span id="icon-boxHist" class="toggle-icon">▼</span>
-            </div>
-            <div id="wrapper-boxHist" class="box-content">
-                <div class="input-group">
-    <label style="display:flex; justify-content:space-between; align-items:center;">
-        Personalidade
-        <label style="margin:0; font-size:10px; color:var(--warning); text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center; width:fit-content;">
-            <input type="checkbox" id="hide-personality" onchange="updateField('info', 'hidePersonality', this.checked)" style="width:auto; margin:0;"> Ocultar na Ficha
-        </label>
-    </label>
-    <textarea id="info-personalidade" oninput="updateField('info', 'personalidade', this.value)"></textarea>
-</div>
-                <div class="input-group">
-                    <label style="display:flex; justify-content:space-between; align-items:center;">
-                        História
-                        <label style="margin:0; font-size:10px; color:var(--warning); text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center; width:fit-content;">
-                            <input type="checkbox" id="info-hideHistoria" onchange="updateField('info', 'hideHistoria', this.checked)" style="width:auto; margin:0;"> Ocultar na Ficha
-                        </label>
-                    </label>
-                    <textarea id="info-historia" style="min-height: 120px;" oninput="updateField('info', 'historia', this.value)"></textarea>
-                </div>
-                <div class="input-group"><label>Referência de Aparência</label><input type="text" id="info-aparencia" placeholder="Ex: Roronoa Zoro (One Piece)" oninput="updateField('info', 'aparencia', this.value)"></div>
-            </div>
-        </div>
-    </div>
 
-    <div>
-        <div class="box">
-            <div class="box-title" id="title-boxLog" style="color: var(--warning);" onclick="toggleBox('boxLog')">
-                <span>Log de Atualizações <span onclick="openInfoModal('Log de Atualizações', 'Ao final de toda semana, clique em Adicionar Entrada. Use o título para indicar a numeração da semana e a caixa maior para listar os treinos feitos, dinheiro conquistado e NPCs recrutados. Para aprovação da sua ficha com os ADMs, não mande prints, use o botão Copiar Tudo para exportar perfeitamente a lista de evolução.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxLog" class="toggle-icon">▼</span>
-            </div>
-            <div id="wrapper-boxLog" class="box-content">
-                <div class="input-group">
-                    <label style="display:flex; justify-content:space-between; align-items:center;">
-                        Entradas
-                        <button type="button" class="btn btn-outline btn-warning" style="font-size: 10px; padding: 2px 6px;" onclick="addLog()">+ Adicionar Entrada</button>
-                    </label>
-                    <div id="logs-container"></div>
-                </div>
-                <div style="margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px;">
-                    <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center; flex-wrap: wrap;">
-                        <button class="btn btn-outline" style="color:var(--warning); border-color:var(--warning);" onclick="copyLog()">📋Copiar Tudo</button>
-                        <div style="display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 6px; border: 1px dashed #555;">
-                            <button class="btn btn-outline" style="color:#0dcaf0; border-color:#0dcaf0; padding: 6px 10px; font-size: 11px;" onclick="copyPartialLog()">📋Copiar Últimas:</button>
-                            <input type="number" id="num-logs-copy" value="1" min="1" style="width: 50px; text-align: center; padding: 4px; font-size: 12px; margin: 0; background-color: #1a1a1a; color: var(--text); border: 1px solid #444; border-radius: 4px;">
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Organização</label>
+                                <select id="info-orgTipo" onchange="updateField('info', 'orgTipo', this.value)">
+                                    <option value="">-- Selecione --</option>
+                                    <option value="Pirata">Pirata</option>
+                                    <option value="Caçador de Recompensa">Caçador de Recompensa</option>
+                                    <option value="Marinha">Marinha</option>
+                                    <option value="Governo Mundial">Governo Mundial</option>
+                                    <option value="Vanguarda Popular Revolucionária">Vanguarda Popular Revolucionária</option>
+                                </select>
+                            </div>
+                            <div class="input-group" id="box-tripulacao">
+                                <label id="label-tripulacao">Nome da Tripulação</label>
+                                <input type="text" id="info-tripulacao" oninput="updateField('info', 'tripulacao', this.value)">
+                            </div>
                         </div>
-                    </div>
-                    <pre id="logBox" style="min-height: 150px;"></pre>
-                </div>
-            </div>
-        </div>
-
-        <div class="box">
-            <div class="box-title" id="title-boxInv" onclick="toggleBox('boxInv')">
-                <span>Inventário e NPCs <span onclick="openInfoModal('Inventário e NPCs', 'Para capangas sem ficha complexa, preencha a quantidade em NPCs Comuns. Para recrutamentos importantes e de poder elevado, adicione em NPCs Especiais. Modifique a Origem e adicione o nome da raça. O menu das cinco classes de NPC será destrancado apenas se você designar a quantidade mínima de pontos requisitados para aquela classe nas caixas de texto.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px; color: var(--info);">ⓘ</span></span><span id="icon-boxInv" class="toggle-icon">▼</span>
-            </div>
-            <div id="wrapper-boxInv" class="box-content">
-                <div class="input-group">
-                    <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #b3b3b3; margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
-                        NPCs Comuns
-                        <button type="button" id="btn-add-npc-c" class="btn btn-outline btn-success" style="font-size: 14px; padding: 4px 12px;" onclick="addNpcComum()">+</button>
-                    </div>
-                    <div id="npcs-comuns-container"></div>
-                </div>
-                <div class="input-group" style="margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px; margin-bottom: 15px;">
-                    <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #b3b3b3; margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
-                        NPCs Especiais
-                        <div style="font-size: 10px; color: #aaa; text-transform: none;">Dominação: <span id="count-npc-dom">0</span>/3 | Extra-Narrada: <span id="count-npc-ext">0</span>/3</div>
-                        <button type="button" id="btn-add-npc-e" class="btn btn-outline btn-success" style="font-size: 14px; padding: 4px 12px;" onclick="addNpcEspecial()">+</button>
-                    </div>
-                    <div id="npcs-especiais-container"></div>
-                </div>
-                <div class="input-group">
-                    <label>Inventário</label>
-                    <textarea id="info-inventario" placeholder="* Item 1&#10;* Item 2" style="min-height: 120px;" oninput="updateField('info', 'inventario', this.value)"></textarea>
-                </div>
-                <div class="input-group" style="margin-top: 10px; border-top: 1px dashed #444; padding-top: 10px;">
-                    <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #b3b3b3; margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
-                        Navios
-                        <button type="button" class="btn btn-outline btn-success" style="font-size: 14px; padding: 4px 12px;" onclick="addNavio()">+</button>
-                    </div>
-                    <div id="navios-container"></div>
-                </div>
-                <div class="input-group" style="margin-top: 10px; border-top: 1px dashed #444; padding-top: 10px;">
-                    <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #b3b3b3; margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
-                        Itens e Armas Equipadas (Buffs Ativos)
-                        <button type="button" class="btn btn-outline btn-success" style="font-size: 14px; padding: 4px 12px;" onclick="addArmaEquipada()">+</button>
-                    </div>
-                    <div id="armas-equipadas-container"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="box">
-            <div class="box-title" id="title-boxTec" onclick="toggleBox('boxTec')">
-                <span>Técnicas <span onclick="openInfoModal('Técnicas', 'Clique em Adicionar Técnica. É imperativo que selecione o Estilo de Luta correspondente no menu. Em Nome, apenas insira o título do golpe. Em Descrição, detalhe puramente as ações narrativas da movimentação. O espaço de Efeitos é estritamente mecânico: escreva o debuff ou buff com exatidão matemática para que os avaliadores validem sem erros de interpretação.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px; color: var(--info);">ⓘ</span></span><span id="icon-boxTec" class="toggle-icon">▼</span>
-            </div>
-            <div id="wrapper-boxTec" class="box-content">
-                <div class="input-group" style="margin-bottom: 15px; border-bottom: 1px dashed #444; padding-bottom: 10px;">
-                    <label style="color: var(--warning); margin-bottom: 5px;">Opções de Ocultamento</label>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
-                            <input type="checkbox" id="info-hideTecNome" onchange="updateField('info', 'hideTecNome', this.checked)" style="width:auto; margin:0;"> Ocultar Nomes
-                        </label>
-                        <label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
-                            <input type="checkbox" id="info-hideTecDesc" onchange="updateField('info', 'hideTecDesc', this.checked)" style="width:auto; margin:0;"> Ocultar Descrições
-                        </label>
-                        <label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
-                            <input type="checkbox" id="info-hideTecEfeito" onchange="updateField('info', 'hideTecEfeito', this.checked)" style="width:auto; margin:0;"> Ocultar Efeitos
-                        </label>
-                        <label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
-                            <input type="checkbox" id="info-hideNaoTreinadas" onchange="updateHideNaoTreinadas(this.checked)" style="width:auto; margin:0;"> Ocultar Não Treinadas
-                        </label>
-                        <label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
-                            <input type="checkbox" id="info-showApenasNaoTreinadas" onchange="updateShowApenasNaoTreinadas(this.checked)" style="width:auto; margin:0;"> Mostrar Apenas Não Treinadas
-                        </label>
-                    </div>
-                    <div id="hide-styles-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px;"></div>
-                </div>
-                <div class="input-group">
-                    <label>Treinos Acumulados</label>
-                    <input type="text" id="info-treinosAcumulados" placeholder="0" oninput="formatAndSave('info', 'treinosAcumulados', this)">
-                </div>
-                <div class="input-group">
-                    <label style="display:flex; justify-content:space-between; align-items:center;">
-                        Lista de Técnicas
-                        <div style="display:flex; gap: 5px; align-items:center;">
-                            <select id="info-ordemTecnicas" onchange="changeOrdemTecnicas(this.value)" style="font-size: 10px; padding: 2px; width: auto; background-color: #222; border: 1px solid #555; border-radius: 4px; color: var(--text);">
-                                <option value="alfabetica">Ordem Alfabética</option>
-                                <option value="estilo">Ordem por Estilo</option>
-                                <option value="manual">Ordem Manual</option>
+                        <div class="input-group" id="box-pirataStatus" style="display: none;">
+                            <label>Status Pirata</label>
+                            <select id="info-pirataStatus" onchange="updateField('info', 'pirataStatus', this.value)">
+                                <option value="Normal">Normal</option>
+                                <option value="Supernova">Supernova</option>
+                                <option value="Shichibukai">Shichibukai</option>
+                                <option value="Yonkou">Yonkou</option>
                             </select>
-                            <button type="button" class="btn btn-outline btn-success" style="font-size: 10px; padding: 2px 6px;" onclick="addTecnica()">+ Adicionar Técnica</button>
                         </div>
+                        <div class="input-group" id="box-recompensaTravada" style="display: none; margin-top: 10px;">
+                            <label>Recompensa Travada</label>
+                            <div class="currency-input">
+                                <span>฿</span><input type="text" id="info-recompensaTravada" placeholder="Vazio = 🔒" oninput="formatCurrency('info', 'recompensaTravada', this)">
+                            </div>
+                        </div>
+                        <div class="input-row" id="box-patente-salario" style="display: none; margin-top: -5px;">
+                            <div class="input-group">
+                                <label>Patente</label>
+                                <input type="text" id="info-patente" disabled>
+                                <div style="display:flex; gap:5px; margin-top:5px;">
+                                    <button id="btn-rebaixar" class="btn btn-outline btn-danger" style="display:none; font-size:10px; flex:1; padding:4px;" onclick="rebaixarCargo()">⬇️Rebaixar</button>
+                                    <button id="btn-promover" class="btn btn-outline btn-success" style="display:none; font-size:10px; flex:1; padding:4px;" onclick="promoverCargo()">🎖️Promover</button>
+                                </div>
+                            </div>
+                            <div class="input-group"><label>Mérito</label><input type="text" id="info-merito" oninput="formatAndSave('info', 'merito', this)"></div>
+                            <div class="input-group"><label>Salário</label><input type="text" id="info-salario" disabled></div>
+                        </div>
+                        
+                        <label style="font-size: 10px; font-weight: bold; text-transform: uppercase; margin-bottom: 3px; display: block; border-top: 1px dashed #444; padding-top: 10px;">Estilos de Luta</label>
+                        <div id="box-estilo-mink" class="input-row" style="display: none; margin-bottom: 5px;">
+                            <input type="text" value="Electro" disabled style="color: var(--warning); font-weight: bold; background-color: #1a1a1a; cursor: not-allowed; text-align: center;">
+                        </div>
+                        
+                        <div class="input-row" style="margin-bottom: 5px;">
+                            <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
+                                <select id="info-estilo1" onchange="updateField('info', 'estilo1', this.value)"></select>
+                                <input type="text" id="info-freestyle1" placeholder="Nome do Freestyle" oninput="updateField('info', 'freestyle1', this.value)">
+                            </div>
+                            <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
+                                <select id="info-estilo2" onchange="updateField('info', 'estilo2', this.value)"></select>
+                                <input type="text" id="info-freestyle2" placeholder="Nome do Freestyle" oninput="updateField('info', 'freestyle2', this.value)">
+                            </div>
+                        </div>
+                        <div class="input-row">
+                            <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
+                                <select id="info-estilo3" onchange="updateField('info', 'estilo3', this.value)"></select>
+                                <input type="text" id="info-freestyle3" placeholder="Nome do Freestyle" oninput="updateField('info', 'freestyle3', this.value)">
+                            </div>
+                            <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
+                                <select id="info-estilo4" onchange="updateField('info', 'estilo4', this.value)"></select>
+                                <input type="text" id="info-freestyle4" placeholder="Nome do Freestyle" oninput="updateField('info', 'freestyle4', this.value)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-grid">
+                <div>
+                    <div class="box">
+                        <div class="box-title" id="title-boxHab" style="color: var(--primary);" onclick="toggleBox('boxHab')">
+                            <span>Habilidades Únicas <span onclick="openInfoModal('Habilidades Únicas', 'Clique no botão com o sinal de soma para buscar as habilidades que seu personagem comprou ou conquistou. Habilidades ligadas à sua Raça ou Linhagem aparecerão sozinhas e não podem ser apagadas. Abaixo da lista, surgirão caixas de seleção. Use-as DURANTE o combate para ligar ou desligar buffs dinâmicos que modificam seus status na mesma hora.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxHab" class="toggle-icon">▼</span>
+                        </div>
+                        <div id="wrapper-boxHab" class="box-content">
+                            <div class="input-group">
+                                <div style="display:flex; gap: 5px;">
+                                    <select id="hab-select" style="flex: 1; background-color: #2a2a2a; color: var(--text); border: 1px solid #444; border-radius: 4px; padding: 6px; font-size: 13px;">
+                                        <option value="">-- Adicionar Habilidade --</option>
+                                    </select>
+                                    <button class="btn btn-outline btn-success" onclick="addHabilidade()">+</button>
+                                </div>
+                            </div>
+                            <div id="hab-list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 5px;"></div>
+                            
+                            <div style="margin-top: 15px; border-top: 1px dashed #444; padding-top: 10px; display: flex; align-items: center; justify-content: space-between;">
+                                <label style="font-size: 11px; color: var(--text);">Buff: Aliados c/ Espírito Contagiante</label>
+                                <div style="display: flex; gap: 5px; align-items: center;">
+                                    <input type="text" id="info-aliadosEspiritoContagiante" placeholder="0" oninput="formatAndSave('info', 'aliadosEspiritoContagiante', this)" style="width: 50px; text-align: center; padding: 4px; font-size: 12px; background-color: #2a2a2a; color: var(--text); border: 1px solid #444; border-radius: 4px;">
+                                </div>
+                            </div>
+
+                            <div id="hab-ativos" style="margin-top: 15px; border-top: 1px dashed #444; padding-top: 10px; display: none;">
+                                <label style="color: var(--primary); font-size: 11px;">Buffs Ativos</label>
+                                <div id="hab-ativo-atirador" style="display:none; margin-top:5px;">
+                                    <label style="font-size:11px; display:flex; align-items:center; gap:5px; width:fit-content;"><input type="checkbox" id="chk-atirador" onchange="updateField('info', 'habCaminhoAtiradorAtivo', this.checked)"> Caminho do Atirador: Atirando com arma de fogo</label>
+                                </div>
+                                <div id="hab-ativo-qi" style="display:none; margin-top:5px;">
+                                    <label style="font-size:11px; display:flex; align-items:center; gap:5px; width:fit-content;"><input type="checkbox" id="chk-qi" onchange="updateField('info', 'habQIAvancadoAtivo', this.checked)"> QI Avançado: Mais de 3 turnos na batalha</label>
+                                </div>
+                                <div id="hab-ativo-beckman" style="display:none; margin-top:5px;">
+                                    <label style="font-size:11px; display:flex; align-items:center; gap:5px; width:fit-content;"><input type="checkbox" id="chk-beckman" onchange="updateField('info', 'linhagemBeckmanArma', this.checked)"> Linhagem Beckman: Segurando arma de fogo</label>
+                                </div>
+                                <div id="hab-ativo-retorno" style="display:none; margin-top:5px; flex-direction:column; gap:5px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px;">
+                                    <label style="font-size:10px; color:#aaa; width:fit-content;">Golpe de Retorno (Usos no dia)</label>
+                                    <select id="sel-retorno-uso" onchange="updateField('info', 'habRetornoUso', parseInt(this.value))" style="font-size: 11px; background-color: #222; color: #fff; border: 1px solid #444;">
+                                        <option value="1">1º Uso (Nenhum debuff)</option>
+                                        <option value="2">Já usou 2 vezes (-10% Res)</option>
+                                        <option value="3">Já usou 3 vezes (-20% Res)</option>
+                                    </select>
+                                </div>
+                                <div id="hab-ativo-armista" style="display:none; margin-top:5px; flex-direction:column; gap:5px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px;">
+                                    <label style="font-size:10px; color:#aaa;">Favoritismo Armista</label>
+                                    <select id="sel-armista-ativo" onchange="updateField('info', 'habFavArmistaAtivo', this.value)" style="font-size: 11px; background-color: #222; color: #fff; border: 1px solid #444;">
+                                    </select>
+                                    <select id="sel-armista-attr" onchange="updateField('info', 'habFavArmistaAttr', this.value)" style="font-size: 11px; background-color: #222; color: #fff; border: 1px solid #444;">
+                                        <option value="d">Bônus em Destreza</option>
+                                        <option value="f">Bônus em Força</option>
+                                    </select>
+                                </div>
+                                <div id="hab-ativo-furia" style="display:none; margin-top:5px; flex-direction:column; gap:5px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px;">
+                                    <label style="font-size:10px; color:#aaa;">Fúria Ardente (Atributo a Buffar)</label>
+                                    <select id="sel-furia-attr" onchange="updateField('info', 'habFuriaArdenteAttr', this.value)" style="font-size: 11px; background-color: #222; color: #fff; border: 1px solid #444;">
+                                        <option value="f">Força</option>
+                                        <option value="d">Destreza</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="box">
+                        <div class="box-title" id="title-boxBase" onclick="toggleBox('boxBase')">
+                            <span>Atributos Base <span onclick="openInfoModal('Atributos Base', 'Digite os pontos brutos que você ganhou em Força, Destreza, Resistência e Velocidade nas caixas de input. O sistema calcula o Total ao lado baseado nos seus buffs. Se o seu total de Velocidade for maior que zero, um painel inferior abrirá. Você precisa dividir EXATAMENTE o valor Total da Velocidade entre Reflexos e Velocidade Corporal, ou o sistema bloqueará com um aviso vermelho.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px; color: var(--info);">ⓘ</span></span><span id="icon-boxBase" class="toggle-icon">▼</span>
+                        </div>
+                        <div id="wrapper-boxBase" class="box-content">
+                            <div id="totalBaseDisplay" style="text-align: center; font-size: 22px; font-weight: bold; font-family: 'Cinzel', serif; color: var(--info); margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; border: 1px solid var(--info);">Total: 0</div>
+                            
+                            <div class="attr-row">
+                                <span class="attr-label">Força</span>
+                                <div class="attr-input-group"><input type="text" class="attr-input" id="stat-f" placeholder="0" oninput="formatAndSave('stats', 'f', this)"><span class="attr-total" id="total-f">Total: 0</span></div>
+                            </div>
+                            <div class="attr-row">
+                                <span class="attr-label">Destreza</span>
+                                <div class="attr-input-group"><input type="text" class="attr-input" id="stat-d" placeholder="0" oninput="formatAndSave('stats', 'd', this)"><span class="attr-total" id="total-d">Total: 0</span></div>
+                            </div>
+                            <div class="attr-row">
+                                <span class="attr-label">Resistência</span>
+                                <div class="attr-input-group"><input type="text" class="attr-input" id="stat-r" placeholder="0" oninput="formatAndSave('stats', 'r', this)"><span class="attr-total" id="total-r">Total: 0</span></div>
+                            </div>
+                            <div class="attr-row" style="margin-bottom: 0;">
+                                <span class="attr-label">Velocidade</span>
+                                <div class="attr-input-group"><input type="text" class="attr-input" id="stat-v" placeholder="0" oninput="formatAndSave('stats', 'v', this)"><span class="attr-total" id="total-v">Total: 0</span></div>
+                            </div>
+                            <div id="container-boxVel" style="display:none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #444;">
+                                <div style="display:flex; gap: 10px;">
+                                    <div style="flex:1"><label style="font-size: 10px;">Reflexo</label><input type="text" id="sub-refl" placeholder="0" oninput="formatAndSave('substats', 'refl', this)"></div>
+                                    <div style="flex:1"><label style="font-size: 10px;">Velocidade Corporal</label><input type="text" id="sub-vcorp" placeholder="0" oninput="formatAndSave('substats', 'vcorp', this)"></div>
+                                </div>
+                                <div id="avisoVel" class="avisoErro"></div>
+                            </div>
+                            <div id="container-boxVelAgua" style="display:none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #444;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                    <span style="font-family:'Cinzel', serif; font-size:14px; font-weight:bold; color:var(--info);">Velocidade na Água</span>
+                                </div>
+                                <div style="display:flex; gap: 10px;">
+                                    <div style="flex:1"><label style="font-size: 10px;">Reflexo (Água)</label><input type="text" id="sub-reflAgua" placeholder="0" oninput="formatAndSave('substats', 'reflAgua', this)"></div>
+                                    <div style="flex:1"><label style="font-size: 10px;">Vel. Corporal (Água)</label><input type="text" id="sub-vcorpAgua" placeholder="0" oninput="formatAndSave('substats', 'vcorpAgua', this)"></div>
+                                </div>
+                                <div id="avisoVelAgua" class="avisoErro"></div>
+                                <span class="attr-total" id="total-vAgua" style="display:block; text-align:right; margin-top:5px; color:var(--info); font-weight:bold;">Total na Água: 0</span>
+                            </div>
+                            <div id="container-boxVelAkuma" style="display:none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #444;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                    <span style="font-family:'Cinzel', serif; font-size:14px; font-weight:bold; color:var(--danger);">Velocidade Adicional (Akuma no Mi)</span>
+                                </div>
+                                <div style="display:flex; gap: 10px;">
+                                    <div style="flex:1"><label style="font-size: 10px;">Reflexo Adicional</label><input type="text" id="sub-reflAkuma" placeholder="0" oninput="formatAndSave('substats', 'reflAkuma', this)"></div>
+                                    <div style="flex:1"><label style="font-size: 10px;">Vel. Corp. Adicional</label><input type="text" id="sub-vcorpAkuma" placeholder="0" oninput="formatAndSave('substats', 'vcorpAkuma', this)"></div>
+                                </div>
+                                <div id="avisoVelAkuma" class="avisoErro"></div>
+                                <span class="attr-total" id="total-vAkuma" style="display:block; text-align:right; margin-top:5px; color:var(--danger); font-weight:bold;">Adicional: 0</span>
+                            </div>
+                            <div id="avisoBase" class="avisoErro"></div>
+                        </div>
+                    </div>
+
+                    <div class="box">
+                        <div class="box-title" id="title-boxEsp" style="color: #a461ff;" onclick="toggleBox('boxEsp')">
+                            <span>Espírito <span onclick="openInfoModal('Espírito', 'A caixa só abre quando você atinge o mínimo de pontos totais. Coloque os pontos no campo Espírito Base. Em seguida, desça para as caixas de Armamento, Observação e Rei. Você precisa pegar o Total do seu Espírito e fragmentar ele nestes três Hakis. Ao colocar pontos neles, caixas de marcação aparecerão abaixo; clique para ligar a capacidade de usar níveis avançados quando você obtiver a aprovação.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxEsp" class="toggle-icon">▼</span>
+                        </div>
+                        <div id="wrapper-boxEsp" class="box-content">
+                            <div style="margin-bottom: 10px;">
+                                <label style="font-size: 10px;">Espírito Base</label>
+                                <input type="text" id="stat-esp" placeholder="🔒 Bloqueado" disabled oninput="formatAndSave('stats', 'esp', this)" style="font-size: 16px; font-weight: bold; font-family: 'Cinzel', serif; text-align: right;">
+                                <span id="total-esp" class="attr-total" style="display:block; text-align:right;">Total: 0</span>
+                            </div>
+                            <div id="box-haki" style="display:none; padding-top:10px; border-top: 1px dashed #444;">
+                                <div style="display:flex; gap: 10px; margin-bottom: 5px;">
+                                    <div style="flex:1"><label style="font-size: 10px;">Armamento</label><input type="text" id="sub-hArm" placeholder="0" oninput="formatAndSave('substats', 'hArm', this)"></div>
+                                    <div style="flex:1"><label style="font-size: 10px;">Observação</label><input type="text" id="sub-hObs" placeholder="0" oninput="formatAndSave('substats', 'hObs', this)"></div>
+                                    <div style="flex:1"><label style="font-size: 10px;">Rei</label><input type="text" id="sub-hRei" placeholder="0" oninput="formatAndSave('substats', 'hRei', this)"></div>
+                                </div>
+                                <div id="avisoEsp" class="avisoErro"></div>
+                                <div style="margin-top:15px; display:grid; grid-template-columns: 1fr 1fr 1fr; font-size:11px; border-top: 1px dashed #444; padding-top: 15px;">
+                                    <div style="padding: 0 10px; border-right: 1px solid #444; display: flex; flex-direction: column; align-items: center;">
+                                        <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start;">
+                                            <div id="cont-ha1" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHA1" onchange="updateField('info', 'unlockHA1', this.checked)"> Invisível</label></div>
+                                            <div id="cont-ha2" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHA2" onchange="updateField('info', 'unlockHA2', this.checked)"> Visível</label></div>
+                                            <div id="cont-ha3" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHA3" onchange="updateField('info', 'unlockHA3', this.checked)"> Imbuição</label></div>
+                                            <div id="cont-ha4" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHA4" onchange="updateField('info', 'unlockHA4', this.checked)"> Full Body</label></div>
+                                            <div id="cont-ha5" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHA5" onchange="updateField('info', 'unlockHA5', this.checked)"> Emissão</label></div>
+                                            <div id="cont-ha6" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHA6" onchange="updateField('info', 'unlockHA6', this.checked)"> Avançado</label></div>
+                                        </div>
+                                    </div>
+                                    <div style="padding: 0 10px; border-right: 1px solid #444; display: flex; flex-direction: column; align-items: center;">
+                                        <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start;">
+                                            <div id="cont-ho2" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHO2" onchange="updateField('info', 'unlockHO2', this.checked)"> Intenção</label></div>
+                                            <div id="cont-ho3" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHO3" onchange="updateField('info', 'unlockHO3', this.checked)"> Premonição</label></div>
+                                            <div id="cont-ho4" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHO4" onchange="updateField('info', 'unlockHO4', this.checked)"> Avançado</label></div>
+                                        </div>
+                                    </div>
+                                    <div style="padding: 0 10px; display: flex; flex-direction: column; align-items: center;">
+                                        <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start;">
+                                            <div id="cont-hr2" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHR2" onchange="updateField('info', 'unlockHR2', this.checked)"> Dominação</label></div>
+                                            <div id="cont-hr3" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHR3" onchange="updateField('info', 'unlockHR3', this.checked)"> Incapacitação</label></div>
+                                            <div id="cont-hr4" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHR4" onchange="updateField('info', 'unlockHR4', this.checked)"> Pressão</label></div>
+                                            <div id="cont-hr5" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHR5" onchange="updateField('info', 'unlockHR5', this.checked)"> Assassinato de Observação</label></div>
+                                            <div id="cont-hr6" style="display:none;"><label style="display:flex;align-items:center;gap:6px;text-transform:uppercase;font-weight:bold;color:#bbb;"><input type="checkbox" id="chk-unlockHR6" onchange="updateField('info', 'unlockHR6', this.checked)"> Infusão</label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="box" id="container-boxAmi">
+                        <div class="box-title" id="title-boxAmi" style="color: var(--danger);" onclick="toggleBox('boxAmi')">
+                            <span>Akuma no Mi <span onclick="openInfoModal('Akuma no Mi', 'Este campo é vinculado com a Fruta selecionada. Deposite seus pontos na caixa principal. Embaixo, ative apenas as caixas que sua fruta engloba. O sistema vai pegar o valor Total e te obrigar a dividir com perfeição entre as capacidades. Se a barra de Controle de Habilidade chegar em cem por cento, o painel do Despertar vai acender indicando a liberação.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxAmi" class="toggle-icon">▼</span>
+                        </div>
+                        <div id="wrapper-boxAmi" class="box-content">
+                            <div class="input-group">
+                                <label style="color: var(--danger); font-family: 'Cinzel', serif;">Fruta Consumida</label>
+                                <select id="select-akuma" onchange="selecionarAkuma(this.value)" style="width: 100%; padding: 10px; background-color: #1a1a1a; color: var(--text); border: 1px solid var(--danger); border-radius: 4px; font-weight: bold;"></select>
+                            </div>
+                            
+                            <div id="box-zoan-buffs" style="display:none; margin-bottom: 15px; background: rgba(220, 53, 69, 0.1); padding: 10px; border-radius: 6px; border: 1px dashed var(--danger);">
+                                <label style="font-size: 11px; color: var(--danger); text-transform: uppercase; font-weight: bold;">Buffs Extras da Fruta (%)</label>
+                                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 5px; margin-top: 5px;">
+                                    <div><label style="font-size: 9px; color: #aaa;">Força</label><input type="number" id="info-zoanBuffF" placeholder="0" oninput="formatAndSave('info', 'zoanBuffF', this)" style="font-size: 12px; text-align: center; background-color: #222;"></div>
+                                    <div><label style="font-size: 9px; color: #aaa;">Destreza</label><input type="number" id="info-zoanBuffD" placeholder="0" oninput="formatAndSave('info', 'zoanBuffD', this)" style="font-size: 12px; text-align: center; background-color: #222;"></div>
+                                    <div><label style="font-size: 9px; color: #aaa;">Resistência</label><input type="number" id="info-zoanBuffR" placeholder="0" oninput="formatAndSave('info', 'zoanBuffR', this)" style="font-size: 12px; text-align: center; background-color: #222;"></div>
+                                    <div><label style="font-size: 9px; color: #aaa;">Velocidade</label><input type="number" id="info-zoanBuffV" placeholder="0" oninput="formatAndSave('info', 'zoanBuffV', this)" style="font-size: 12px; text-align: center; background-color: #222;"></div>
+                                </div>
+                                <div id="box-zoan-forms" style="display:flex; justify-content: space-between; margin-top: 10px; gap: 5px;">
+                                    <button id="btn-forma-comum" class="btn btn-outline" style="flex: 1; font-size: 10px; padding: 4px;" onclick="updateField('info', 'zoanForma', 'Comum')">Comum</button>
+                                    <button id="btn-forma-instavel" class="btn btn-outline" style="flex: 1; font-size: 10px; padding: 4px;" onclick="updateField('info', 'zoanForma', 'Instável')">Instável</button>
+                                    <button id="btn-forma-hibrida" class="btn btn-outline" style="flex: 1; font-size: 10px; padding: 4px;" onclick="updateField('info', 'zoanForma', 'Híbrida')">Híbrida</button>
+                                    <button id="btn-forma-completa" class="btn btn-outline" style="flex: 1; font-size: 10px; padding: 4px;" onclick="updateField('info', 'zoanForma', 'Completa')">Completa</button>
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 15px; background: rgba(220, 53, 69, 0.1); padding: 10px; border-radius: 6px; border: 1px dashed var(--danger);">
+                                <label style="font-size: 11px; color: var(--danger); text-transform: uppercase; font-weight: bold;">Pontos da Akuma</label>
+                                <input type="text" id="stat-ami" placeholder="0" oninput="formatAndSave('stats', 'ami', this)" style="font-size: 18px; font-weight: bold; font-family: 'Cinzel', serif; text-align: right; color: var(--danger); border-color: var(--danger);">
+                                <div style="display:flex; justify-content:space-between; margin-top:5px;">
+                                    <span id="ami-distribuiveis" style="font-size: 12px; font-weight: bold; color: var(--info);">Disponível: 0</span>
+                                    <span id="total-ami" class="attr-total" style="color: var(--danger); font-weight: bold;">Total: 0</span>
+                                </div>
+                            </div>
+
+                            <div id="box-amiSub" style="display:none; padding-top:10px;">
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                    <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; border: 1px solid #444;">
+                                        <label style="font-size: 11px; display:flex; align-items:center; gap:5px; color: #ddd; margin-bottom: 5px; width:fit-content;"><input type="checkbox" id="chk-amiAlc" onchange="toggleAmi('amiAlc', this.checked)"> Alcance</label>
+                                        <input type="text" id="sub-amiAlc" placeholder="0" oninput="formatAndSave('substats', 'amiAlc', this)" style="font-size: 14px; text-align: right; font-weight: bold;">
+                                        <div style="display:flex; align-items:center; justify-content: space-between; margin-top:5px;">
+                                            <label style="font-size:9px; margin:0; text-transform:none; color:#aaa;">Multiplicador (m):</label>
+                                            <input type="text" id="info-amiAlcMult" placeholder="Ex: 1.8x" onchange="formatAmiAlcMult(this)" style="width:45px; padding:2px; font-size:10px; text-align:center; background: #222; border: 1px solid #555;">
+                                        </div>
+                                    </div>
+
+                                    <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; border: 1px solid #444;">
+                                        <label style="font-size: 11px; display:flex; align-items:center; gap:5px; color: #ddd; margin-bottom: 5px; width:fit-content;"><input type="checkbox" id="chk-amiDur" onchange="toggleAmi('amiDur', this.checked)"> Durabilidade</label>
+                                        <input type="text" id="sub-amiDur" placeholder="0" oninput="formatAndSave('substats', 'amiDur', this)" style="font-size: 14px; text-align: right; font-weight: bold;">
+                                    </div>
+
+                                    <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; border: 1px solid #444;">
+                                        <label style="font-size: 11px; display:flex; align-items:center; gap:5px; color: #ddd; margin-bottom: 5px; width:fit-content;"><input type="checkbox" id="chk-amiPot" onchange="toggleAmi('amiPot', this.checked)"> Potência</label>
+                                        <input type="text" id="sub-amiPot" placeholder="0" oninput="formatAndSave('substats', 'amiPot', this)" style="font-size: 14px; text-align: right; font-weight: bold;">
+                                        <div id="box-amiPotBuff" style="display:none; flex-direction:column; gap:2px; margin-top:5px;">
+                                            <div style="display:flex; align-items:center; justify-content: space-between;">
+                                                <label style="font-size:9px; margin:0; text-transform:none; color:#aaa;">Dano Adicional (%):</label>
+                                                <input type="text" id="info-amiPotBuff" placeholder="Ex: 50" oninput="formatAndSave('info', 'amiPotBuff', this)" style="width:45px; padding:2px; font-size:10px; text-align:center; background: #222; border: 1px solid #555;">
+                                            </div>
+                                            <div style="display:flex; align-items:center; justify-content: space-between;">
+                                                <label style="font-size:9px; margin:0; text-transform:none; color:#aaa;">Resistência (%):</label>
+                                                <input type="text" id="info-amiResPct" placeholder="Ex: 50" oninput="formatAndSave('info', 'amiResPct', this)" style="width:45px; padding:2px; font-size:10px; text-align:center; background: #222; border: 1px solid #555;">
+                                            </div>
+                                        </div>
+                                        <span id="ami-res-total" style="font-size:10px; color:var(--warning); display:block; margin-top:3px; text-align:right;"></span>
+                                    </div>
+
+                                    <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; border: 1px solid #444;">
+                                        <label style="font-size: 11px; display:flex; align-items:center; gap:5px; color: #ddd; margin-bottom: 5px; width:fit-content;"><input type="checkbox" id="chk-amiVel" onchange="toggleAmi('amiVel', this.checked)"> Velocidade</label>
+                                        <input type="text" id="sub-amiVel" placeholder="0" oninput="formatAndSave('substats', 'amiVel', this)" style="font-size: 14px; text-align: right; font-weight: bold;">
+                                        <div id="box-amiVelBuff" style="display:none; flex-direction:column; gap:2px; margin-top:5px;">
+                                            <div style="display:flex; align-items:center; justify-content: space-between;">
+                                                <label style="font-size:9px; margin:0; text-transform:none; color:#aaa; display:flex; align-items:center; gap:3px;">
+                                                    <input type="checkbox" id="chk-amiVelAtivo" onchange="updateField('info', 'amiVelAtivo', this.checked)" style="width:auto; margin:0;"> Ativar (%)
+                                                </label>
+                                                <input type="text" id="info-amiVelBuff" placeholder="Ex: 75" oninput="formatAndSave('info', 'amiVelBuff', this)" style="width:45px; padding:2px; font-size:10px; text-align:center; background: #222; border: 1px solid #555;">
+                                            </div>
+                                        </div>
+                                        <span id="ami-vel-total" style="font-size:10px; color:var(--warning); display:block; margin-top:3px; text-align:right;"></span>
+                                    </div>
+                                </div>
+
+                                <div id="box-despertar" style="margin-top: 12px; background: rgba(164, 97, 255, 0.1); padding: 10px; border-radius: 6px; border: 1px dashed #a461ff; transition: opacity 0.3s;">
+                                    <label style="font-size: 12px; display:flex; align-items:center; gap:5px; color: #a461ff; font-weight:bold; margin-bottom: 5px; font-family: 'Cinzel', serif; width:fit-content;">
+                                        <input type="checkbox" id="chk-amiDesp" onchange="toggleAmi('amiDesp', this.checked)"> 🌟 Despertar
+                                    </label>
+                                    <input type="text" id="sub-amiDesp" placeholder="0" oninput="formatAndSave('substats', 'amiDesp', this)" style="font-size: 16px; text-align: right; font-weight: bold; border-color: #a461ff; color: #a461ff;">
+                                    <div style="font-size: 10px; color: #aaa; text-align: right; margin-top: 4px;">Requer 100% de Controle</div>
+                                </div>
+
+                                <div id="avisoAmi" class="avisoErro"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="box">
+                        <div class="box-title" id="title-boxEstamina" onclick="toggleBox('boxEstamina')">
+                            <span>Calculadora de Estamina <span onclick="openInfoModal('Calculadora de Estamina', 'Na hora do turno de combate, não diminua sua estamina de cabeça. Puxe os dados usando os botões Puxar. O sistema calcula a dedução correta automaticamente com base nos seus multiplicadores e buffs engatilhados. Quando o gasto total estiver certo, clique em Gastar Estamina para reduzir a barra vermelha. Use os botões de Repouso quando o mestre liberar turnos de descanso.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px; color: var(--info);">ⓘ</span></span><span id="icon-boxEstamina" class="toggle-icon">▼</span>
+                        </div>
+                        <div id="wrapper-boxEstamina" class="box-content">
+                            <div style="text-align: center; margin-bottom: 15px;">
+                                <span style="font-family: 'Cinzel', serif; font-weight: bold; color: var(--success); font-size: 16px;">Estamina: <input type="text" id="estamina-atual" value="0" class="no-sum" oninput="formatAndSave('info', 'estaminaAtual', this)" style="width: 70px; text-align: center; font-size: 16px; font-weight: bold; font-family: 'Cinzel', serif; background: transparent; border: none; border-bottom: 1px dashed var(--success); color: var(--success); padding: 0; outline: none;"> / <span id="estamina-total">0</span></span>
+                                <div style="margin-top: 10px; display: flex; justify-content: center; gap: 10px;">
+                                    <button class="btn btn-outline" style="color:var(--info); border-color:var(--info); font-size: 11px; padding: 4px 8px;" onclick="recuperarEstamina(0.10)">Em Movimento (+10%)</button>
+                                    <button class="btn btn-outline" style="color:var(--success); border-color:var(--success); font-size: 11px; padding: 4px 8px;" onclick="recuperarEstamina(0.30)">Repouso Total (+30%)</button>
+                                </div>
+                                <div style="margin-top: 10px; display: flex; justify-content: center;">
+                                    <label style="font-size:11px; color:var(--danger); font-weight:bold; cursor:pointer; display:flex; gap:5px; align-items:center; width:fit-content; margin:0 auto;">
+                                        <input type="checkbox" id="info-exaustaoCompleta" onchange="updateField('info', 'exaustaoCompleta', this.checked)" style="width:auto; margin:0;"> Exaustão Completa (-20% Todos os Atributos)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="input-row">
+                                <div class="input-group">
+                                    <label>Velocidade da Ação</label>
+                                    <div style="display: flex; gap: 5px;">
+                                        <input type="text" id="info-estaminaVelocidade" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'estaminaVelocidade', this)">
+                                        <button class="btn btn-outline btn-warning" style="padding: 4px 8px;" onclick="puxarVelocidade()">Puxar</button>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label>Dano Causado</label>
+                                    <div style="display: flex; gap: 5px;">
+                                        <input type="text" id="info-estaminaDano" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'estaminaDano', this)">
+                                        <button class="btn btn-outline btn-danger" style="padding: 4px 8px;" onclick="puxarDano()">Puxar</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-row">
+                                <div class="input-group">
+                                    <label>Buff Ativo (%)</label>
+                                    <input type="text" id="info-estaminaBuffPct" placeholder="0" oninput="formatAndSave('info', 'estaminaBuffPct', this)">
+                                </div>
+                                <div class="input-group">
+                                    <label>Haki Armamento?</label>
+                                    <select id="info-estaminaHakiArm" onchange="updateField('info', 'estaminaHakiArm', this.value)">
+                                        <option value="nao">Não</option>
+                                        <option value="sim">Sim</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label>Haki Observação?</label>
+                                    <select id="info-estaminaHakiObs" onchange="updateField('info', 'estaminaHakiObs', this.value)">
+                                        <option value="nao">Não</option>
+                                        <option value="sim">Sim</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="background: rgba(0,0,0,0.3); padding: 15px; border: 1px dashed #555; border-radius: 6px; text-align: center; margin-top: 5px;">
+                                <div style="font-size: 18px; font-family: 'Cinzel', serif; font-weight: bold; color: var(--warning);">Custo de Estamina: <span id="estamina-custo-final">0</span></div>
+                                <div style="font-size: 11px; color: #aaa; margin-top: 8px; line-height: 1.4;" id="estamina-formula"></div>
+                                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                    <button class="btn btn-outline" style="color:var(--info); border-color:var(--info); flex: 1; font-size: 14px;" onclick="copiarEstamina()">📋Copiar</button>
+                                    <button class="btn btn-outline" style="color:var(--danger); border-color:var(--danger); flex: 1; font-size: 14px;" onclick="gastarEstamina()">🔥Gastar Estamina</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="box">
+                        <div class="box-title" id="title-boxCalc" onclick="toggleBox('boxCalc')">
+                            <span>Calculadora de Dano <span onclick="openInfoModal('Calculadora de Dano', 'Durante o embate, coloque a resistência adversária no primeiro campo. Selecione se seu golpe foi de Destreza ou Força, e adicione bônus brutos ou porcentagens ativas que declarou. O sistema puxará sua Potência de Fruta e seu nível de Haki marcado, formulando a matemática de dano físico embaixo. Clique no botão de Receber Dano só se você for o alvo do ataque.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px; color: var(--info);">ⓘ</span></span><span id="icon-boxCalc" class="toggle-icon">▼</span>
+                        </div>
+                        <div id="wrapper-boxCalc" class="box-content">
+                            <div style="text-align: center; margin-bottom: 15px;">
+                                <span style="font-family: 'Cinzel', serif; font-weight: bold; color: var(--danger); font-size: 16px;">HP: <input type="text" id="hp-atual" value="0" class="no-sum" oninput="formatAndSave('info', 'hpAtual', this)" style="width: 70px; text-align: center; font-size: 16px; font-weight: bold; font-family: 'Cinzel', serif; background: transparent; border: none; border-bottom: 1px dashed var(--danger); color: var(--danger); padding: 0; outline: none;"> / <span id="hp-total">0</span></span>
+                            </div>
+                            <div class="input-row">
+                                <div class="input-group" id="box-calcQuemAtaca" style="flex: 1;">
+                                    <label>Quem ataca?</label>
+                                    <select id="info-calcQuemAtaca" onchange="updateField('info', 'calcQuemAtaca', this.value)">
+                                        <option value="eu">Eu</option>
+                                        <option value="inimigo">Inimigo</option>
+                                    </select>
+                                </div>
+                                <div class="input-group" style="flex: 1.5;">
+                                    <label>Atributo Físico <span style="font-size:8px;text-transform:none;">(Sem buffs de técnicas)</span></label>
+                                    <div style="display: flex; gap: 5px;">
+                                        <input type="text" id="info-calcUseAttr" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'calcUseAttr', this)">
+                                        <button class="btn btn-outline btn-info" style="padding: 4px 8px;" onclick="puxarDestrezaDano()">D</button>
+                                        <button class="btn btn-outline btn-danger" style="padding: 4px 8px;" onclick="puxarForcaDano()">F</button>
+                                    </div>
+                                </div>
+                                <div class="input-group" id="box-calcUseAmi" style="flex: 1;">
+                                    <label id="label-calcUseAmi">Somar Akuma?</label>
+                                    <select id="info-calcUseAmi" onchange="updateField('info', 'calcUseAmi', this.value)">
+                                        <option value="sim">Sim</option>
+                                        <option value="nao">Não</option>
+                                    </select>
+                                    <input type="text" id="info-calcAmiManual" placeholder="0" class="no-sum" style="display: none;" oninput="formatAndSave('info', 'calcAmiManual', this)">
+                                </div>
+                            </div>
+                            <div class="input-row">
+                                <div class="input-group">
+                                    <label>Resistência</label>
+                                    <div style="display: flex; gap: 5px;">
+                                        <input type="text" id="info-calcInimigoRes" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'calcInimigoRes', this)">
+                                        <button class="btn btn-outline btn-warning" style="padding: 4px 8px;" onclick="puxarResistenciaDano()">Puxar</button>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label>Res. Ignorada (%)</label>
+                                    <input type="text" id="info-calcResIgnorada" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'calcResIgnorada', this)">
+                                </div>
+                                <div class="input-group">
+                                    <label>Dano Ignorado (%)</label>
+                                    <input type="text" id="info-calcDanoIgnorado" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'calcDanoIgnorado', this)">
+                                </div>
+                                <div class="input-group">
+                                    <label>Dano Akuma Ignorado (%)</label>
+                                    <input type="text" id="info-calcDanoAmiIgnorado" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'calcDanoAmiIgnorado', this)">
+                                </div>
+                            </div>
+                            <div class="input-row">
+                                <div class="input-group">
+                                    <label>Bônus de Estilo</label>
+                                    <input type="text" id="info-calcBuffFlat" placeholder="0" oninput="formatAndSave('info', 'calcBuffFlat', this)">
+                                </div>
+                                <div class="input-group">
+                                    <label>Buff Ativo (%)</label>
+                                    <input type="text" id="info-calcBuffPct" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'calcBuffPct', this)">
+                                </div>
+                                <div class="input-group">
+                                    <label>Buff Dano (%)</label>
+                                    <input type="text" id="info-calcBuffDanoFinalPct" placeholder="0" class="no-sum" oninput="formatAndSave('info', 'calcBuffDanoFinalPct', this)">
+                                </div>
+                                <div class="input-group" id="box-calcUseHaki">
+                                    <label id="label-calcUseHaki">Somar Armamento?</label>
+                                    <select id="info-calcUseHaki" onchange="updateField('info', 'calcUseHaki', this.value)">
+                                        <option value="nao">Não</option>
+                                        <option value="invisivel">Invisível</option>
+                                        <option value="visivel">Visível</option>
+                                        <option value="imbuicao">Imbuição</option>
+                                        <option value="fullbody">Full Body</option>
+                                        <option value="emissao">Emissão</option>
+                                        <option value="avancado">Avançado</option>
+                                    </select>
+                                    <input type="text" id="info-calcHakiManual" placeholder="0" class="no-sum" style="display: none;" oninput="formatAndSave('info', 'calcHakiManual', this)">
+                                </div>
+                                <div class="input-group" id="box-calcUseHakiRei">
+                                    <label id="label-calcUseHakiRei">Somar Rei?</label>
+                                    <select id="info-calcUseHakiRei" onchange="updateField('info', 'calcUseHakiRei', this.value)">
+                                        <option value="nao">Não</option>
+                                        <option value="pressao">Pressão</option>
+                                        <option value="infusao">Infusão</option>
+                                    </select>
+                                    <input type="text" id="info-calcHakiReiManual" placeholder="0" class="no-sum" style="display: none;" oninput="formatAndSave('info', 'calcHakiReiManual', this)">
+                                </div>
+                            </div>
+                            <div style="background: rgba(0,0,0,0.3); padding: 15px; border: 1px dashed #555; border-radius: 6px; text-align: center; margin-top: 5px;">
+                                <div style="font-size: 18px; font-family: 'Cinzel', serif; font-weight: bold; color: var(--danger);">Dano Final: <span id="calc-dano-final">0</span></div>
+                                <div style="font-size: 11px; color: #aaa; margin-top: 8px; line-height: 1.4;" id="calc-formula"></div>
+                                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                    <button class="btn btn-outline" style="color:var(--info); border-color:var(--info); flex: 1; font-size: 14px;" onclick="copiarDano()">📋Copiar</button>
+                                    <button class="btn btn-outline" style="color:var(--danger); border-color:var(--danger); flex: 1; font-size: 14px;" onclick="sofrerDano()">🩸Receber Dano</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="box">
+                        <div class="box-title" id="title-boxHist" onclick="toggleBox('boxHist')">
+                            <span>História e Personalidade <span onclick="openInfoModal('História e Personalidade', 'Digite sua biografia e comportamento nessas caixas. Caso seu passado envolva dados sigilosos na trama do RPG que não podem ser vistos por metagaming em resumos, deixe marcada a opção Ocultar na Ficha. Dessa forma o texto é salvo no banco, mas ignorado ao pressionar o botão Copiar Ficha.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px; color: var(--info);">ⓘ</span></span><span id="icon-boxHist" class="toggle-icon">▼</span>
+                        </div>
+                        <div id="wrapper-boxHist" class="box-content">
+                            <div class="input-group">
+                                <label style="display:flex; justify-content:space-between; align-items:center;">
+                                    Personalidade
+                                    <label style="margin:0; font-size:10px; color:var(--warning); text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center; width:fit-content;">
+                                        <input type="checkbox" id="hide-personality" onchange="updateField('info', 'hidePersonality', this.checked)" style="width:auto; margin:0;"> Ocultar na Ficha
+                                    </label>
+                                </label>
+                                <textarea id="info-personalidade" oninput="updateField('info', 'personalidade', this.value)"></textarea>
+                            </div>
+                            <div class="input-group">
+                                <label style="display:flex; justify-content:space-between; align-items:center;">
+                                    História
+                                    <label style="margin:0; font-size:10px; color:var(--warning); text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center; width:fit-content;">
+                                        <input type="checkbox" id="info-hideHistoria" onchange="updateField('info', 'hideHistoria', this.checked)" style="width:auto; margin:0;"> Ocultar na Ficha
+                                    </label>
+                                </label>
+                                <textarea id="info-historia" style="min-height: 120px;" oninput="updateField('info', 'historia', this.value)"></textarea>
+                            </div>
+                            <div class="input-group"><label>Referência de Aparência</label><input type="text" id="info-aparencia" placeholder="Ex: Roronoa Zoro (One Piece)" oninput="updateField('info', 'aparencia', this.value)"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="box">
+                        <div class="box-title" id="title-boxLog" style="color: var(--warning);" onclick="toggleBox('boxLog')">
+                            <span>Log de Atualizações <span onclick="openInfoModal('Log de Atualizações', 'Ao final de toda semana, clique em Adicionar Entrada. Use o título para indicar a numeração da semana e a caixa maior para listar os treinos feitos, dinheiro conquistado e NPCs recrutados. Para aprovação da sua ficha com os ADMs, não mande prints, use o botão Copiar Tudo para exportar perfeitamente a lista de evolução.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxLog" class="toggle-icon">▼</span>
+                        </div>
+                        <div id="wrapper-boxLog" class="box-content">
+                            <div class="input-group">
+                                <label style="display:flex; justify-content:space-between; align-items:center;">
+                                    Entradas
+                                    <button type="button" class="btn btn-outline btn-warning" style="font-size: 10px; padding: 2px 6px;" onclick="addLog()">+ Adicionar Entrada</button>
+                                </label>
+                                <div id="logs-container"></div>
+                            </div>
+                            <div style="margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px;">
+                                <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center; flex-wrap: wrap;">
+                                    <button class="btn btn-outline" style="color:var(--warning); border-color:var(--warning);" onclick="copyLog()">📋Copiar Tudo</button>
+                                    <div style="display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 6px; border: 1px dashed #555;">
+                                        <button class="btn btn-outline" style="color:#0dcaf0; border-color:#0dcaf0; padding: 6px 10px; font-size: 11px;" onclick="copyPartialLog()">📋Copiar Últimas:</button>
+                                        <input type="number" id="num-logs-copy" value="1" min="1" style="width: 50px; text-align: center; padding: 4px; font-size: 12px; margin: 0; background-color: #1a1a1a; color: var(--text); border: 1px solid #444; border-radius: 4px;">
+                                    </div>
+                                </div>
+                                <pre id="logBox" style="min-height: 150px;"></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="box">
+                        <div class="box-title" id="title-boxInv" onclick="toggleBox('boxInv')">
+                            <span>Inventário e NPCs <span onclick="openInfoModal('Inventário e NPCs', 'Para capangas sem ficha complexa, preencha a quantidade em NPCs Comuns. Para recrutamentos importantes e de poder elevado, adicione em NPCs Especiais. Modifique a Origem e adicione o nome da raça. O menu das cinco classes de NPC será destrancado apenas se você designar a quantidade mínima de pontos requisitados para aquela classe nas caixas de texto.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px; color: var(--info);">ⓘ</span></span><span id="icon-boxInv" class="toggle-icon">▼</span>
+                        </div>
+                        <div id="wrapper-boxInv" class="box-content">
+                            <div class="input-group">
+                                <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #b3b3b3; margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
+                                    NPCs Comuns
+                                    <button type="button" id="btn-add-npc-c" class="btn btn-outline btn-success" style="font-size: 14px; padding: 4px 12px;" onclick="addNpcComum()">+</button>
+                                </div>
+                                <div id="npcs-comuns-container"></div>
+                            </div>
+                            <div class="input-group" style="margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px; margin-bottom: 15px;">
+                                <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #b3b3b3; margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
+                                    NPCs Especiais
+                                    <div style="font-size: 10px; color: #aaa; text-transform: none;">Dominação: <span id="count-npc-dom">0</span>/3 | Extra-Narrada: <span id="count-npc-ext">0</span>/3</div>
+                                    <button type="button" id="btn-add-npc-e" class="btn btn-outline btn-success" style="font-size: 14px; padding: 4px 12px;" onclick="addNpcEspecial()">+</button>
+                                </div>
+                                <div id="npcs-especiais-container"></div>
+                            </div>
+                            <div class="input-group">
+                                <label>Inventário</label>
+                                <textarea id="info-inventario" placeholder="* Item 1&#10;* Item 2" style="min-height: 120px;" oninput="updateField('info', 'inventario', this.value)"></textarea>
+                            </div>
+                            <div class="input-group" style="margin-top: 10px; border-top: 1px dashed #444; padding-top: 10px;">
+                                <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #b3b3b3; margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
+                                    Navios
+                                    <button type="button" class="btn btn-outline btn-success" style="font-size: 14px; padding: 4px 12px;" onclick="addNavio()">+</button>
+                                </div>
+                                <div id="navios-container"></div>
+                            </div>
+                            <div class="input-group" style="margin-top: 10px; border-top: 1px dashed #444; padding-top: 10px;">
+                                <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #b3b3b3; margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
+                                    Itens e Armas Equipadas (Buffs Ativos)
+                                    <button type="button" class="btn btn-outline btn-success" style="font-size: 14px; padding: 4px 12px;" onclick="addArmaEquipada()">+</button>
+                                </div>
+                                <div id="armas-equipadas-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="box">
+                        <div class="box-title" id="title-boxTec" onclick="toggleBox('boxTec')">
+                            <span>Técnicas <span onclick="openInfoModal('Técnicas', 'Clique em Adicionar Técnica. É imperativo que selecione o Estilo de Luta correspondente no menu. Em Nome, apenas insira o título do golpe. Em Descrição, detalhe puramente as ações narrativas da movimentação. O espaço de Efeitos é estritamente mecânico: escreva o debuff ou buff com exatidão matemática para que os avaliadores validem sem erros de interpretação.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px; color: var(--info);">ⓘ</span></span><span id="icon-boxTec" class="toggle-icon">▼</span>
+                        </div>
+                        <div id="wrapper-boxTec" class="box-content">
+                            <div class="input-group" style="margin-bottom: 15px; border-bottom: 1px dashed #444; padding-bottom: 10px;">
+                                <label style="color: var(--warning); margin-bottom: 5px;">Opções de Ocultamento</label>
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
+                                        <input type="checkbox" id="info-hideTecNome" onchange="updateField('info', 'hideTecNome', this.checked)" style="width:auto; margin:0;"> Ocultar Nomes
+                                    </label>
+                                    <label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
+                                        <input type="checkbox" id="info-hideTecDesc" onchange="updateField('info', 'hideTecDesc', this.checked)" style="width:auto; margin:0;"> Ocultar Descrições
+                                    </label>
+                                    <label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
+                                        <input type="checkbox" id="info-hideTecEfeito" onchange="updateField('info', 'hideTecEfeito', this.checked)" style="width:auto; margin:0;"> Ocultar Efeitos
+                                    </label>
+                                    <label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
+                                        <input type="checkbox" id="info-hideNaoTreinadas" onchange="updateHideNaoTreinadas(this.checked)" style="width:auto; margin:0;"> Ocultar Não Treinadas
+                                    </label>
+                                    <label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
+                                        <input type="checkbox" id="info-showApenasNaoTreinadas" onchange="updateShowApenasNaoTreinadas(this.checked)" style="width:auto; margin:0;"> Mostrar Apenas Não Treinadas
+                                    </label>
+                                </div>
+                                <div id="hide-styles-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px;"></div>
+                            </div>
+                            <div class="input-group">
+                                <label>Treinos Acumulados</label>
+                                <input type="text" id="info-treinosAcumulados" placeholder="0" oninput="formatAndSave('info', 'treinosAcumulados', this)">
+                            </div>
+                            <div class="input-group">
+                                <label style="display:flex; justify-content:space-between; align-items:center;">
+                                    Lista de Técnicas
+                                    <div style="display:flex; gap: 5px; align-items:center;">
+                                        <select id="info-ordemTecnicas" onchange="changeOrdemTecnicas(this.value)" style="font-size: 10px; padding: 2px; width: auto; background-color: #222; border: 1px solid #555; border-radius: 4px; color: var(--text);">
+                                            <option value="alfabetica">Ordem Alfabética</option>
+                                            <option value="estilo">Ordem por Estilo</option>
+                                            <option value="manual">Ordem Manual</option>
+                                        </select>
+                                        <button type="button" class="btn btn-outline btn-success" style="font-size: 10px; padding: 2px 6px;" onclick="addTecnica()">+ Adicionar Técnica</button>
+                                    </div>
+                                </label>
+                                <div id="tecnicas-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="box">
+                        <div class="box-title" id="title-boxRes" onclick="toggleBox('boxRes')">
+                            <span>Ficha Pronta <span onclick="openInfoModal('Ficha Pronta', 'Este visor exibe o código bruto do WhatsApp formatado sem margem de erros de recuo. É bloqueado contra cliques. Use sempre os três botões principais acima da caixa de visualização para exportar as partes de código isoladas. Copie as Técnicas se adicionou um novo golpe, ou copie apenas a Ficha completa caso tenha upado de nível base.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px; color: var(--info);">ⓘ</span></span><span id="icon-boxRes" class="toggle-icon">▼</span>
+                        </div>
+                        <div id="wrapper-boxRes" class="box-content">
+                            <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                                <button class="btn btn-outline" style="color:var(--success); border-color:var(--success);" onclick="copyFicha()">📋Copiar Ficha</button>
+                                <button class="btn btn-outline" style="color:var(--success); border-color:var(--success);" onclick="copyFichaManual()">📋Copiar Ficha Manual</button>
+                                <button class="btn btn-outline" style="color:var(--info); border-color:var(--info);" onclick="copyAtributos()">📋Copiar Atributos</button>
+                                <button class="btn btn-outline" style="color:var(--warning); border-color:var(--warning);" onclick="copyTecnicas()">📋Copiar Técnicas</button>
+                            </div>
+                            <pre id="resBox"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="custom-prompt-overlay" class="modal-overlay">
+            <div class="modal-box">
+                <div id="custom-prompt-msg" class="modal-msg"></div>
+                <input type="text" id="custom-prompt-input" style="margin-bottom: 15px; text-align: center; width: 100%;">
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button class="btn btn-outline btn-success" id="custom-prompt-ok">Confirmar</button>
+                    <button class="btn btn-outline btn-danger" id="custom-prompt-cancel">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="custom-alert-overlay" class="modal-overlay">
+            <div class="modal-box" style="border-color: var(--info);">
+                <div id="custom-alert-msg" class="modal-msg"></div>
+                <button class="btn btn-outline btn-info" id="custom-alert-ok">OK</button>
+            </div>
+        </div>
+
+        <div id="info-modal-overlay" class="modal-overlay">
+            <div class="modal-box" style="border-color: var(--success);">
+                <div id="info-modal-title" class="modal-msg" style="font-weight:bold; color:var(--success); margin-bottom: 10px;"></div>
+                <div id="info-modal-msg" class="modal-msg" style="text-align: justify; font-size: 13px;"></div>
+                <button class="btn btn-outline btn-success" onclick="document.getElementById('info-modal-overlay').style.display='none'">Fechar</button>
+            </div>
+        </div>
+
+        <div id="modal-alcunha" class="modal-overlay">
+            <div class="modal-box" style="width: 400px; max-height: 80vh; overflow-y: auto;">
+                <div id="modal-alcunha-title" class="modal-msg" style="font-weight:bold; color:var(--info);">Criar Nova Alcunha</div>
+                <input type="text" id="alcunha-nome" placeholder="Nome da Alcunha" style="margin-bottom: 10px; text-align:center;">
+                <label style="display:flex; align-items:center; gap:5px; justify-content:center; margin:0 auto 10px auto; width:fit-content; font-size:12px; cursor:pointer;">
+                    <input type="checkbox" id="alcunha-has-buff" onchange="document.getElementById('alcunha-buffs-container').style.display = this.checked ? 'block' : 'none'"> Dá algum buff?
+                </label>
+                <div id="alcunha-buffs-container" style="display:none; text-align:left; border-top:1px dashed #555; padding-top:10px;">
+                    <div id="alcunha-buffs-list"></div>
+                    <button class="btn btn-outline btn-success" style="width:100%; font-size:11px; margin-top:5px; padding:6px;" onclick="addAlcunhaBuffRow()">+ Adicionar Buff</button>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                    <button class="btn btn-outline btn-success" onclick="saveAlcunha()">Salvar</button>
+                    <button id="btn-delete-alcunha" class="btn btn-outline btn-danger" onclick="deleteAlcunha()" style="display:none;">Apagar</button>
+                    <button class="btn btn-outline" style="border-color: #666; color: #ccc;" onclick="document.getElementById('modal-alcunha').style.display='none'">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-importar-exportar" class="modal-overlay">
+            <div class="modal-box" style="width: 400px; text-align: center;">
+                <div class="modal-msg" style="font-weight:bold; color:var(--success); margin-bottom: 15px;">Importar / Exportar Ficha</div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn btn-outline btn-info" onclick="exportarJSON('tudo')">📤 Exportar TUDO (.json)</button>
+                    <button class="btn btn-outline btn-info" onclick="exportarJSON('atual')">📄 Exportar APENAS ATUAL (.json)</button>
+                    <label class="btn btn-outline btn-warning" style="cursor: pointer; margin: 0;">
+                        📥 Importar Ficha (.json)
+                        <input type="file" id="file-import-json" accept=".json" style="display: none;" onchange="importarJSON(event)">
                     </label>
-                    <div id="tecnicas-container"></div>
+                    <button class="btn btn-outline" style="border-color: #666; color: #ccc; margin-top: 10px;" onclick="document.getElementById('modal-importar-exportar').style.display='none'">Fechar</button>
                 </div>
             </div>
         </div>
 
-        <div class="box">
-            <div class="box-title" id="title-boxRes" onclick="toggleBox('boxRes')">
-                <span>Ficha Pronta <span onclick="openInfoModal('Ficha Pronta', 'Este visor exibe o código bruto do WhatsApp formatado sem margem de erros de recuo. É bloqueado contra cliques. Use sempre os três botões principais acima da caixa de visualização para exportar as partes de código isoladas. Copie as Técnicas se adicionou um novo golpe, ou copie apenas a Ficha completa caso tenha upado de nível base.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px; color: var(--info);">ⓘ</span></span><span id="icon-boxRes" class="toggle-icon">▼</span>
-            </div>
-            <div id="wrapper-boxRes" class="box-content">
-                <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
-                    <button class="btn btn-outline" style="color:var(--success); border-color:var(--success);" onclick="copyFicha()">📋Copiar Ficha</button>
-                    <button class="btn btn-outline" style="color:var(--success); border-color:var(--success);" onclick="copyFichaManual()">📋Copiar Ficha Manual</button>
-                    <button class="btn btn-outline" style="color:var(--info); border-color:var(--info);" onclick="copyAtributos()">📋Copiar Atributos</button>
-                    <button class="btn btn-outline" style="color:var(--warning); border-color:var(--warning);" onclick="copyTecnicas()">📋Copiar Técnicas</button>
-                </div>
-                <pre id="resBox"></pre>
-            </div>
-        </div>
-    </div>
-  </div>
-</div>
+        <script src="script.js"></script>
 
-<div id="custom-prompt-overlay" class="modal-overlay">
-  <div class="modal-box">
-    <div id="custom-prompt-msg" class="modal-msg"></div>
-    <input type="text" id="custom-prompt-input" style="margin-bottom: 15px; text-align: center; width: 100%;">
-    <div style="display: flex; gap: 10px; justify-content: center;">
-      <button class="btn btn-outline btn-success" id="custom-prompt-ok">Confirmar</button>
-      <button class="btn btn-outline btn-danger" id="custom-prompt-cancel">Cancelar</button>
-    </div>
-  </div>
-</div>
-
-<div id="custom-alert-overlay" class="modal-overlay">
-  <div class="modal-box" style="border-color: var(--info);">
-    <div id="custom-alert-msg" class="modal-msg"></div>
-    <button class="btn btn-outline btn-info" id="custom-alert-ok">OK</button>
-  </div>
-</div>
-
-<div id="info-modal-overlay" class="modal-overlay">
-  <div class="modal-box" style="border-color: var(--success);">
-    <div id="info-modal-title" class="modal-msg" style="font-weight:bold; color:var(--success); margin-bottom: 10px;"></div>
-    <div id="info-modal-msg" class="modal-msg" style="text-align: justify; font-size: 13px;"></div>
-    <button class="btn btn-outline btn-success" onclick="document.getElementById('info-modal-overlay').style.display='none'">Fechar</button>
-  </div>
-</div>
-
-<div id="modal-alcunha" class="modal-overlay">
-  <div class="modal-box" style="width: 400px; max-height: 80vh; overflow-y: auto;">
-    <div id="modal-alcunha-title" class="modal-msg" style="font-weight:bold; color:var(--info);">Criar Nova Alcunha</div>
-    <input type="text" id="alcunha-nome" placeholder="Nome da Alcunha" style="margin-bottom: 10px; text-align:center;">
-    <label style="display:flex; align-items:center; gap:5px; justify-content:center; margin:0 auto 10px auto; width:fit-content; font-size:12px; cursor:pointer;">
-      <input type="checkbox" id="alcunha-has-buff" onchange="document.getElementById('alcunha-buffs-container').style.display = this.checked ? 'block' : 'none'"> Dá algum buff?
-    </label>
-    <div id="alcunha-buffs-container" style="display:none; text-align:left; border-top:1px dashed #555; padding-top:10px;">
-      <div id="alcunha-buffs-list"></div>
-      <button class="btn btn-outline btn-success" style="width:100%; font-size:11px; margin-top:5px; padding:6px;" onclick="addAlcunhaBuffRow()">+ Adicionar Buff</button>
-    </div>
-    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
-      <button class="btn btn-outline btn-success" onclick="saveAlcunha()">Salvar</button>
-      <button id="btn-delete-alcunha" class="btn btn-outline btn-danger" onclick="deleteAlcunha()" style="display:none;">Apagar</button>
-      <button class="btn btn-outline" style="border-color: #666; color: #ccc;" onclick="document.getElementById('modal-alcunha').style.display='none'">Cancelar</button>
-    </div>
-  </div>
-</div>
-
-<div id="modal-importar-exportar" class="modal-overlay">
-  <div class="modal-box" style="width: 400px; text-align: center;">
-    <div class="modal-msg" style="font-weight:bold; color:var(--success); margin-bottom: 15px;">Importar / Exportar Ficha</div>
-    <div style="display: flex; flex-direction: column; gap: 10px;">
-      <button class="btn btn-outline btn-info" onclick="exportarJSON('tudo')">📤 Exportar TUDO (.json)</button>
-      <button class="btn btn-outline btn-info" onclick="exportarJSON('atual')">📄 Exportar APENAS ATUAL (.json)</button>
-      <label class="btn btn-outline btn-warning" style="cursor: pointer; margin: 0;">
-        📥 Importar Ficha (.json)
-        <input type="file" id="file-import-json" accept=".json" style="display: none;" onchange="importarJSON(event)">
-      </label>
-      <button class="btn btn-outline" style="border-color: #666; color: #ccc; margin-top: 10px;" onclick="document.getElementById('modal-importar-exportar').style.display='none'">Fechar</button>
-    </div>
-  </div>
-</div>
-
-<script src="script.js"></script>
-
-</body>
+    </body>
 </html>

@@ -969,9 +969,9 @@ function runFallbackChecks() {
               telefone: "", orgTipo: "", tripulacao: "", pirataStatus: "Normal", patente: "", salario: "", estilo1: "", freestyle1: "", estilo2: "", freestyle2: "",
               estilo3: "", freestyle3: "", estilo4: "", freestyle4: "", berries: 5000000, npcsComunsList: [], npcsEspeciaisList: [], akumaNome: "", 
               personalidade: "", historia: "", aparencia: "", inventario: "", naviosList: [], armasEquipadasList: [], hasAmiAlc: true, hasAmiDur: true, hasAmiPot: true, hasAmiVel: true, hasAmiDesp: false,
-              amiResPct: "", amiAlcMult: "1", calcQuemAtaca: "eu", calcUseAttr: "", calcInimigoRes: "", calcResIgnorada: "", calcDanoIgnorado: "", calcBuffFlat: "", calcBuffPct: "", calcBuffDanoFinalPct: "", calcUseAmi: "sim", amiPotBuff: "", calcUseHaki: "nao", calcUseHakiRei: "nao", sceneType: "Treino Padrão", sceneText: "", hpAtual: -1,
+              amiResPct: "", amiAlcMult: "1", calcQuemAtaca: "eu", calcUseAttr: "", calcInimigoRes: "", calcResIgnorada: "", calcDanoIgnorado: "", calcDanoAmiIgnorado: "", calcBuffFlat: "", calcBuffPct: "", calcBuffDanoFinalPct: "", calcUseAmi: "sim", amiPotBuff: "", calcUseHaki: "nao", calcUseHakiRei: "nao", sceneType: "Treino Padrão", sceneText: "", hpAtual: -1,
               boxIden: false, boxMec: false, boxSoc: false, boxBase: false, boxEsp: false, boxAmi: false, boxHist: false, 
-              boxInv: false, boxCalc: false, boxEstamina: false, estaminaAtual: -1, estaminaVelocidade: "", estaminaDano: "", estaminaBuffPct: "", estaminaHakiArm: "nao", estaminaHakiObs: "nao", boxScene: false, akumaId: "", selCharR1: "", selCharR2: "", treinosAcumulados: 0, ordemTecnicas: "alfabetica", hideHistoria: false, hidePersonality: false, hideTecNome: false, hideTecDesc: false, hideTecEfeito: false, hiddenStyles: [], exaustaoCompleta: false, habilidadesExclusivas: [], habCaminhoAtiradorAtivo: false, habFavArmistaAtivo: "nenhum", habFavArmistaAttr: "d", habFuriaArdenteAttr: "f", habQIAvancadoAtivo: false, linhagemBeckmanArma: false, habRetornoUso: 1, merito: 0, aliadosEspiritoContagiante: 0,
+              boxInv: false, boxCalc: false, boxEstamina: false, estaminaAtual: -1, estaminaVelocidade: "", estaminaDano: "", estaminaBuffPct: "", estaminaHakiArm: "nao", estaminaHakiObs: "nao", boxScene: false, akumaId: "", selCharR1: "", selCharR2: "", treinosAcumulados: 0, ordemTecnicas: "alfabetica", hideHistoria: false, hidePersonality: false, hideTecNome: false, hideTecDesc: false, hideTecEfeito: false, hiddenStyles: [], exaustaoCompleta: false, habilidadesExclusivas: [], habCaminhoAtiradorAtivo: false, habFavArmistaAtivo: "sem", habFavArmistaAttr: "d", habFuriaArdenteAttr: "f", habQIAvancadoAtivo: false, linhagemBeckmanArma: false, habRetornoUso: 1, merito: 0, aliadosEspiritoContagiante: 0,
               unlockHA1: false, unlockHA2: false, unlockHA3: false, unlockHA4: false, unlockHA5: false, unlockHA6: false,
               unlockHO2: false, unlockHO3: false, unlockHO4: false,
               unlockHR2: false, unlockHR3: false, unlockHR4: false, unlockHR5: false, unlockHR6: false,
@@ -1273,7 +1273,6 @@ function renderArmasEquipadas() {
                         <option value="ignRes" ${a.stat === 'ignRes' ? 'selected' : ''}>Ignorar Resistência</option>
                         <option value="ignDanoGeral" ${a.stat === 'ignDanoGeral' ? 'selected' : ''}>Ignorar Dano Geral</option>
                         <option value="ignDanoAmi" ${a.stat === 'ignDanoAmi' ? 'selected' : ''}>Ignorar Dano Akuma</option>
-                        <option value="ignDanoHaki" ${a.stat === 'ignDanoHaki' ? 'selected' : ''}>Ignorar Dano Haki</option>
                     </optgroup>
                 </select>
                 <select onchange="updateArmaEquipada(${idx}, 'type', this.value)" style="width: 70px; padding: 6px; font-size: 11px;">
@@ -1677,7 +1676,7 @@ function addAlcunhaBuffRow() {
             <optgroup label="Atributos"><option value="tudoAttr">Todos os Atributos</option><option value="d">Destreza</option><option value="f">Força</option><option value="r">Resistência</option><option value="v">Velocidade</option><option value="refl">Reflexo</option><option value="vcorp">Vel. Corporal</option><option value="vAgua">Velocidade (Água)</option><option value="reflAgua">Reflexo (Água)</option><option value="vcorpAgua">Vel. Corporal (Água)</option></optgroup>
             <optgroup label="Espírito"><option value="tudoEsp">Todo o Espírito</option><option value="esp">Espírito</option><option value="ha">Armamento</option><option value="ho">Observação</option><option value="hr">Rei</option></optgroup>
             <optgroup label="Akuma no Mi"><option value="tudoAmi">Toda a Akuma</option><option value="amiAlc">Alcance</option><option value="amiDur">Durabilidade</option><option value="amiPot">Potência</option><option value="amiVel">Velocidade</option><option value="amiDesp">Despertar</option></optgroup>
-            <optgroup label="Combate"><option value="dano">Dano</option><option value="ignRes">Ignorar Resistência</option><option value="ignDanoGeral">Ignorar Dano Geral</option><option value="ignDanoAmi">Ignorar Dano Akuma</option><option value="ignDanoHaki">Ignorar Dano Haki</option></optgroup>
+            <optgroup label="Combate"><option value="dano">Dano</option><option value="ignRes">Ignorar Resistência</option><option value="ignDanoGeral">Ignorar Dano Geral</option><option value="ignDanoAmi">Ignorar Dano Akuma</option></optgroup>
         </select>
         <select class="buff-type" style="flex:1; font-size:11px; padding:4px; background:#2a2a2a; border:1px solid #444; color:#fff; border-radius:4px;">
             <option value="pct">% (+X%)</option>
@@ -2042,57 +2041,6 @@ window.sofrerDano = async function() {
     let dano = parseInt(rawDano) || 0;
     if (dano <= 0) return;
 
-    if (currentChar.info.calcQuemAtaca === "inimigo") {
-        let reducaoGeral = 0;
-        let reducaoAmi = 0;
-        let reducaoHaki = 0;
-
-        let getReductions = (buffs) => {
-            buffs.forEach(b => {
-                if (b.stat === 'ignDanoGeral') reducaoGeral += parseInt(b.val) || 0;
-                else if (b.stat === 'ignDanoAmi') reducaoAmi += parseInt(b.val) || 0;
-                else if (b.stat === 'ignDanoHaki') reducaoHaki += parseInt(b.val) || 0;
-            });
-        };
-
-        if (currentChar.info.alcunhasList && currentChar.info.alcunhaAtiva) {
-            let ativa = currentChar.info.alcunhasList.find(a => a.nome === currentChar.info.alcunhaAtiva);
-            if (ativa && ativa.buffs) getReductions(ativa.buffs.filter(b => !b.cond || (currentChar.info.alcunhaCondicoes && currentChar.info.alcunhaCondicoes[b.cond])));
-        }
-
-        if (currentChar.info.armasEquipadasList) {
-            getReductions(currentChar.info.armasEquipadasList.filter(a => a.ativo));
-        }
-
-        let totalBase = (currentChar.stats.d||0) + (currentChar.stats.f||0) + (currentChar.stats.r||0) + (currentChar.stats.v||0);
-        if ((currentChar.info.habilidadesExclusivas || []).includes("Favoritismo Armista") && totalBase >= 15000) {
-            if (currentChar.info.habFavArmistaAtivo === "criacao" || currentChar.info.habFavArmistaAtivo === "criacao_favorita") {
-                reducaoGeral += 15;
-            }
-        }
-
-        let msgs = [];
-        if (reducaoGeral > 0) msgs.push(`${reducaoGeral}% de Redução de Dano Geral`);
-        if (reducaoAmi > 0) msgs.push(`${reducaoAmi}% de Redução contra Akuma no Mi`);
-        if (reducaoHaki > 0) msgs.push(`${reducaoHaki}% de Redução contra Haki`);
-
-        if (msgs.length > 0) {
-            let desc = msgs.join("<br>");
-            let conf = await customPrompt(`Você possui as seguintes reduções ativas:<br>${desc}<br><br>Digite a % TOTAL que deseja usar neste ataque (ou deixe vazio/0 para não usar):`, true);
-            if (conf !== null && conf.trim() !== "") {
-                let pctToUse = parseInt(conf) || 0;
-                if (pctToUse > 100) pctToUse = 100;
-                if (pctToUse > 0) {
-                    let reducVal = Math.floor(dano * (pctToUse / 100));
-                    dano -= reducVal;
-                    await customAlert(`Dano reduzido em <b>${reducVal.toLocaleString('pt-BR')}</b>!<br>Novo dano a sofrer: <b>${dano.toLocaleString('pt-BR')}</b>`);
-                }
-            } else if (conf === null) {
-                return;
-            }
-        }
-    }
-
     let currentHp = parseInt(currentChar.info.hpAtual);
     if (isNaN(currentHp) || currentHp === -1) {
         currentHp = parseInt(document.getElementById('hp-total').textContent.replace(/\D/g, "")) || 0;
@@ -2389,6 +2337,10 @@ function updateUI() {
     let fmtCalcDanoIgn = i.calcDanoIgnorado ? i.calcDanoIgnorado.toLocaleString("pt-BR") : "";
     if(calcDanoIgnEl && calcDanoIgnEl.value !== fmtCalcDanoIgn) calcDanoIgnEl.value = fmtCalcDanoIgn;
 
+    let calcDanoAmiIgnEl = document.getElementById('info-calcDanoAmiIgnorado');
+    let fmtCalcDanoAmiIgn = i.calcDanoAmiIgnorado ? i.calcDanoAmiIgnorado.toLocaleString("pt-BR") : "";
+    if(calcDanoAmiIgnEl && calcDanoAmiIgnEl.value !== fmtCalcDanoAmiIgn) calcDanoAmiIgnEl.value = fmtCalcDanoAmiIgn;
+
     let calcBuffFlatEl = document.getElementById('info-calcBuffFlat');
     let fmtCalcBuffFlat = i.calcBuffFlat ? i.calcBuffFlat.toLocaleString("pt-BR") : "";
     if(calcBuffFlatEl && calcBuffFlatEl.value !== fmtCalcBuffFlat) calcBuffFlatEl.value = fmtCalcBuffFlat;
@@ -2516,19 +2468,19 @@ function updateUI() {
         }
         if(hHas("Constituição Única")) { tBonus.f += 0.10; tBonus.r += 0.15; }
         if(hHas("Contração Muscular")) { if(totalBase >= 10000) { tBonus.f += 0.20; tBonus.r += 0.20; } else if(totalBase >= 5000) { tBonus.f += 0.10; tBonus.r += 0.10; } }
-        if(hHas("Favoritismo Armista") && totalBase >= 5000) {
-            let isFav = (i.habFavArmistaAtivo === "favorita" || i.habFavArmistaAtivo === "criacao_favorita");
-            let isCria = (i.habFavArmistaAtivo === "criacao" || i.habFavArmistaAtivo === "criacao_favorita");
+        if(hHas("Favoritismo Armista")) {
+            let fav = i.habFavArmistaAtivo;
             let attrCh = i.habFavArmistaAttr === 'f' ? 'f' : 'd';
-            if (isFav) {
-                tBonus[attrCh] += 0.10;
-                if (totalBase >= 15000) { tBonus.r += 0.15; tBonus.v += 0.15; }
-                else { tBonus.r += 0.10; }
-            }
-            if (isCria) {
-                tBonus[attrCh] += 0.10;
-                if (totalBase >= 15000) { tBonus.r += 0.20; tBonus.v += 0.20; }
-                else if (totalBase >= 10000) { tBonus.r += 0.10; }
+            if (totalBase >= 15000) {
+                if (fav === "generica") { tBonus.f -= 0.90; tBonus.d -= 0.90; tBonus.r -= 0.90; tBonus.v -= 0.90; }
+                else if (fav === "favorita") { tBonus.r += 0.10; tBonus[attrCh] += 0.10; }
+                else if (fav === "criacao") { tBonus.r += 0.10; tBonus.v += 0.10; tBonus[attrCh] += 0.10; }
+                else if (fav === "criacao_favorita") { tBonus.r += 0.25; tBonus.v += 0.25; }
+            } else if (totalBase >= 10000) {
+                if (fav === "favorita") { tBonus.r += 0.10; tBonus[attrCh] += 0.10; }
+                else if (fav === "criacao") { tBonus.r += 0.10; tBonus.v += 0.10; tBonus[attrCh] += 0.10; }
+            } else if (totalBase >= 5000) {
+                if (fav === "favorita") { tBonus.r += 0.10; tBonus[attrCh] += 0.10; }
             }
         }
         if(hHas("Filho do Mar")) { if(totalBase >= 15000) { tBonus.r += 0.15; } else if(totalBase >= 10000) { tBonus.r += 0.10; } else if(totalBase >= 5000) { tBonus.r += 0.05; } }
@@ -3178,7 +3130,20 @@ function updateUI() {
             let elAtirador = document.getElementById('hab-ativo-atirador'); if(elAtirador) { elAtirador.style.display = hasAtirador ? 'block' : 'none'; document.getElementById('chk-atirador').checked = i.habCaminhoAtiradorAtivo; }
             let elQI = document.getElementById('hab-ativo-qi'); if(elQI) { elQI.style.display = hasQI ? 'block' : 'none'; document.getElementById('chk-qi').checked = i.habQIAvancadoAtivo; }
             let elBeckman = document.getElementById('hab-ativo-beckman'); if(elBeckman) { elBeckman.style.display = isBeckman ? 'block' : 'none'; document.getElementById('chk-beckman').checked = i.linhagemBeckmanArma; }
-            let elArmista = document.getElementById('hab-ativo-armista'); if(elArmista) { elArmista.style.display = hasFavArm ? 'flex' : 'none'; document.getElementById('sel-armista-ativo').value = i.habFavArmistaAtivo; document.getElementById('sel-armista-attr').value = i.habFavArmistaAttr; }
+            let elArmista = document.getElementById('hab-ativo-armista'); 
+            if(elArmista) { 
+                elArmista.style.display = hasFavArm ? 'flex' : 'none'; 
+                let selArmAtivo = document.getElementById('sel-armista-ativo');
+                let armOpts = '<option value="sem">Sem Arma</option><option value="generica">Arma Genérica</option><option value="favorita">Arma Favorita</option>';
+                if (totalBase >= 10000) armOpts += '<option value="criacao">Criação Própria</option>';
+                if (totalBase >= 15000) armOpts += '<option value="criacao_favorita">Arma Favorita + Criação Própria</option>';
+                if (selArmAtivo.innerHTML !== armOpts) selArmAtivo.innerHTML = armOpts;
+                if (!Array.from(selArmAtivo.options).some(o => o.value === i.habFavArmistaAtivo)) {
+                    i.habFavArmistaAtivo = "sem";
+                }
+                selArmAtivo.value = i.habFavArmistaAtivo; 
+                document.getElementById('sel-armista-attr').value = i.habFavArmistaAttr; 
+            }
             let elFuria = document.getElementById('hab-ativo-furia'); if(elFuria) { elFuria.style.display = hasFuria ? 'flex' : 'none'; document.getElementById('sel-furia-attr').value = i.habFuriaArdenteAttr || 'f'; }
             let elRetorno = document.getElementById('hab-ativo-retorno'); if(elRetorno) { elRetorno.style.display = hasRetorno ? 'flex' : 'none'; document.getElementById('sel-retorno-uso').value = i.habRetornoUso || 1; }
         }
@@ -3191,19 +3156,19 @@ function updateUI() {
         }
         if(hasHab("Constituição Única")) { bonus.f += 0.10; bonus.r += 0.15; }
         if(hasHab("Contração Muscular")) { if(totalBase >= 10000) { bonus.f += 0.20; bonus.r += 0.20; } else if(totalBase >= 5000) { bonus.f += 0.10; bonus.r += 0.10; } }
-        if(hasHab("Favoritismo Armista") && totalBase >= 5000) {
-            let isFav = (i.habFavArmistaAtivo === "favorita" || i.habFavArmistaAtivo === "criacao_favorita");
-            let isCria = (i.habFavArmistaAtivo === "criacao" || i.habFavArmistaAtivo === "criacao_favorita");
+        if(hasHab("Favoritismo Armista")) {
+            let fav = i.habFavArmistaAtivo;
             let attrCh = i.habFavArmistaAttr === 'f' ? 'f' : 'd';
-            if (isFav) {
-                bonus[attrCh] += 0.10;
-                if (totalBase >= 15000) { bonus.r += 0.15; bonus.v += 0.15; }
-                else { bonus.r += 0.10; }
-            }
-            if (isCria) {
-                bonus[attrCh] += 0.10;
-                if (totalBase >= 15000) { bonus.r += 0.20; bonus.v += 0.20; }
-                else if (totalBase >= 10000) { bonus.r += 0.10; }
+            if (totalBase >= 15000) {
+                if (fav === "generica") { bonus.f -= 0.90; bonus.d -= 0.90; bonus.r -= 0.90; bonus.v -= 0.90; }
+                else if (fav === "favorita") { bonus.r += 0.10; bonus[attrCh] += 0.10; }
+                else if (fav === "criacao") { bonus.r += 0.10; bonus.v += 0.10; bonus[attrCh] += 0.10; }
+                else if (fav === "criacao_favorita") { bonus.r += 0.25; bonus.v += 0.25; }
+            } else if (totalBase >= 10000) {
+                if (fav === "favorita") { bonus.r += 0.10; bonus[attrCh] += 0.10; }
+                else if (fav === "criacao") { bonus.r += 0.10; bonus.v += 0.10; bonus[attrCh] += 0.10; }
+            } else if (totalBase >= 5000) {
+                if (fav === "favorita") { bonus.r += 0.10; bonus[attrCh] += 0.10; }
             }
         }
         if(hasHab("Filho do Mar")) { if(totalBase >= 15000) { bonus.refl += 0.15; bonus.r += 0.15; } else if(totalBase >= 10000) { bonus.refl += 0.10; bonus.r += 0.10; } else if(totalBase >= 5000) { bonus.refl += 0.05; bonus.r += 0.05; } }
@@ -3857,24 +3822,56 @@ function updateUI() {
         calcRes = 0;
     }
 
-    let calcAttrSemAmi = calcAttrVal;
-    calcAttrVal += danoHaki + danoHakiRei + danoAmi;
+    let reducaoDanoGeral = parseInt(i.calcDanoIgnorado) || 0;
+    let reducaoDanoAmi = parseInt(i.calcDanoAmiIgnorado) || 0;
+    let favArmDanoFinal = 0;
 
-    let favArmDano = 0;
-    if (hasHab("Favoritismo Armista") && totalBase >= 15000) {
-        if(i.habFavArmistaAtivo === "favorita") favArmDano = 0.10;
-        else if(i.habFavArmistaAtivo === "criacao") favArmDano = 0.15;
-        else if(i.habFavArmistaAtivo === "criacao_favorita") favArmDano = 0.25;
+    if (i.calcQuemAtaca === 'inimigo') {
+        let getReductions = (buffs) => {
+            buffs.forEach(b => {
+                if (b.stat === 'ignDanoGeral') reducaoDanoGeral += parseInt(b.val) || 0;
+                else if (b.stat === 'ignDanoAmi') reducaoDanoAmi += parseInt(b.val) || 0;
+            });
+        };
+
+        if (i.alcunhasList && i.alcunhaAtiva) {
+            let ativa = i.alcunhasList.find(a => a.nome === i.alcunhaAtiva);
+            if (ativa && ativa.buffs) getReductions(ativa.buffs.filter(b => !b.cond || (i.alcunhaCondicoes && i.alcunhaCondicoes[b.cond])));
+        }
+        if (i.armasEquipadasList) getReductions(i.armasEquipadasList.filter(a => a.ativo));
     }
-    if (favArmDano > 0) calcAttrVal += Math.floor(calcAttrVal * favArmDano);
+
+    if (hasHab("Favoritismo Armista")) {
+        let fav = i.habFavArmistaAtivo;
+        if (totalBase >= 15000) {
+            if (fav === "criacao_favorita") {
+                if (i.calcQuemAtaca === 'inimigo') {
+                    reducaoDanoGeral += 20;
+                } else {
+                    favArmDanoFinal = 20;
+                }
+            }
+        } else if (totalBase >= 5000 && totalBase < 15000) {
+            if (fav === "generica" && i.calcQuemAtaca !== 'inimigo') {
+                favArmDanoFinal = -10;
+            }
+        }
+    }
+
+    let calcAttrSemAmi = calcAttrVal;
+    
+    if (reducaoDanoAmi > 0) {
+        danoAmi = Math.max(0, danoAmi - Math.floor(danoAmi * (reducaoDanoAmi / 100)));
+    }
+    calcAttrVal += danoHaki + danoHakiRei + danoAmi;
 
     let calcFator = K / (K + calcRes);
     let danoFisico = Math.floor(calcAttrVal * calcFator);
     let buffDanoFinalPct = parseInt(i.calcBuffDanoFinalPct) || 0;
 
-    let extraFlatDano = (flatBonus.dano || 0) + (itemFlat.dano || 0);
-    let extraPctDano = Math.round(((bonus.dano || 0) + (itemBonus.dano || 0)) * 100);
-    let totalPctDano = buffDanoFinalPct + extraPctDano;
+    let extraFlatDano = i.calcQuemAtaca === 'inimigo' ? 0 : (flatBonus.dano || 0) + (itemFlat.dano || 0);
+    let extraPctDano = i.calcQuemAtaca === 'inimigo' ? 0 : Math.round(((bonus.dano || 0) + (itemBonus.dano || 0)) * 100);
+    let totalPctDano = buffDanoFinalPct + extraPctDano + favArmDanoFinal;
 
     let baseComFlat = danoFisico + extraFlatDano + danoBonusResNegativa;
     let calcDanoFinal = baseComFlat;
@@ -3883,18 +3880,12 @@ function updateUI() {
         calcDanoFinal = baseComFlat + Math.floor(baseComFlat * (totalPctDano / 100));
     }
 
-    let calcDanoIgnorado = parseInt(i.calcDanoIgnorado) || 0;
-    if (hasHab("Favoritismo Armista") && totalBase >= 15000) {
-        if (i.habFavArmistaAtivo === "criacao" || i.habFavArmistaAtivo === "criacao_favorita") {
-            calcDanoIgnorado += 15;
-        }
-    }
     let valDanoIgnorado = 0;
     let calcDanoAntesIgnorado = calcDanoFinal;
     
-    if (calcDanoIgnorado > 0) {
-        if (calcDanoIgnorado > 100) calcDanoIgnorado = 100;
-        valDanoIgnorado = Math.floor(calcDanoFinal * (calcDanoIgnorado / 100));
+    if (reducaoDanoGeral > 0) {
+        if (reducaoDanoGeral > 100) reducaoDanoGeral = 100;
+        valDanoIgnorado = Math.floor(calcDanoFinal * (reducaoDanoGeral / 100));
         calcDanoFinal = calcDanoFinal - valDanoIgnorado;
     }
     
@@ -3959,8 +3950,8 @@ function updateUI() {
         let valToPrint = typeof calcDanoAntesIgnorado !== 'undefined' ? calcDanoAntesIgnorado : calcDanoFinal;
         calcFormTexto += `<br><span style="color:#ffc107;">Dano com Buff Final: ${baseComFlat.toLocaleString("pt-BR")} + ${totalPctDano}% = ${valToPrint.toLocaleString("pt-BR")}</span>`;
     }
-    if (typeof calcDanoIgnorado !== 'undefined' && calcDanoIgnorado > 0) {
-        calcFormTexto += `<br><span style="color:#dc3545;">Dano Ignorado: ${calcDanoAntesIgnorado.toLocaleString("pt-BR")} - ${calcDanoIgnorado}% = ${calcDanoFinal.toLocaleString("pt-BR")}</span>`;
+    if (reducaoDanoGeral > 0) {
+        calcFormTexto += `<br><span style="color:#dc3545;">Dano Ignorado: ${calcDanoAntesIgnorado.toLocaleString("pt-BR")} - ${reducaoDanoGeral}% = ${calcDanoFinal.toLocaleString("pt-BR")}</span>`;
     }
     document.getElementById('calc-formula').innerHTML = calcFormTexto;
 
@@ -4530,7 +4521,7 @@ function updateUI() {
     } else if (i.alcunhaAtiva) {
         let formatAlcunha = (alcObj) => {
             if (alcObj && alcObj.buffs && alcObj.buffs.length > 0) {
-                let names = {tudo:"Todos os Atributos",tudoAttr:"Todos os Atributos",tudoEsp:"Todo o Espírito",tudoAmi:"Toda a Akuma",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar",dano:"Dano Final",ignRes:"Ignorar Resistência",ignDanoGeral:"Ignorar Dano Geral",ignDanoAmi:"Ignorar Dano Akuma",ignDanoHaki:"Ignorar Dano Haki"};
+                let names = {tudo:"Todos os Atributos",tudoAttr:"Todos os Atributos",tudoEsp:"Todo o Espírito",tudoAmi:"Toda a Akuma",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar",dano:"Dano Final",ignRes:"Ignorar Resistência",ignDanoGeral:"Ignorar Dano Geral",ignDanoAmi:"Ignorar Dano Akuma"};
                 let condGroups = { "": [] };
                 alcObj.buffs.forEach(b => {
                     let cName = (b.cond && b.cond.trim() !== "") ? b.cond.trim() : "";
@@ -4615,7 +4606,7 @@ function updateUI() {
             if (hab === "Constituição Única") return "+10% Força, +15% Resistência.";
             if (hab === "Contração Muscular") { if (tb >= 10000) return "+20% Força e Resistência."; if (tb >= 5000) return "+10% Força e Resistência."; return ""; }
             if (hab === "Espírito Contagiante") return "Aliados recebem +5% em todos os atributos.";
-            if (hab === "Favoritismo Armista") { if (tb >= 15000) return "Bônus cumulativos de níveis aplicados (For/Des, Res, Vel, Dano, Red. Dano)."; if (tb >= 10000) return "Bônus cumulativos de níveis aplicados (For/Des, Res)."; if (tb >= 5000) return "Bônus cumulativos de níveis aplicados (For/Des, Res)."; return ""; }
+            if (hab === "Favoritismo Armista") { if (tb >= 15000) return "Atributos dinâmicos por arma selecionada."; if (tb >= 10000) return "Atributos dinâmicos por arma selecionada."; if (tb >= 5000) return "Atributos dinâmicos por arma selecionada."; return ""; }
             if (hab === "Filho do Mar") { if (tb >= 15000) return "+15% Reflexo e Resistência."; if (tb >= 10000) return "+10% Reflexo e Resistência."; if (tb >= 5000) return "+5% Reflexo e Resistência."; return ""; }
             if(hasHab("Flexibilidade")) { if(totalBase >= 10000) bonus.v += 0.20; else if(totalBase >= 5000) bonus.v += 0.10; }
         if(hasHab("Fúria Ardente")) { let fA = i.habFuriaArdenteAttr || 'f'; if(totalBase >= 15000) bonus[fA] += 0.15; else if(totalBase >= 10000) bonus[fA] += 0.10; else if(totalBase >= 5000) bonus[fA] += 0.05; }
@@ -4921,7 +4912,7 @@ ${attrOut}${tecnicasOut}`;
 
     let formatAlcunhaManual = (alcObj) => {
         if (alcObj && alcObj.buffs && alcObj.buffs.length > 0) {
-            let names = {tudo:"Todos os Atributos",tudoAttr:"Todos os Atributos",tudoEsp:"Todo o Espírito",tudoAmi:"Toda a Akuma",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar",dano:"Dano Final",ignRes:"Ignorar Resistência",ignDanoGeral:"Ignorar Dano Geral",ignDanoAmi:"Ignorar Dano Akuma",ignDanoHaki:"Ignorar Dano Haki"};
+            let names = {tudo:"Todos os Atributos",tudoAttr:"Todos os Atributos",tudoEsp:"Todo o Espírito",tudoAmi:"Toda a Akuma",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar",dano:"Dano Final",ignRes:"Ignorar Resistência",ignDanoGeral:"Ignorar Dano Geral",ignDanoAmi:"Ignorar Dano Akuma"};
             let condGroups = { "": [] };
             alcObj.buffs.forEach(b => {
                 let cName = (b.cond && b.cond.trim() !== "") ? b.cond.trim() : "";
