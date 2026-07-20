@@ -4224,12 +4224,12 @@ function updateUI() {
                     tBonus.r -= 0.9;
                     tBonus.v -= 0.9;
                 } else if (fav === "favorita") {
-                    tBonus.r += 0.1;
+                    tBonus.r += 0.15;
+                    tBonus.v += 0.15;
                     tBonus[attrCh] += 0.1;
                 } else if (fav === "criacao") {
-                    tBonus.r += 0.1;
-                    tBonus.v += 0.1;
-                    tBonus[attrCh] += 0.1;
+                    tBonus.r += 0.2;
+                    tBonus.v += 0.2;
                 } else if (fav === "criacao_favorita") {
                     tBonus.r += 0.25;
                     tBonus.v += 0.25;
@@ -5643,12 +5643,11 @@ function updateUI() {
                 bonus.r -= 0.9;
                 bonus.v -= 0.9;
             } else if (fav === "favorita") {
-                bonus.r += 0.1;
-                bonus[attrCh] += 0.1;
+                bonus.r += 0.15;
+                bonus.v += 0.15;
             } else if (fav === "criacao") {
-                bonus.r += 0.1;
-                bonus.v += 0.1;
-                bonus[attrCh] += 0.1;
+                bonus.r += 0.2;
+                bonus.v += 0.2;
             } else if (fav === "criacao_favorita") {
                 bonus.r += 0.25;
                 bonus.v += 0.25;
@@ -6741,6 +6740,18 @@ function updateUI() {
                     reducaoDanoGeral += 20;
                 } else {
                     favArmDanoFinal = 20;
+                }
+            } else if (fav === "favorita") {
+                if (i.calcQuemAtaca === "inimigo") {
+                    reducaoDanoGeral += 10;
+                } else {
+                    favArmDanoFinal = 10;
+                }
+            } else if (fav === "criacao") {
+                if (i.calcQuemAtaca === "inimigo") {
+                    reducaoDanoGeral += 15;
+                } else {
+                    favArmDanoFinal = 15;
                 }
             }
         } else if (totalBase >= 5000 && totalBase < 15000) {
