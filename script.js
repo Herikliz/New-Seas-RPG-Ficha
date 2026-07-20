@@ -43,7 +43,7 @@ const racas = { "Braços Longos":{f:.30,r:.15}, "Bucaneiro":{f:.35,r:.40}, "Giga
 const linhagens = { "Nenhuma":{}, "Augur":{d:.15,v:.15,req:["Humano"]}, "Barnum":{req:["Braços Longos","Pernas Longas","Kumate","Três-Olhos"]}, "Beckman":{d:.15,v:.15,ho:.15,req:["Humano"]}, "Boa":{f:.15,ha:.15,req:["Kuja"]}, "Capone":{d:.10,v:.10,req:["Humano"]}, "Charlotte":{charlotte:true}, "Chinjao":{f:.20,r:.10,req:["Humano"]}, "D.":{}, "Dracule":{d:.20,ho:.15,req:["Humano"]}, "Drole":{f:.10,r:.05,v:.10,ha:.10,req:["Gigante","Meio-Gigante","Wotan"]}, "Família do Sol":{f:.10,r:.10,req:["Tritão","Sereiano","Wotan"]}, "Gan":{esp:.10,req:["Povo do Céu: Birkan","Povo do Céu: Shandia","Povo do Céu: Skypieano"]}, "Kong":{req:["Humano"]}, "Kozuki":{d:.15,v:.15,esp:.10,req:["Humano"]}, "Kurozumi":{d:.10,v:.10,req:["Humano"]}, "Laufey":{f:.15,r:.15,v:-.05,req:["Gigante"]}, "Mokomo":{v:.15,req:["Mink"]}, "Nefertari":{d:.15,v:.15,req:["Humano"]}, "Neptune":{d:.15,req:["Sereiano"]}, "Newgate":{r:.20,f:.20,req:["Humano","Meio-Gigante"]}, "Nico":{req:["Humano"]}, "Sakazuki":{f:.25,r:.20,req:["Humano"]}, "Silvers":{esp:.20,req:["Humano"]}, "Tenryūbito: Família Donquixote":{d:.10,ami:.15,req:["Humano"]}, "Tenryūbito: Família Figarland":{d:.10,esp:.15,req:["Humano"]}, "Tom":{f:.10,r:.10,req:["Tritão"]}, "Vega":{v:.10,d:.05,req:["Humano"]} };
 
 const habilidadesExclusivasDict = {
-    "Arte da Esgrima": "+10% em Destreza quando tiver 5.000 pontos (15% aos 10k, 20% aos 15k). -20% de gasto de Estamina.",
+    "Arte da Esgrima": "+10% em Destreza quando tiver 5.000 pontos (15% aos 10k, 20% aos 15k). A partir dos 5.000 pontos: -20% de gasto de Estamina.",
     "Batedor de Carteiras": "+15% em Destreza quando tiver 5.000 pontos (20% aos 10k, 25% aos 15k).",
     "Caminho do Atirador": "+5% em Destreza quando tiver 5.000 pontos (10% aos 10k, 15% aos 15k). +10% em Destreza ao atirar com armas de fogo (15% aos 10k, 20% aos 15k).",
     "Constituição Única": "+10% de Força e +15% de Resistência.",
@@ -1273,6 +1273,7 @@ function renderArmasEquipadas() {
                         <option value="ignRes" ${a.stat === 'ignRes' ? 'selected' : ''}>Ignorar Resistência</option>
                         <option value="ignDanoGeral" ${a.stat === 'ignDanoGeral' ? 'selected' : ''}>Ignorar Dano Geral</option>
                         <option value="ignDanoAmi" ${a.stat === 'ignDanoAmi' ? 'selected' : ''}>Ignorar Dano Akuma</option>
+                        <option value="redEstamina" ${a.stat === 'redEstamina' ? 'selected' : ''}>Redução de Estamina</option>
                     </optgroup>
                 </select>
                 <select onchange="updateArmaEquipada(${idx}, 'type', this.value)" style="width: 70px; padding: 6px; font-size: 11px;">
@@ -1676,7 +1677,7 @@ function addAlcunhaBuffRow() {
             <optgroup label="Atributos"><option value="tudoAttr">Todos os Atributos</option><option value="d">Destreza</option><option value="f">Força</option><option value="r">Resistência</option><option value="v">Velocidade</option><option value="refl">Reflexo</option><option value="vcorp">Vel. Corporal</option><option value="vAgua">Velocidade (Água)</option><option value="reflAgua">Reflexo (Água)</option><option value="vcorpAgua">Vel. Corporal (Água)</option></optgroup>
             <optgroup label="Espírito"><option value="tudoEsp">Todo o Espírito</option><option value="esp">Espírito</option><option value="ha">Armamento</option><option value="ho">Observação</option><option value="hr">Rei</option></optgroup>
             <optgroup label="Akuma no Mi"><option value="tudoAmi">Toda a Akuma</option><option value="amiAlc">Alcance</option><option value="amiDur">Durabilidade</option><option value="amiPot">Potência</option><option value="amiVel">Velocidade</option><option value="amiDesp">Despertar</option></optgroup>
-            <optgroup label="Combate"><option value="dano">Dano</option><option value="ignRes">Ignorar Resistência</option><option value="ignDanoGeral">Ignorar Dano Geral</option><option value="ignDanoAmi">Ignorar Dano Akuma</option></optgroup>
+            <optgroup label="Combate"><option value="dano">Dano</option><option value="ignRes">Ignorar Resistência</option><option value="ignDanoGeral">Ignorar Dano Geral</option><option value="ignDanoAmi">Ignorar Dano Akuma</option><option value="redEstamina">Redução de Estamina</option></optgroup>
         </select>
         <select class="buff-type" style="flex:1; font-size:11px; padding:4px; background:#2a2a2a; border:1px solid #444; color:#fff; border-radius:4px;">
             <option value="pct">% (+X%)</option>
@@ -3984,16 +3985,60 @@ function updateUI() {
     let custoHaki = eHArm + eHObs;
 
     let custoEstTotal = custoVel + custoDano + custoBuff + custoHaki;
-    if (hasHab("Arte da Esgrima") && totalBase >= 5000) custoEstTotal = Math.floor(custoEstTotal * 0.80);
-    if (hasHab("QI Avançado")) custoEstTotal = Math.floor(custoEstTotal * 0.50);
+    let custoBruto = custoEstTotal;
+    
+    let totalRedEstamina = 0;
+    let fontesRedEstamina = [];
+
+    if (hasHab("Arte da Esgrima") && totalBase >= 5000) {
+        totalRedEstamina += 20;
+        fontesRedEstamina.push("Arte da Esgrima");
+    }
+    if (hasHab("QI Avançado")) {
+        totalRedEstamina += 50;
+        fontesRedEstamina.push("QI Avançado");
+    }
+
+    if (i.alcunhasList && i.alcunhaAtiva) {
+        let ativa = i.alcunhasList.find(a => a.nome === i.alcunhaAtiva);
+        if (ativa && ativa.buffs) {
+            ativa.buffs.forEach(b => {
+                if (b.cond && (!i.alcunhaCondicoes || !i.alcunhaCondicoes[b.cond])) return;
+                if (b.stat === 'redEstamina') {
+                    totalRedEstamina += b.val;
+                    fontesRedEstamina.push(ativa.nome);
+                }
+            });
+        }
+    }
+    
+    if (i.armasEquipadasList) {
+        i.armasEquipadasList.forEach(a => {
+            if (a.ativo && a.stat === 'redEstamina') {
+                let val = parseInt(a.val) || 0;
+                totalRedEstamina += val;
+                fontesRedEstamina.push(a.nome || 'Item');
+            }
+        });
+    }
+
+    if (totalRedEstamina > 100) totalRedEstamina = 100;
+    if (totalRedEstamina > 0 && custoBruto > 0) {
+        custoEstTotal = Math.floor(custoBruto * (1 - (totalRedEstamina / 100)));
+    }
+
     document.getElementById('estamina-custo-final').textContent = custoEstTotal.toLocaleString("pt-BR");
 
     let estFormula = "";
-    if (custoEstTotal > 0) {
+    if (custoBruto > 0) {
         if (custoVel > 0) estFormula += `<span style="color:#0dcaf0;">+ ${custoVel.toLocaleString("pt-BR")} (10% de Vel.)</span><br>`;
         if (custoDano > 0) estFormula += `<span style="color:#dc3545;">+ ${custoDano.toLocaleString("pt-BR")} (10% de Dano)</span><br>`;
         if (custoBuff > 0) estFormula += `<span style="color:#198754;">+ ${custoBuff.toLocaleString("pt-BR")} (${eBuff}% de Buff)</span><br>`;
         if (custoHaki > 0) estFormula += `<span style="color:#a461ff;">+ ${custoHaki.toLocaleString("pt-BR")} (Haki)</span><br>`;
+        if (totalRedEstamina > 0) {
+            fontesRedEstamina.sort((a, b) => a.localeCompare(b));
+            estFormula += `<span style="color:var(--warning);">Redução: -${totalRedEstamina}% (${fontesRedEstamina.join(" + ")})</span><br>`;
+        }
         estFormula += `Gasto Total: ${custoEstTotal.toLocaleString("pt-BR")} de Estamina`;
     } else {
         estFormula = "Nenhum gasto registrado.";
@@ -4521,7 +4566,7 @@ function updateUI() {
     } else if (i.alcunhaAtiva) {
         let formatAlcunha = (alcObj) => {
             if (alcObj && alcObj.buffs && alcObj.buffs.length > 0) {
-                let names = {tudo:"Todos os Atributos",tudoAttr:"Todos os Atributos",tudoEsp:"Todo o Espírito",tudoAmi:"Toda a Akuma",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar",dano:"Dano Final",ignRes:"Ignorar Resistência",ignDanoGeral:"Ignorar Dano Geral",ignDanoAmi:"Ignorar Dano Akuma"};
+                let names = {tudo:"Todos os Atributos",tudoAttr:"Todos os Atributos",tudoEsp:"Todo o Espírito",tudoAmi:"Toda a Akuma",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar",dano:"Dano Final",ignRes:"Ignorar Resistência",ignDanoGeral:"Ignorar Dano Geral",ignDanoAmi:"Ignorar Dano Akuma",redEstamina:"Redução de Estamina"};
                 let condGroups = { "": [] };
                 alcObj.buffs.forEach(b => {
                     let cName = (b.cond && b.cond.trim() !== "") ? b.cond.trim() : "";
@@ -4912,7 +4957,7 @@ ${attrOut}${tecnicasOut}`;
 
     let formatAlcunhaManual = (alcObj) => {
         if (alcObj && alcObj.buffs && alcObj.buffs.length > 0) {
-            let names = {tudo:"Todos os Atributos",tudoAttr:"Todos os Atributos",tudoEsp:"Todo o Espírito",tudoAmi:"Toda a Akuma",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar",dano:"Dano Final",ignRes:"Ignorar Resistência",ignDanoGeral:"Ignorar Dano Geral",ignDanoAmi:"Ignorar Dano Akuma"};
+            let names = {tudo:"Todos os Atributos",tudoAttr:"Todos os Atributos",tudoEsp:"Todo o Espírito",tudoAmi:"Toda a Akuma",d:"Destreza",f:"Força",r:"Resistência",v:"Velocidade",refl:"Reflexo",vcorp:"Vel. Corporal",vAgua:"Velocidade (Água)",reflAgua:"Reflexo (Água)",vcorpAgua:"Vel. Corporal (Água)",esp:"Espírito",ha:"Haki do Armamento",ho:"Haki da Observação",hr:"Haki do Rei",amiAlc:"Alcance",amiDur:"Durabilidade",amiPot:"Potência",amiVel:"Velocidade",amiDesp:"Despertar",dano:"Dano Final",ignRes:"Ignorar Resistência",ignDanoGeral:"Ignorar Dano Geral",ignDanoAmi:"Ignorar Dano Akuma",redEstamina:"Redução de Estamina"};
             let condGroups = { "": [] };
             alcObj.buffs.forEach(b => {
                 let cName = (b.cond && b.cond.trim() !== "") ? b.cond.trim() : "";
