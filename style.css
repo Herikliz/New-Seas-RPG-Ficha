@@ -19,7 +19,7 @@ body {
     color: var(--text);
     margin: 0;
     padding: 0;
-    font-family: 'Lora', serif;
+    font-family: "Lora", serif;
 }
 
 header {
@@ -33,7 +33,7 @@ header {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: "Segoe UI", sans-serif;
     gap: 15px;
 }
 
@@ -54,7 +54,7 @@ body.pc-mode header {
     justify-content: center;
     flex-wrap: wrap;
     gap: 5px;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     padding: 8px 15px;
     border-radius: 6px;
     border: 1px dashed #555;
@@ -64,7 +64,7 @@ body.pc-mode header {
     width: 180px;
     padding: 6px 10px;
     font-size: 13px;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: "Segoe UI", sans-serif;
     border-radius: 4px;
     text-align: center;
 }
@@ -124,7 +124,7 @@ body.pc-mode header {
     text-transform: uppercase;
     font-size: 11px;
     font-weight: bold;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: "Segoe UI", sans-serif;
     transition: 0.2s;
     white-space: nowrap;
 }
@@ -181,7 +181,7 @@ body.pc-mode header {
     margin: 3px;
     color: white;
     transition: 0.2s;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: "Segoe UI", sans-serif;
 }
 
 .btn-outline {
@@ -191,7 +191,7 @@ body.pc-mode header {
 }
 
 .btn-outline:hover:not(:disabled) {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .btn:disabled {
@@ -203,24 +203,30 @@ body.pc-mode header {
     background-color: var(--success);
 }
 
-input, textarea, select {
+input,
+textarea,
+select {
     background-color: #2a2a2a;
     color: var(--text);
     border: 1px solid #444;
-    font-family: 'Lora', serif;
+    font-family: "Lora", serif;
     border-radius: 4px;
     padding: 6px;
     width: 100%;
     font-size: 13px;
 }
 
-input:focus:not(:disabled), textarea:focus:not(:disabled), select:focus:not(:disabled) {
+input:focus:not(:disabled),
+textarea:focus:not(:disabled),
+select:focus:not(:disabled) {
     outline: none;
     border-color: var(--warning);
     background-color: #333;
 }
 
-input:disabled, textarea:disabled, select:disabled {
+input:disabled,
+textarea:disabled,
+select:disabled {
     background-color: #1a1a1a;
     color: #666;
     cursor: not-allowed;
@@ -247,7 +253,7 @@ input:disabled, textarea:disabled, select:disabled {
     padding-right: 5px;
     color: #b3b3b3;
     font-weight: bold;
-    font-family: 'Lora', serif;
+    font-family: "Lora", serif;
 }
 
 .currency-input input {
@@ -274,8 +280,9 @@ textarea {
     line-height: 1.5;
 }
 
-.box-title, label {
-    font-family: 'Cinzel', serif;
+.box-title,
+label {
+    font-family: "Cinzel", serif;
     color: #b3b3b3;
 }
 
@@ -325,7 +332,7 @@ textarea {
     border: 1px solid #444;
     padding: 15px;
     border-radius: 8px;
-    background-color: rgba(0,0,0,0.2);
+    background-color: rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -338,7 +345,7 @@ textarea {
     border: 1px solid #444;
     padding: 15px;
     border-radius: 8px;
-    background-color: rgba(0,0,0,0.2);
+    background-color: rgba(0, 0, 0, 0.2);
     top: 0;
     left: 0;
     width: 100%;
@@ -372,7 +379,7 @@ textarea {
 
 .back-title {
     color: var(--info);
-    font-family: 'Cinzel', serif;
+    font-family: "Cinzel", serif;
     margin-top: 0;
 }
 
@@ -441,14 +448,14 @@ textarea {
     align-items: center;
     justify-content: space-between;
     margin-bottom: 10px;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     padding: 8px;
     border-radius: 6px;
     border: 1px solid #333;
 }
 
 .attr-label {
-    font-family: 'Cinzel', serif;
+    font-family: "Cinzel", serif;
     font-size: 14px;
     font-weight: bold;
     color: var(--warning);
@@ -467,14 +474,14 @@ textarea {
     width: 100px;
     text-align: right;
     font-size: 16px;
-    font-family: 'Cinzel', serif;
+    font-family: "Cinzel", serif;
     font-weight: bold;
 }
 
 .attr-total {
     font-size: 11px;
     color: #aaa;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: "Segoe UI", sans-serif;
 }
 
 .conditional-selects {
@@ -489,21 +496,22 @@ textarea {
 .avisoErro {
     color: var(--danger);
     font-size: 11px;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: "Segoe UI", sans-serif;
     font-weight: bold;
     margin-top: 5px;
     display: none;
     text-align: right;
 }
 
-pre#resBox, pre#logBox {
+pre#resBox,
+pre#logBox {
     background: #111;
     padding: 20px;
     border-radius: 6px;
     border: 1px solid #444;
     white-space: pre-wrap;
     word-wrap: break-word;
-    font-family: 'Segoe UI', monospace;
+    font-family: "Segoe UI", monospace;
     font-size: 14px;
     min-height: 500px;
     color: #ddd;
@@ -513,11 +521,12 @@ pre#resBox, pre#logBox {
 
 optgroup {
     color: var(--info);
-    font-family: 'Cinzel', serif;
+    font-family: "Cinzel", serif;
     font-weight: bold;
 }
 
-.vertical-mode .three-col-grid, .vertical-mode .main-grid {
+.vertical-mode .three-col-grid,
+.vertical-mode .main-grid {
     grid-template-columns: 1fr !important;
 }
 
@@ -527,13 +536,17 @@ optgroup {
     margin-bottom: 10px;
 }
 
-.vertical-mode .conditional-selects, .vertical-mode .attr-row {
+.vertical-mode .conditional-selects,
+.vertical-mode .attr-row {
     flex-direction: column !important;
     gap: 8px !important;
     align-items: stretch !important;
 }
 
-.vertical-mode input, .vertical-mode select, .vertical-mode button.btn, .vertical-mode textarea {
+.vertical-mode input,
+.vertical-mode select,
+.vertical-mode button.btn,
+.vertical-mode textarea {
     font-size: 16px !important;
     padding: 12px !important;
 }
@@ -559,7 +572,7 @@ optgroup {
 
 option {
     color: var(--text);
-    font-family: 'Lora', serif;
+    font-family: "Lora", serif;
     font-weight: normal;
 }
 
@@ -570,7 +583,7 @@ option {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0, 0, 0, 0.8);
     z-index: 9999;
     justify-content: center;
     align-items: center;
@@ -589,7 +602,7 @@ option {
     color: var(--text);
     margin-bottom: 15px;
     font-size: 14px;
-    font-family: 'Lora', serif;
+    font-family: "Lora", serif;
 }
 
 .btn-tab.dragging {
@@ -597,7 +610,8 @@ option {
     border: 1px dashed var(--warning) !important;
 }
 
-.btn-tab.drag-over, .btn-add.drag-over {
+.btn-tab.drag-over,
+.btn-add.drag-over {
     transform: scale(1.05);
     border: 1px dashed var(--info) !important;
     background: rgba(13, 202, 240, 0.2) !important;
