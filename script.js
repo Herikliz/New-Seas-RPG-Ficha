@@ -5828,7 +5828,8 @@ function updateUI() {
 
     let passiveV = Math.round((V + flatBonus.v) * (1 + bonus.v));
     let zoanBaseV = passiveV;
-    if (zBonus.v > 0) zoanBaseV = Math.round(passiveV * (1 + zBonus.v));
+    let zoanVBonusPoints = zBonus.v > 0 ? Math.round(passiveV * (1 + zBonus.v)) - passiveV : 0;
+    zBonus.v = 0;
     let totalV = Math.round((zoanBaseV + itemFlat.v) * (1 + itemBonus.v));
     let elTotalV = document.getElementById("total-v");
     elTotalV.innerText = "Total: " + totalV.toLocaleString("pt-BR");
@@ -6061,81 +6062,83 @@ function updateUI() {
         else finalAkumaVelBox = baseAkumaVelBox;
     }
 
-    let elBoxVelAkuma = document.getElementById("container-boxVelAkuma");
-    if (elBoxVelAkuma) {
-        if (i.amiVelAtivo && finalAkumaVelBox > 0) {
-            elBoxVelAkuma.style.display = "block";
-            document.getElementById("total-vAkuma").innerText =
-                "Adicional: " + finalAkumaVelBox.toLocaleString("pt-BR");
+    let totalAdicionalVel = (i.amiVelAtivo ? finalAkumaVelBox : 0) + zoanVBonusPoints;
 
-            if (typeof currentChar.substats.reflAkuma === "undefined")
-                currentChar.substats.reflAkuma = 0;
-            if (typeof currentChar.substats.vcorpAkuma === "undefined")
-                currentChar.substats.vcorpAkuma = 0;
+        let elBoxVelAkuma = document.getElementById("container-boxVelAkuma");
+        if (elBoxVelAkuma) {
+            if (totalAdicionalVel > 0) {
+                elBoxVelAkuma.style.display = "block";
+                document.getElementById("total-vAkuma").innerText =
+                    "Adicional: " + totalAdicionalVel.toLocaleString("pt-BR");
 
-            let REFAkuma = currentChar.substats.reflAkuma || 0;
-            let VCORPAkuma = currentChar.substats.vcorpAkuma || 0;
-            let totalVelSubAkuma = REFAkuma + VCORPAkuma;
+                if (typeof currentChar.substats.reflAkuma === "undefined")
+                    currentChar.substats.reflAkuma = 0;
+                if (typeof currentChar.substats.vcorpAkuma === "undefined")
+                    currentChar.substats.vcorpAkuma = 0;
 
-            if (!isSuperAdmin && totalVelSubAkuma > finalAkumaVelBox) {
-                let diff = totalVelSubAkuma - finalAkumaVelBox;
-                let active = document.activeElement;
-                if (active && active.id === "sub-reflAkuma") {
-                    REFAkuma -= diff;
-                    currentChar.substats.reflAkuma = Math.max(0, REFAkuma);
-                } else if (active && active.id === "sub-vcorpAkuma") {
-                    VCORPAkuma -= diff;
-                    currentChar.substats.vcorpAkuma = Math.max(0, VCORPAkuma);
-                } else {
-                    if (VCORPAkuma >= diff) {
-                        VCORPAkuma -= diff;
-                        currentChar.substats.vcorpAkuma = Math.max(
-                            0,
-                            VCORPAkuma,
-                        );
-                    } else if (REFAkuma >= diff) {
+                let REFAkuma = currentChar.substats.reflAkuma || 0;
+                let VCORPAkuma = currentChar.substats.vcorpAkuma || 0;
+                let totalVelSubAkuma = REFAkuma + VCORPAkuma;
+
+                if (!isSuperAdmin && totalVelSubAkuma > totalAdicionalVel) {
+                    let diff = totalVelSubAkuma - totalAdicionalVel;
+                    let active = document.activeElement;
+                    if (active && active.id === "sub-reflAkuma") {
                         REFAkuma -= diff;
                         currentChar.substats.reflAkuma = Math.max(0, REFAkuma);
+                    } else if (active && active.id === "sub-vcorpAkuma") {
+                        VCORPAkuma -= diff;
+                        currentChar.substats.vcorpAkuma = Math.max(0, VCORPAkuma);
+                    } else {
+                        if (VCORPAkuma >= diff) {
+                            VCORPAkuma -= diff;
+                            currentChar.substats.vcorpAkuma = Math.max(
+                                0,
+                                VCORPAkuma,
+                            );
+                        } else if (REFAkuma >= diff) {
+                            REFAkuma -= diff;
+                            currentChar.substats.reflAkuma = Math.max(0, REFAkuma);
+                        }
                     }
+                    document.getElementById("avisoVelAkuma").style.display =
+                        "block";
+                    document.getElementById("avisoVelAkuma").textContent =
+                        `Limite atingido!\n Máx: ${totalAdicionalVel.toLocaleString("pt-BR")}`;
+                } else if (
+                    totalVelSubAkuma < totalAdicionalVel &&
+                    totalAdicionalVel > 0
+                ) {
+                    let diff = totalAdicionalVel - totalVelSubAkuma;
+                    document.getElementById("avisoVelAkuma").style.display =
+                        "block";
+                    document.getElementById("avisoVelAkuma").textContent =
+                        `Pontos não distribuídos no Adicional: ${diff.toLocaleString("pt-BR")}`;
+                } else {
+                    document.getElementById("avisoVelAkuma").style.display = "none";
                 }
-                document.getElementById("avisoVelAkuma").style.display =
-                    "block";
-                document.getElementById("avisoVelAkuma").textContent =
-                    `Limite atingido!\n Máx: ${finalAkumaVelBox.toLocaleString("pt-BR")}`;
-            } else if (
-                totalVelSubAkuma < finalAkumaVelBox &&
-                finalAkumaVelBox > 0
-            ) {
-                let diff = finalAkumaVelBox - totalVelSubAkuma;
-                document.getElementById("avisoVelAkuma").style.display =
-                    "block";
-                document.getElementById("avisoVelAkuma").textContent =
-                    `Pontos não distribuídos no Adicional: ${diff.toLocaleString("pt-BR")}`;
+
+                let elReflAkuma = document.getElementById("sub-reflAkuma");
+                let fmtReflAkuma = currentChar.substats.reflAkuma
+                    ? currentChar.substats.reflAkuma.toLocaleString("pt-BR")
+                    : "";
+                if (elReflAkuma && elReflAkuma.value !== fmtReflAkuma)
+                    elReflAkuma.value = fmtReflAkuma;
+
+                let elVcorpAkuma = document.getElementById("sub-vcorpAkuma");
+                let fmtVcorpAkuma = currentChar.substats.vcorpAkuma
+                    ? currentChar.substats.vcorpAkuma.toLocaleString("pt-BR")
+                    : "";
+                if (elVcorpAkuma && elVcorpAkuma.value !== fmtVcorpAkuma)
+                    elVcorpAkuma.value = fmtVcorpAkuma;
             } else {
-                document.getElementById("avisoVelAkuma").style.display = "none";
+                elBoxVelAkuma.style.display = "none";
+                if (currentChar.substats.reflAkuma)
+                    currentChar.substats.reflAkuma = 0;
+                if (currentChar.substats.vcorpAkuma)
+                    currentChar.substats.vcorpAkuma = 0;
             }
-
-            let elReflAkuma = document.getElementById("sub-reflAkuma");
-            let fmtReflAkuma = currentChar.substats.reflAkuma
-                ? currentChar.substats.reflAkuma.toLocaleString("pt-BR")
-                : "";
-            if (elReflAkuma && elReflAkuma.value !== fmtReflAkuma)
-                elReflAkuma.value = fmtReflAkuma;
-
-            let elVcorpAkuma = document.getElementById("sub-vcorpAkuma");
-            let fmtVcorpAkuma = currentChar.substats.vcorpAkuma
-                ? currentChar.substats.vcorpAkuma.toLocaleString("pt-BR")
-                : "";
-            if (elVcorpAkuma && elVcorpAkuma.value !== fmtVcorpAkuma)
-                elVcorpAkuma.value = fmtVcorpAkuma;
-        } else {
-            elBoxVelAkuma.style.display = "none";
-            if (currentChar.substats.reflAkuma)
-                currentChar.substats.reflAkuma = 0;
-            if (currentChar.substats.vcorpAkuma)
-                currentChar.substats.vcorpAkuma = 0;
         }
-    }
 
     let ESP = currentChar.stats.esp;
 
@@ -7130,12 +7133,13 @@ function updateUI() {
             itemFlat.v,
             zBonus.v,
         );
-        if (i.amiVelAtivo && finalAkumaVel > 0) {
+        let totalAdicionalTexto = (i.amiVelAtivo ? finalAkumaVel : 0) + zoanVBonusPoints;
+        if (totalAdicionalTexto > 0) {
             let totalVBase = Math.round(
                 (Math.round((V + flatBonus.v) * (1 + bonus.v)) + itemFlat.v) *
                     (1 + itemBonus.v),
             );
-            velNormalStr += `+${finalAkumaVel.toLocaleString("pt-BR")} (Akuma no Mi) = ${(totalVBase + finalAkumaVel).toLocaleString("pt-BR")}`;
+            velNormalStr += `+${totalAdicionalTexto.toLocaleString("pt-BR")} (Adicional) = ${(totalVBase + totalAdicionalTexto).toLocaleString("pt-BR")}`;
         }
         let hasWaterDiff =
             waterBuffV !== 0 ||
@@ -7156,7 +7160,7 @@ function updateUI() {
                 itemBonus.v,
                 itemFlat.v,
             );
-            if (i.amiVelAtivo && finalAkumaVel > 0) {
+            if (totalAdicionalTexto > 0) {
                 let totalVAguaBase = Math.round(
                     (Math.round(
                         (V + totalFlatBonusVAgua) * (1 + totalBonusVAgua),
@@ -7164,16 +7168,16 @@ function updateUI() {
                         itemFlat.v) *
                         (1 + itemBonus.v),
                 );
-                strTotalAgua += `+${finalAkumaVel.toLocaleString("pt-BR")} (Akuma no Mi) = ${(totalVAguaBase + finalAkumaVel).toLocaleString("pt-BR")}`;
+                strTotalAgua += `+${totalAdicionalTexto.toLocaleString("pt-BR")} (Adicional) = ${(totalVAguaBase + totalAdicionalTexto).toLocaleString("pt-BR")}`;
             }
             attrOut += `↠ *𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:* ${velNormalStr} | ${strTotalAgua} (dentro d'água)\n`;
 
             let REFAgua = currentChar.substats.reflAgua || 0;
             let VCORPAgua = currentChar.substats.vcorpAgua || 0;
-            let REFAkuma = i.amiVelAtivo
+            let REFAkuma = totalAdicionalTexto > 0
                 ? currentChar.substats.reflAkuma || 0
                 : 0;
-            let VCORPAkuma = i.amiVelAtivo
+            let VCORPAkuma = totalAdicionalTexto > 0
                 ? currentChar.substats.vcorpAkuma || 0
                 : 0;
             let totalBonusReflAgua = bonus.refl + bonus.reflAgua;
@@ -7358,10 +7362,10 @@ function updateUI() {
             }
         } else {
             attrOut += `↠ *𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:* ${velNormalStr}\n`;
-            let REFAkuma = i.amiVelAtivo
+            let REFAkuma = totalAdicionalTexto > 0
                 ? currentChar.substats.reflAkuma || 0
                 : 0;
-            let VCORPAkuma = i.amiVelAtivo
+            let VCORPAkuma = totalAdicionalTexto > 0
                 ? currentChar.substats.vcorpAkuma || 0
                 : 0;
             if (REF > 0 || REFAkuma > 0) {
@@ -8093,7 +8097,7 @@ function updateUI() {
                 return "";
             }
             if (hab === "Espírito Contagiante")
-                return "Aliados recebem +5% em todos os atributos.";
+                return "Aliados recebem buffs em todos os atributos.";
             if (hab === "Favoritismo Armista") {
                 if (tb >= 15000)
                     return "Atributos dinâmicos por arma selecionada.";
