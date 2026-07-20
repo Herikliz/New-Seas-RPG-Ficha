@@ -48,7 +48,7 @@ const habilidadesExclusivasDict = {
     "Caminho do Atirador": "+5% em Destreza quando tiver 5.000 pontos (10% aos 10k, 15% aos 15k). +10% em Destreza ao atirar com armas de fogo (15% aos 10k, 20% aos 15k).",
     "Constituição Única": "+10% de Força e +15% de Resistência.",
     "Contração Muscular": "+10% de Força e Resistência quando tiver 5.000 pontos (20% aos 10k).",
-    "Espírito Contagiante": "Aliados recebem um bônus passivo de +5% em todos os atributos.",
+    "Espírito Contagiante": "Aos 5k: Aliados e Usuário +5% Atributos, -10% Estamina. Aos 10k: +10% Atributos, Usuário +10% Resistência. Aos 15k: +15% Atributos, Usuário +10% Redução de Dano.",
     "Favoritismo Armista": "Aos 10.000: Ao empunhar criações: +10% R e V, e F ou D. Aos 15.000: Bônus massivos de R, V, Dano e Redução de Dano.",
     "Filho do Mar": "+5% em Reflexo e Resistência aos 5.000 (10% aos 10k, 15% aos 15k).",
     "Flexibilidade": "+10% em Velocidade aos 5.000 (20% aos 10k).",
@@ -971,7 +971,7 @@ function runFallbackChecks() {
               personalidade: "", historia: "", aparencia: "", inventario: "", naviosList: [], armasEquipadasList: [], hasAmiAlc: true, hasAmiDur: true, hasAmiPot: true, hasAmiVel: true, hasAmiDesp: false,
               amiResPct: "", amiAlcMult: "1", calcQuemAtaca: "eu", calcUseAttr: "", calcInimigoRes: "", calcResIgnorada: "", calcDanoIgnorado: "", calcDanoAmiIgnorado: "", calcBuffFlat: "", calcBuffPct: "", calcBuffDanoFinalPct: "", calcUseAmi: "sim", amiPotBuff: "", calcUseHaki: "nao", calcUseHakiRei: "nao", sceneType: "Treino Padrão", sceneText: "", hpAtual: -1,
               boxIden: false, boxMec: false, boxSoc: false, boxBase: false, boxEsp: false, boxAmi: false, boxHist: false, 
-              boxInv: false, boxCalc: false, boxEstamina: false, estaminaAtual: -1, estaminaVelocidade: "", estaminaDano: "", estaminaBuffPct: "", estaminaHakiArm: "nao", estaminaHakiObs: "nao", boxScene: false, akumaId: "", selCharR1: "", selCharR2: "", treinosAcumulados: 0, ordemTecnicas: "alfabetica", hideHistoria: false, hidePersonality: false, hideTecNome: false, hideTecDesc: false, hideTecEfeito: false, hiddenStyles: [], exaustaoCompleta: false, habilidadesExclusivas: [], habCaminhoAtiradorAtivo: false, habFavArmistaAtivo: "sem", habFavArmistaAttr: "d", habFuriaArdenteAttr: "f", habQIAvancadoAtivo: false, linhagemBeckmanArma: false, habRetornoUso: 1, merito: 0, aliadosEspiritoContagiante: 0,
+              boxInv: false, boxCalc: false, boxEstamina: false, estaminaAtual: -1, estaminaVelocidade: "", estaminaDano: "", estaminaBuffPct: "", estaminaHakiArm: "nenhum", estaminaHakiObs: "nenhum", estaminaHakiRei: "nenhum", boxScene: false, akumaId: "", selCharR1: "", selCharR2: "", treinosAcumulados: 0, ordemTecnicas: "alfabetica", hideHistoria: false, hidePersonality: false, hideTecNome: false, hideTecDesc: false, hideTecEfeito: false, hiddenStyles: [], exaustaoCompleta: false, habilidadesExclusivas: [], habCaminhoAtiradorAtivo: false, habFavArmistaAtivo: "sem", habFavArmistaAttr: "d", habFuriaArdenteAttr: "f", habQIAvancadoAtivo: false, linhagemBeckmanArma: false, habRetornoUso: 1, merito: 0, aliadosEspiritoContagiante: 0,
               unlockHA1: false, unlockHA2: false, unlockHA3: false, unlockHA4: false, unlockHA5: false, unlockHA6: false,
               unlockHO2: false, unlockHO3: false, unlockHO4: false,
               unlockHR2: false, unlockHR3: false, unlockHR4: false, unlockHR5: false, unlockHR6: false,
@@ -2469,6 +2469,11 @@ function updateUI() {
         }
         if(hHas("Constituição Única")) { tBonus.f += 0.10; tBonus.r += 0.15; }
         if(hHas("Contração Muscular")) { if(totalBase >= 10000) { tBonus.f += 0.20; tBonus.r += 0.20; } else if(totalBase >= 5000) { tBonus.f += 0.10; tBonus.r += 0.10; } }
+        if(hHas("Espírito Contagiante")) {
+            if(totalBase >= 15000) { tBonus.d += 0.15; tBonus.f += 0.15; tBonus.r += 0.15; tBonus.v += 0.15; }
+            else if(totalBase >= 10000) { tBonus.d += 0.10; tBonus.f += 0.10; tBonus.r += 0.20; tBonus.v += 0.10; }
+            else if(totalBase >= 5000) { tBonus.d += 0.05; tBonus.f += 0.05; tBonus.r += 0.05; tBonus.v += 0.05; }
+        }
         if(hHas("Favoritismo Armista")) {
             let fav = i.habFavArmistaAtivo;
             let attrCh = i.habFavArmistaAttr === 'f' ? 'f' : 'd';
@@ -3157,6 +3162,11 @@ function updateUI() {
         }
         if(hasHab("Constituição Única")) { bonus.f += 0.10; bonus.r += 0.15; }
         if(hasHab("Contração Muscular")) { if(totalBase >= 10000) { bonus.f += 0.20; bonus.r += 0.20; } else if(totalBase >= 5000) { bonus.f += 0.10; bonus.r += 0.10; } }
+        if(hasHab("Espírito Contagiante")) {
+            if(totalBase >= 15000) { bonus.d += 0.15; bonus.f += 0.15; bonus.r += 0.15; bonus.v += 0.15; }
+            else if(totalBase >= 10000) { bonus.d += 0.10; bonus.f += 0.10; bonus.r += 0.20; bonus.v += 0.10; }
+            else if(totalBase >= 5000) { bonus.d += 0.05; bonus.f += 0.05; bonus.r += 0.05; bonus.v += 0.05; }
+        }
         if(hasHab("Favoritismo Armista")) {
             let fav = i.habFavArmistaAtivo;
             let attrCh = i.habFavArmistaAttr === 'f' ? 'f' : 'd';
@@ -3842,6 +3852,10 @@ function updateUI() {
         if (i.armasEquipadasList) getReductions(i.armasEquipadasList.filter(a => a.ativo));
     }
 
+    if (hasHab("Espírito Contagiante") && totalBase >= 15000 && i.calcQuemAtaca === 'inimigo') {
+        reducaoDanoGeral += 10;
+    }
+
     if (hasHab("Favoritismo Armista")) {
         let fav = i.habFavArmistaAtivo;
         if (totalBase >= 15000) {
@@ -3961,30 +3975,59 @@ function updateUI() {
     if (elEstAtual) elEstAtual.value = i.estaminaAtual.toLocaleString("pt-BR");
 
     let elEstHakiArm = document.getElementById('info-estaminaHakiArm');
-    if (elEstHakiArm) {
-        let htmlHakiArm = '<option value="nao">Não</option><option value="sim">Sim</option>';
-        if (i.unlockHA4) htmlHakiArm += '<option value="fullbody">Full Body</option>';
-        if (elEstHakiArm.innerHTML !== htmlHakiArm) elEstHakiArm.innerHTML = htmlHakiArm;
-        if (Array.from(elEstHakiArm.options).some(o => o.value === i.estaminaHakiArm)) {
-            elEstHakiArm.value = i.estaminaHakiArm;
-        } else {
-            elEstHakiArm.value = "nao";
-            i.estaminaHakiArm = "nao";
-        }
+    if (elEstHakiArm && Array.from(elEstHakiArm.options).some(o => o.value === i.estaminaHakiArm)) {
+        elEstHakiArm.value = i.estaminaHakiArm;
+    } else if (elEstHakiArm) {
+        elEstHakiArm.value = "nenhum";
+        i.estaminaHakiArm = "nenhum";
+    }
+
+    let elEstHakiObs = document.getElementById('info-estaminaHakiObs');
+    if (elEstHakiObs && Array.from(elEstHakiObs.options).some(o => o.value === i.estaminaHakiObs)) {
+        elEstHakiObs.value = i.estaminaHakiObs;
+    } else if (elEstHakiObs) {
+        elEstHakiObs.value = "nenhum";
+        i.estaminaHakiObs = "nenhum";
+    }
+
+    let elEstHakiRei = document.getElementById('info-estaminaHakiRei');
+    if (elEstHakiRei && Array.from(elEstHakiRei.options).some(o => o.value === i.estaminaHakiRei)) {
+        elEstHakiRei.value = i.estaminaHakiRei;
+    } else if (elEstHakiRei) {
+        elEstHakiRei.value = "nenhum";
+        i.estaminaHakiRei = "nenhum";
     }
 
     let eVel = parseInt(i.estaminaVelocidade) || 0;
     let eDano = parseInt(i.estaminaDano) || 0;
     let eBuff = parseInt(i.estaminaBuffPct) || 0;
-    let eHArm = i.estaminaHakiArm === 'sim' ? 300 : (i.estaminaHakiArm === 'fullbody' ? 600 : 0);
-    let eHObs = i.estaminaHakiObs === 'sim' ? 200 : 0;
 
     let custoVel = Math.floor(eVel * 0.10);
     let custoDano = Math.floor(eDano * 0.10);
     let custoBuff = Math.floor((eBuff / 10) * 150);
-    let custoHaki = eHArm + eHObs;
+    
+    let subtotalAcao = custoVel + custoDano + custoBuff;
+    let percHaki = 0;
+    let fixoHaki = 0;
 
-    let custoEstTotal = custoVel + custoDano + custoBuff + custoHaki;
+    if (i.estaminaHakiArm === 'invisivel') percHaki += 5;
+    else if (i.estaminaHakiArm === 'visivel') percHaki += 10;
+    else if (i.estaminaHakiArm === 'emissao') percHaki += 25;
+    else if (i.estaminaHakiArm === 'avancado') percHaki += 50;
+    else if (i.estaminaHakiArm === 'fullbody') percHaki += 75;
+
+    if (i.estaminaHakiObs === 'intencao') fixoHaki += 500;
+    else if (i.estaminaHakiObs === 'premonicao') fixoHaki += 750;
+    else if (i.estaminaHakiObs === 'avancado') percHaki += 50;
+
+    if (i.estaminaHakiRei === 'dominacao') fixoHaki += Math.floor(estTotalVal * 0.02);
+    else if (i.estaminaHakiRei === 'incapacitacao') fixoHaki += Math.floor(estTotalVal * 0.05);
+    else if (i.estaminaHakiRei === 'assassinato') percHaki += 25;
+    else if (i.estaminaHakiRei === 'pressao') percHaki += 50;
+    else if (i.estaminaHakiRei === 'infusao') percHaki += 90;
+
+    let custoHaki = Math.floor(subtotalAcao * (percHaki / 100)) + fixoHaki;
+    let custoEstTotal = subtotalAcao + custoHaki;
     let custoBruto = custoEstTotal;
     
     let totalRedEstamina = 0;
@@ -3993,6 +4036,15 @@ function updateUI() {
     if (hasHab("Arte da Esgrima") && totalBase >= 5000) {
         totalRedEstamina += 20;
         fontesRedEstamina.push("Arte da Esgrima");
+    }
+    if (hasHab("Espírito Contagiante") && totalBase >= 5000) {
+        totalRedEstamina += 10;
+        fontesRedEstamina.push("Espírito Contagiante");
+    }
+    let qtdEspiritoEst = parseInt(i.aliadosEspiritoContagiante) || 0;
+    if (qtdEspiritoEst > 0) {
+        totalRedEstamina += (qtdEspiritoEst * 10);
+        fontesRedEstamina.push(qtdEspiritoEst > 1 ? `Aliados c/ Espírito (${qtdEspiritoEst}x)` : "Aliado c/ Espírito");
     }
     if (hasHab("QI Avançado")) {
         totalRedEstamina += 50;

@@ -590,22 +590,39 @@
                                 </div>
                             </div>
                             <div class="input-row">
-                                <div class="input-group">
-                                    <label>Buff Ativo (%)</label>
+                                <div class="input-group" style="flex: 0.5;">
+                                    <label>Buff (%)</label>
                                     <input type="text" id="info-estaminaBuffPct" placeholder="0" oninput="formatAndSave('info', 'estaminaBuffPct', this)">
                                 </div>
-                                <div class="input-group">
+                                <div class="input-group" style="flex: 1;">
                                     <label>Haki Armamento?</label>
                                     <select id="info-estaminaHakiArm" onchange="updateField('info', 'estaminaHakiArm', this.value)">
-                                        <option value="nao">Não</option>
-                                        <option value="sim">Sim</option>
+                                        <option value="nenhum">Nenhum</option>
+                                        <option value="invisivel">Invisível (+5%)</option>
+                                        <option value="visivel">Visível (+10%)</option>
+                                        <option value="emissao">Emissão (+25%)</option>
+                                        <option value="avancado">Avançado (+50%)</option>
+                                        <option value="fullbody">Full Body (+75%)</option>
                                     </select>
                                 </div>
-                                <div class="input-group">
+                                <div class="input-group" style="flex: 1;">
                                     <label>Haki Observação?</label>
                                     <select id="info-estaminaHakiObs" onchange="updateField('info', 'estaminaHakiObs', this.value)">
-                                        <option value="nao">Não</option>
-                                        <option value="sim">Sim</option>
+                                        <option value="nenhum">Nenhum</option>
+                                        <option value="intencao">Intenção (500)</option>
+                                        <option value="premonicao">Premonição (750)</option>
+                                        <option value="avancado">Avançado (+50%)</option>
+                                    </select>
+                                </div>
+                                <div class="input-group" style="flex: 1;">
+                                    <label>Haki do Rei?</label>
+                                    <select id="info-estaminaHakiRei" onchange="updateField('info', 'estaminaHakiRei', this.value)">
+                                        <option value="nenhum">Nenhum</option>
+                                        <option value="dominacao">Dominação (2%)</option>
+                                        <option value="incapacitacao">Incap. (5%)</option>
+                                        <option value="assassinato">Ass. (+25%)</option>
+                                        <option value="pressao">Pressão (+50%)</option>
+                                        <option value="infusao">Infusão (+90%)</option>
                                     </select>
                                 </div>
                             </div>
