@@ -431,17 +431,17 @@ const racas = {
     Wotan: { f: 0.3, r: 0.25 },
 };
 const linhagens = {
-    Nenhuma: {},
-    Augur: { d: 0.15, v: 0.15, req: ["Humano"] },
-    Barnum: { req: ["Braços Longos", "Pernas Longas", "Kumate", "Três-Olhos"] },
-    Beckman: { d: 0.15, v: 0.15, ho: 0.15, req: ["Humano"] },
-    Boa: { f: 0.15, ha: 0.15, req: ["Kuja"] },
-    Capone: { d: 0.1, v: 0.1, req: ["Humano"] },
-    Charlotte: { charlotte: true },
-    Chinjao: { f: 0.2, r: 0.1, req: ["Humano"] },
+    "Nenhuma": {},
+    "Augur": { d: 0.15, v: 0.15, req: ["Humano"] },
+    "Barnum": { req: ["Braços Longos", "Pernas Longas", "Kumate", "Três-Olhos"] },
+    "Beckman": { d: 0.15, v: 0.15, ho: 0.15, req: ["Humano"] },
+    "Boa": { f: 0.15, ha: 0.15, req: ["Kuja"] },
+    "Capone": { d: 0.1, v: 0.1, req: ["Humano"] },
+    "Charlotte": { charlotte: true },
+    "Chinjao": { f: 0.2, r: 0.1, req: ["Humano"] },
     "D.": {},
-    Dracule: { d: 0.2, ho: 0.15, req: ["Humano"] },
-    Drole: {
+    "Dracule": { d: 0.2, ho: 0.15, req: ["Humano"] },
+    "Drole": {
         f: 0.1,
         r: 0.05,
         v: 0.1,
@@ -449,7 +449,7 @@ const linhagens = {
         req: ["Gigante", "Meio-Gigante", "Wotan"],
     },
     "Família do Sol": { f: 0.1, r: 0.1, req: ["Tritão", "Sereiano", "Wotan"] },
-    Gan: {
+    "Gan": {
         esp: 0.1,
         req: [
             "Povo do Céu: Birkan",
@@ -457,21 +457,22 @@ const linhagens = {
             "Povo do Céu: Skypieano",
         ],
     },
-    Kong: { req: ["Humano"] },
-    Kozuki: { d: 0.15, v: 0.15, esp: 0.1, req: ["Humano"] },
-    Kurozumi: { d: 0.1, v: 0.1, req: ["Humano"] },
-    Laufey: { f: 0.15, r: 0.15, v: -0.05, req: ["Gigante"] },
-    Mokomo: { v: 0.15, req: ["Mink"] },
-    Nefertari: { d: 0.15, v: 0.15, req: ["Humano"] },
-    Neptune: { d: 0.15, req: ["Sereiano"] },
-    Newgate: { r: 0.2, f: 0.2, req: ["Humano", "Meio-Gigante"] },
-    Nico: { req: ["Humano"] },
-    Sakazuki: { f: 0.25, r: 0.2, req: ["Humano"] },
-    Silvers: { esp: 0.2, req: ["Humano"] },
+    "Kong": { req: ["Humano"] },
+    "Kozuki": { d: 0.15, v: 0.15, esp: 0.1, req: ["Humano"] },
+    "Kurozumi": { d: 0.1, v: 0.1, req: ["Humano"] },
+    "Laufey": { f: 0.15, r: 0.15, v: -0.05, req: ["Gigante"] },
+    "Mokomo": { v: 0.15, req: ["Mink"] },
+    "Nefertari": { d: 0.15, v: 0.15, req: ["Humano"] },
+    "Neptune": { d: 0.15, req: ["Sereiano"] },
+    "Newgate": { r: 0.2, f: 0.2, req: ["Humano", "Meio-Gigante"] },
+    "Nico": { req: ["Humano"] },
+    "Sakazuki": { f: 0.25, r: 0.2, req: ["Humano"] },
+    "Shinryoku": { v: 0.15, f: 0.15, req: ["Tontatta"] },
+    "Silvers": { esp: 0.2, req: ["Humano"] },
     "Tenryūbito: Família Donquixote": { d: 0.1, ami: 0.15, req: ["Humano"] },
     "Tenryūbito: Família Figarland": { d: 0.1, esp: 0.15, req: ["Humano"] },
-    Tom: { f: 0.1, r: 0.1, req: ["Tritão"] },
-    Vega: { v: 0.1, d: 0.05, req: ["Humano"] },
+    "Tom": { f: 0.1, r: 0.1, req: ["Tritão"] },
+    "Vega": { v: 0.1, d: 0.05, req: ["Humano"] }
 };
 
 const habilidadesExclusivasDict = {
@@ -490,7 +491,7 @@ const habilidadesExclusivasDict = {
         "Aos 10.000: Ao empunhar criações: +10% R e V, e F ou D. Aos 15.000: Bônus massivos de R, V, Dano e Redução de Dano.",
     "Filho do Mar":
         "+5% em Reflexo e Resistência aos 5.000 (10% aos 10k, 15% aos 15k).",
-    Flexibilidade: "+10% em Velocidade aos 5.000 (20% aos 10k).",
+    "Flexibilidade": "+10% em Velocidade aos 5.000 (20% aos 10k).",
     "Fúria Ardente":
         "+5% em Força ou Destreza aos 5.000 (10% aos 10k, 15% aos 15k).",
     "Golpe de Retorno":
@@ -502,26 +503,27 @@ const habilidadesExclusivasDict = {
     "Vontade Inabalável": "Habilidade oculta.",
     "Treinamento de Cavaleiro": "Habilidade oculta.",
     "QI Avançado":
-        "O gasto de estamina é reduzido em 50%. Caso dure mais de 3 turnos, Reflexos aumentados em 5%.",
+        "O gasto de estamina é reduzido em 50%. Caso dure mais de 3 turnos, Reflexos aumentados em 5%."
 };
 
 const linhagemHabilidades = {
-    Dracule: ["Arte da Esgrima"],
-    Capone: ["Batedor de Carteiras"],
-    Augur: ["Caminho do Atirador"],
-    Drole: ["Constituição Única"],
-    Laufey: ["Constituição Única", "Vontade Inabalável"],
-    Mokomo: ["Vontade Inabalável"],
-    Newgate: ["Contração Muscular", "Espírito Contagiante"],
-    Kozuki: ["Favoritismo Armista"],
-    Neptune: ["Filho do Mar", "Flexibilidade"],
-    Boa: ["Flexibilidade"],
-    Sakazuki: ["Fúria Ardente"],
-    Silvers: ["O Escolhido", "Pensamento Acelerado"],
+    "Augur": ["Caminho do Atirador"],
+    "Beckman": ["QI Avançado"],
+    "Boa": ["Flexibilidade"],
+    "Capone": ["Batedor de Carteiras"],
     "D.": ["Espírito Contagiante", "Vontade Inabalável"],
-    Gan: ["Treinamento de Cavaleiro"],
-    Beckman: ["QI Avançado"],
+    "Dracule": ["Arte da Esgrima"],
+    "Drole": ["Constituição Única"],
     "Família do Sol": ["Filho do Mar"],
+    "Gan": ["Treinamento de Cavaleiro"],
+    "Kozuki": ["Favoritismo Armista"],
+    "Laufey": ["Constituição Única", "Vontade Inabalável"],
+    "Mokomo": ["Vontade Inabalável"],
+    "Neptune": ["Filho do Mar", "Flexibilidade"],
+    "Newgate": ["Contração Muscular", "Espírito Contagiante"],
+    "Sakazuki": ["Fúria Ardente"],
+    "Shinryoku": ["Pensamento Acelerado"],
+    "Silvers": ["O Escolhido", "Pensamento Acelerado"]
 };
 
 const allStyles = [
@@ -572,32 +574,32 @@ const allStyles = [
     "Yaristyle",
 ];
 const classStyles = {
-    Arqueólogo: ["Instinto Animal"],
-    Artista: ["Armadilha de Cores", "Escultura de Forma"],
-    Atirador: ["Atirador"],
-    Carpinteiro: ["Impacto Estrutural", "Rope Action"],
-    Cientista: ["Punho Suave"],
-    Combatente: ["Freestyle"],
-    Cozinheiro: ["Cortes Precisos", "Perna Negra"],
-    Ferreiro: ["Impacto Estrutural", "Rope Action"],
-    Inventor: ["Impacto Estrutural", "Rope Action"],
-    Médico: ["Punho Suave"],
-    Musicista: ["Melodia Impactante", "Sinfonia Ilusória"],
-    Navegador: ["Arte do Tempo", "Fúria das Marés"],
+    "Arqueólogo": ["Instinto Animal"],
+    "Artista": ["Armadilha de Cores", "Escultura de Forma"],
+    "Atirador": ["Atirador"],
+    "Carpinteiro": ["Impacto Estrutural", "Rope Action"],
+    "Cientista": ["Punho Suave"],
+    "Combatente": ["Freestyle"],
+    "Cozinheiro": ["Cortes Precisos", "Perna Negra"],
+    "Ferreiro": ["Impacto Estrutural", "Rope Action"],
+    "Inventor": ["Impacto Estrutural", "Rope Action"],
+    "Médico": ["Punho Suave"],
+    "Musicista": ["Melodia Impactante", "Sinfonia Ilusória"],
+    "Navegador": ["Arte do Tempo", "Fúria das Marés"]
 };
 
 const patenteGender = {
-    Aprendiz: { m: "Aprendiz", f: "Aprendiz" },
-    Recruta: { m: "Recruta", f: "Recruta" },
-    Cabo: { m: "Cabo", f: "Cabo" },
-    Sargento: { m: "Sargento", f: "Sargento" },
-    Tenente: { m: "Tenente", f: "Tenente" },
-    Comandante: { m: "Comandante", f: "Comandante" },
-    Capitão: { m: "Capitão", f: "Capitã" },
-    Comodoro: { m: "Comodoro", f: "Comodoro" },
+    "Aprendiz": { m: "Aprendiz", f: "Aprendiz" },
+    "Recruta": { m: "Recruta", f: "Recruta" },
+    "Cabo": { m: "Cabo", f: "Cabo" },
+    "Sargento": { m: "Sargento", f: "Sargento" },
+    "Tenente": { m: "Tenente", f: "Tenente" },
+    "Comandante": { m: "Comandante", f: "Comandante" },
+    "Capitão": { m: "Capitão", f: "Capitã" },
+    "Comodoro": { m: "Comodoro", f: "Comodoro" },
     "Contra-Almirante": { m: "Contra-Almirante", f: "Contra-Almirante" },
     "Vice-Almirante": { m: "Vice-Almirante", f: "Vice-Almirante" },
-    Almirante: { m: "Almirante", f: "Almirante" },
+    "Almirante": { m: "Almirante", f: "Almirante" },
     "Almirante-de-Frota": { m: "Almirante-de-Frota", f: "Almirante-de-Frota" },
     "Agente Judicial": { m: "Agente Judicial", f: "Agente Judicial" },
     "CP-1": { m: "CP-1", f: "CP-1" },
@@ -610,11 +612,11 @@ const patenteGender = {
     "CP-8": { m: "CP-8", f: "CP-8" },
     "CP-9": { m: "CP-9", f: "CP-9" },
     "CP-0": { m: "CP-0", f: "CP-0" },
-    Gorosei: { m: "Gorosei", f: "Gorosei" },
+    "Gorosei": { m: "Gorosei", f: "Gorosei" },
     "Líder do Governo": { m: "Líder do Governo", f: "Líder do Governo" },
-    Iniciado: { m: "Iniciado", f: "Iniciada" },
-    Operador: { m: "Operador", f: "Operadora" },
-    Infiltrador: { m: "Infiltrador", f: "Infiltradora" },
+    "Iniciado": { m: "Iniciado", f: "Iniciada" },
+    "Operador": { m: "Operador", f: "Operadora" },
+    "Infiltrador": { m: "Infiltrador", f: "Infiltradora" },
     "Soldado Revolucionário": {
         m: "Soldado Revolucionário",
         f: "Soldada Revolucionária",
@@ -671,105 +673,105 @@ const patenteGender = {
         m: "Capitão Tático de Defesa",
         f: "Capitã Tática de Defesa",
     },
-    Pilar: { m: "Pilar", f: "Pilar" },
+    "Pilar": { m: "Pilar", f: "Pilar" },
     "Vice-Líder": { m: "Vice-Líder", f: "Vice-Líder" },
-    Eixo: { m: "Eixo", f: "Eixo" },
+    "Eixo": { m: "Eixo", f: "Eixo" },
 };
 
 const baseClassGender = {
-    Arqueólogo: { m: "Arqueólogo", f: "Arqueóloga" },
-    Artista: { m: "Artista", f: "Artista" },
-    Atirador: { m: "Atirador", f: "Atiradora" },
-    Carpinteiro: { m: "Carpinteiro", f: "Carpinteira" },
-    Cientista: { m: "Cientista", f: "Cientista" },
-    Combatente: { m: "Combatente", f: "Combatente" },
-    Cozinheiro: { m: "Cozinheiro", f: "Cozinheira" },
-    Ferreiro: { m: "Ferreiro", f: "Ferreira" },
-    Inventor: { m: "Inventor", f: "Inventora" },
-    Médico: { m: "Médico", f: "Médica" },
-    Musicista: { m: "Musicista", f: "Musicista" },
-    Navegador: { m: "Navegador", f: "Navegadora" },
+    "Arqueólogo": { m: "Arqueólogo", f: "Arqueóloga" },
+    "Artista": { m: "Artista", f: "Artista" },
+    "Atirador": { m: "Atirador", f: "Atiradora" },
+    "Carpinteiro": { m: "Carpinteiro", f: "Carpinteira" },
+    "Cientista": { m: "Cientista", f: "Cientista" },
+    "Combatente": { m: "Combatente", f: "Combatente" },
+    "Cozinheiro": { m: "Cozinheiro", f: "Cozinheira" },
+    "Ferreiro": { m: "Ferreiro", f: "Ferreira" },
+    "Inventor": { m: "Inventor", f: "Inventora" },
+    "Médico": { m: "Médico", f: "Médica" },
+    "Musicista": { m: "Musicista", f: "Musicista" },
+    "Navegador": { m: "Navegador", f: "Navegadora" },
 };
 
 const classTitles = {
-    Arqueólogo: [
+    "Arqueólogo": [
         { m: "Aprendiz de Arqueologia", f: "Aprendiz de Arqueologia" },
         { m: "Historiador", f: "Historiadora" },
         { m: "Mestre de Artefatos", f: "Mestra de Artefatos" },
         { m: "Dominante da História", f: "Dominante da História" },
         { m: "Guru", f: "Guru" },
     ],
-    Artista: [
+    "Artista": [
         { m: "Ilustrador", f: "Ilustradora" },
         { m: "Empresário", f: "Empresária" },
         { m: "Estilista de Mil Faces", f: "Estilista de Mil Faces" },
         { m: "Escultor de Símbolos", f: "Escultora de Símbolos" },
         { m: "Patrono do Mundo", f: "Patrona do Mundo" },
     ],
-    Atirador: [
+    "Atirador": [
         { m: "Atirador Iniciante", f: "Atiradora Iniciante" },
         { m: "Atirador de Precisão", f: "Atiradora de Precisão" },
         { m: "Atirador de Elite", f: "Atiradora de Elite" },
         { m: "Criador Bélico", f: "Criadora Bélica" },
         { m: "Rambo", f: "Rambo" },
     ],
-    Carpinteiro: [
+    "Carpinteiro": [
         { m: "Aprendiz da Madeira", f: "Aprendiz da Madeira" },
         { m: "Construtor de Bordo", f: "Construtora de Bordo" },
         { m: "Engenheiro Naval", f: "Engenheira Naval" },
         { m: "Mestre da Madeira", f: "Mestra da Madeira" },
         { m: "Irmão à Obra", f: "Irmã à Obra" },
     ],
-    Cientista: [
+    "Cientista": [
         { m: "Estudioso", f: "Estudiosa" },
         { m: "Biólogo", f: "Bióloga" },
         { m: "Bioengenheiro", f: "Bioengenheira" },
         { m: "Alquimista", f: "Alquimista" },
         { m: "Gênio Científico", f: "Gênia Científica" },
     ],
-    Combatente: [
+    "Combatente": [
         { m: "Discípulo do Punho", f: "Discípula do Punho" },
         { m: "Guerreiro de Aço", f: "Guerreira de Aço" },
         { m: "Mestre da Guerra", f: "Mestra da Guerra" },
         { m: "Doutrinador Marcial", f: "Doutrinadora Marcial" },
         { m: "Colosso Implacável", f: "Colosso Implacável" },
     ],
-    Cozinheiro: [
+    "Cozinheiro": [
         { m: "Garçom", f: "Garçonete" },
         { m: "Especialista Culinário", f: "Especialista Culinária" },
         { m: "Nutricionista", f: "Nutricionista" },
         { m: "Chef", f: "Chef" },
         { m: "Mestre do Paladar", f: "Mestra do Paladar" },
     ],
-    Ferreiro: [
+    "Ferreiro": [
         { m: "Artesão", f: "Artesã" },
         { m: "Forjador de Imperfeições", f: "Forjadora de Imperfeições" },
         { m: "Forjador de Lendas Menores", f: "Forjadora de Lendas Menores" },
         { m: "Mestre das Lâminas", f: "Mestra das Lâminas" },
         { m: "Forjador Supremo", f: "Forjadora Suprema" },
     ],
-    Inventor: [
+    "Inventor": [
         { m: "Improvisador", f: "Improvisadora" },
         { m: "Mecânico", f: "Mecânica" },
         { m: "Arquitetônico", f: "Arquitetônica" },
         { m: "Condutor", f: "Condutora" },
         { m: "Artífice", f: "Artífice" },
     ],
-    Médico: [
+    "Médico": [
         { m: "Clínico de Campo", f: "Clínica de Campo" },
         { m: "Cirurgião", f: "Cirurgiã" },
         { m: "Biomédico Avançado", f: "Biomédica Avançada" },
         { m: "Mestre da Vida", f: "Mestra da Vida" },
         { m: "Apóstolo da Cura", f: "Apóstola da Cura" },
     ],
-    Musicista: [
+    "Musicista": [
         { m: "Sonante", f: "Sonante" },
         { m: "Celebridade Local", f: "Celebridade Local" },
         { m: "Pop Star", f: "Pop Star" },
         { m: "Ídolo Mundial", f: "Ídolo Mundial" },
         { m: "Imperador Sonoro", f: "Imperatriz Sonora" },
     ],
-    Navegador: [
+    "Navegador": [
         { m: "Marujo", f: "Maruja" },
         { m: "Cartógrafo", f: "Cartógrafa" },
         { m: "Timoneiro", f: "Timoneira" },
@@ -779,17 +781,17 @@ const classTitles = {
 };
 
 const salarios = {
-    Aprendiz: 0,
-    Recruta: 10000000,
-    Cabo: 20000000,
-    Sargento: 30000000,
-    Tenente: 40000000,
-    Comandante: 50000000,
-    Capitão: 60000000,
-    Comodoro: 80000000,
+    "Aprendiz": 0,
+    "Recruta": 10000000,
+    "Cabo": 20000000,
+    "Sargento": 30000000,
+    "Tenente": 40000000,
+    "Comandante": 50000000,
+    "Capitão": 60000000,
+    "Comodoro": 80000000,
     "Contra-Almirante": 90000000,
     "Vice-Almirante": 100000000,
-    Almirante: 150000000,
+    "Almirante": 150000000,
     "Almirante-de-Frota": 200000000,
     "Agente Judicial": 10000000,
     "CP-1": 20000000,
@@ -802,11 +804,11 @@ const salarios = {
     "CP-8": 100000000,
     "CP-9": 150000000,
     "CP-0": 200000000,
-    Gorosei: 500000000,
+    "Gorosei": 500000000,
     "Líder do Governo": 0,
-    Iniciado: 5000000,
-    Operador: 10000000,
-    Infiltrador: 20000000,
+    "Iniciado": 5000000,
+    "Operador": 10000000,
+    "Infiltrador": 20000000,
     "Soldado Revolucionário": 30000000,
     "Coordenador De Operações": 50000000,
     "Esquadrão de Combate": 60000000,
@@ -829,9 +831,9 @@ const salarios = {
     "Capitã Tática de Operações": 100000000,
     "Capitã Tática de Inteligência": 100000000,
     "Capitã Tática de Defesa": 100000000,
-    Pilar: 150000000,
+    "Pilar": 150000000,
     "Vice-Líder": 175000000,
-    Eixo: 200000000,
+    "Eixo": 200000000,
 };
 
 let charData = {
