@@ -467,7 +467,7 @@ const linhagens = {
     "Newgate": { r: 0.2, f: 0.2, req: ["Humano", "Meio-Gigante"] },
     "Nico": { req: ["Humano"] },
     "Sakazuki": { f: 0.25, r: 0.2, req: ["Humano"] },
-    "Shinryoku": { v: 0.15, f: 0.15, req: ["Tontatta"] },
+    "Shinryoku": { v: 0.1, f: 0.15, req: ["Tontatta"] },
     "Silvers": { esp: 0.2, req: ["Humano"] },
     "Tenryūbito: Família Donquixote": { d: 0.1, ami: 0.15, req: ["Humano"] },
     "Tenryūbito: Família Figarland": { d: 0.1, esp: 0.15, req: ["Humano"] },
