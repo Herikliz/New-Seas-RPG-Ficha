@@ -3377,7 +3377,7 @@ function formatRaceStr(rName, aName, isFem) {
 function toggleAmi(field, isChecked) {
     let key = "has" + field.charAt(0).toUpperCase() + field.slice(1);
     currentChar.info[key] = isChecked;
-    if (!isChecked) {
+    if (!isChecked && field !== "amiDesp") {
         currentChar.substats[field] = 0;
         let el = document.getElementById("sub-" + field);
         if (el) el.value = "";
@@ -6046,8 +6046,9 @@ function updateUI() {
         );
     }
 
+    let tempAVelBase = (currentChar.substats.amiVel || 0) + (i.hasAmiDesp ? (currentChar.substats.amiDesp || 0) : 0);
     let calcAVelFinalBox = Math.round(
-        ((currentChar.substats.amiVel || 0) + flatBonus.amiVel) *
+        (tempAVelBase + flatBonus.amiVel) *
             (1 + bonus.amiVel),
     );
     let finalAkumaVelBox = 0;
@@ -6268,7 +6269,7 @@ function updateUI() {
             ? "block"
             : "none";
 
-    ["amiAlc", "amiDur", "amiPot", "amiVel", "amiDesp"].forEach((f) => {
+    ["amiAlc", "amiDur", "amiPot", "amiVel"].forEach((f) => {
         let chk = document.getElementById("chk-" + f);
         let inp = document.getElementById("sub-" + f);
         let key = "has" + f.charAt(0).toUpperCase() + f.slice(1);
@@ -6276,6 +6277,8 @@ function updateUI() {
         if (chk) chk.checked = has;
         if (inp) inp.disabled = !has || isReadOnly;
     });
+    let chkDespUI = document.getElementById("chk-amiDesp");
+    if (chkDespUI) chkDespUI.checked = i.hasAmiDesp;
 
     let AMI = currentChar.stats.ami;
 
@@ -6285,7 +6288,7 @@ function updateUI() {
     if (i.hasAmiPot) baseAmiStats++;
     if (i.hasAmiVel) baseAmiStats++;
 
-    let maxStatAmiInput = baseAmiStats * 10000 + (i.hasAmiDesp ? 10000 : 0);
+    let maxStatAmiInput = baseAmiStats * 10000;
     if (!isSuperAdmin && AMI > maxStatAmiInput) {
         AMI = maxStatAmiInput;
         currentChar.stats.ami = AMI;
@@ -6321,7 +6324,7 @@ function updateUI() {
         currentChar.substats.amiDesp = 0;
     }
 
-    let activeAmiStats = baseAmiStats + (i.hasAmiDesp ? 1 : 0);
+    let activeAmiStats = baseAmiStats;
 
     let maxAmiPoints = 10000;
 
@@ -6330,6 +6333,9 @@ function updateUI() {
         aPot = currentChar.substats.amiPot || 0,
         aVel = currentChar.substats.amiVel || 0,
         aDesp = currentChar.substats.amiDesp || 0;
+
+    let inpDespUI = document.getElementById("sub-amiDesp");
+    if (inpDespUI) inpDespUI.disabled = isReadOnly;
 
     let controlePct = 0;
     if (baseAmiStats > 0) {
@@ -6356,20 +6362,6 @@ function updateUI() {
 
                 let subDesp = document.getElementById("sub-amiDesp");
                 if (subDesp && subDesp.value !== "") subDesp.value = "";
-
-                maxStatAmiInput = baseAmiStats * 10000;
-                if (AMI > maxStatAmiInput) {
-                    AMI = maxStatAmiInput;
-                    currentChar.stats.ami = AMI;
-                    let amiElUpdate = document.getElementById("stat-ami");
-                    if (amiElUpdate)
-                        amiElUpdate.value = AMI.toLocaleString("pt-BR");
-                    totalAmi = AMI;
-                    document.getElementById("total-ami").innerText =
-                        "Total: " + totalAmi.toLocaleString("pt-BR");
-                }
-                activeAmiStats = baseAmiStats;
-                maxAmiPoints = 10000;
             }
         }
     }
@@ -6403,7 +6395,7 @@ function updateUI() {
         }
     }
 
-    let totalAmiSub = aAlc + aDur + aPot + aVel + aDesp;
+    let totalAmiSub = aAlc + aDur + aPot + aVel;
     let pontosDisponiveis = totalAmi - totalAmiSub;
     let elDisp = document.getElementById("ami-distribuiveis");
     if (elDisp)
@@ -6424,14 +6416,8 @@ function updateUI() {
         } else if (active && active.id === "sub-amiVel") {
             aVel -= diff;
             currentChar.substats.amiVel = Math.max(0, aVel);
-        } else if (active && active.id === "sub-amiDesp") {
-            aDesp -= diff;
-            currentChar.substats.amiDesp = Math.max(0, aDesp);
         } else {
-            if (aDesp >= diff) {
-                aDesp -= diff;
-                currentChar.substats.amiDesp = Math.max(0, aDesp);
-            } else if (aVel >= diff) {
+            if (aVel >= diff) {
                 aVel -= diff;
                 currentChar.substats.amiVel = Math.max(0, aVel);
             } else if (aPot >= diff) {
@@ -7499,9 +7485,11 @@ function updateUI() {
 
     if (AMI > 0) {
         attrOut += `↠ *𝙰𝚔𝚞𝚖𝚊 𝚗𝚘 𝙼𝚒:* ${strCalc(AMI, bonus.ami, flatBonus.ami, itemBonus.ami, itemFlat.ami)}\n`;
+        let despAdd = i.hasAmiDesp ? (aDesp || 0) : 0;
         if (i.hasAmiAlc && aAlc > 0) {
+            let baseVal = aAlc + despAdd;
             let calcAAlc = Math.round(
-                (Math.round((aAlc + flatBonus.amiAlc) * (1 + bonus.amiAlc)) +
+                (Math.round((baseVal + flatBonus.amiAlc) * (1 + bonus.amiAlc)) +
                     itemFlat.amiAlc) *
                     (1 + itemBonus.amiAlc),
             );
@@ -7510,25 +7498,28 @@ function updateUI() {
                     (i.amiAlcMult || "1").toString().replace(",", "."),
                 ) || 1;
             let metros = (calcAAlc / 20) * mult;
-            attrOut += `> _𝙰𝚕𝚌𝚊𝚗𝚌𝚎:_ ${strCalc(aAlc, bonus.amiAlc, flatBonus.amiAlc, itemBonus.amiAlc, itemFlat.amiAlc)} (${metros.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}m)\n`;
+            attrOut += `> _𝙰𝚕𝚌𝚊𝚗𝚌𝚎:_ ${strCalc(baseVal, bonus.amiAlc, flatBonus.amiAlc, itemBonus.amiAlc, itemFlat.amiAlc)} (${metros.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}m)\n`;
         }
         if (i.hasAmiDur && aDur > 0) {
+            let baseVal = aDur + despAdd;
             let calcADur = Math.round(
-                (Math.round((aDur + flatBonus.amiDur) * (1 + bonus.amiDur)) +
+                (Math.round((baseVal + flatBonus.amiDur) * (1 + bonus.amiDur)) +
                     itemFlat.amiDur) *
                     (1 + itemBonus.amiDur),
             );
-            let cenas = Math.floor(calcADur / 500);
-            attrOut += `> _𝙳𝚞𝚛𝚊𝚋𝚒𝚕𝚒𝚍𝚊𝚍𝚎:_ ${strCalc(aDur, bonus.amiDur, flatBonus.amiDur, itemBonus.amiDur, itemFlat.amiDur)} (${cenas} cena${cenas !== 1 ? "s" : ""})\n`;
+            let divisor = i.hasAmiDesp ? 1000 : 500;
+            let cenas = Math.floor(calcADur / divisor);
+            attrOut += `> _𝙳𝚞𝚛𝚊𝚋𝚒𝚕𝚒𝚍𝚊𝚍𝚎:_ ${strCalc(baseVal, bonus.amiDur, flatBonus.amiDur, itemBonus.amiDur, itemFlat.amiDur)} (${cenas} cena${cenas !== 1 ? "s" : ""})\n`;
         }
         if (i.hasAmiPot && aPot > 0) {
+            let baseVal = aPot + despAdd;
             let calcAPotFinal = Math.round(
-                (Math.round((aPot + flatBonus.amiPot) * (1 + bonus.amiPot)) +
+                (Math.round((baseVal + flatBonus.amiPot) * (1 + bonus.amiPot)) +
                     itemFlat.amiPot) *
                     (1 + itemBonus.amiPot),
             );
             let strPotFinal = strCalc(
-                aPot,
+                baseVal,
                 bonus.amiPot,
                 flatBonus.amiPot,
                 itemBonus.amiPot,
@@ -7545,13 +7536,14 @@ function updateUI() {
             }
         }
         if (i.hasAmiVel && aVel > 0) {
+            let baseVal = aVel + despAdd;
             let calcAVelFinalOut = Math.round(
-                (Math.round((aVel + flatBonus.amiVel) * (1 + bonus.amiVel)) +
+                (Math.round((baseVal + flatBonus.amiVel) * (1 + bonus.amiVel)) +
                     itemFlat.amiVel) *
                     (1 + itemBonus.amiVel),
             );
             let strVelFinal = strCalc(
-                aVel,
+                baseVal,
                 bonus.amiVel,
                 flatBonus.amiVel,
                 itemBonus.amiVel,
@@ -7570,8 +7562,10 @@ function updateUI() {
                 attrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:_ ${strVelFinal} (${baseAkumaVelUIOut.toLocaleString("pt-BR")} de Velocidade Adicional)\n`;
             }
         }
-        if (i.hasAmiDesp && aDesp > 0)
-            attrOut += `> _𝙳𝚎𝚜𝚙𝚎𝚛𝚝𝚊𝚛:_ ${strCalc(aDesp, bonus.amiDesp, flatBonus.amiDesp, itemBonus.amiDesp, itemFlat.amiDesp)}\n`;
+        if (aDesp > 0 || i.hasAmiDesp) {
+            let strDesp = strCalc(aDesp, bonus.amiDesp, flatBonus.amiDesp, itemBonus.amiDesp, itemFlat.amiDesp);
+            attrOut += `> _𝙳𝚎𝚜𝚙𝚎𝚛𝚝𝚊𝚛:_ ${strDesp}\n`;
+        }
         if (activeAmiStats > 0)
             attrOut += `> _𝙲𝚘𝚗𝚝𝚛ᴏ𝚕𝚎:_ ${controlePct.toLocaleString("pt-BR")}%\n`;
         attrOut += `\n`;
@@ -8550,73 +8544,93 @@ function updateUI() {
     manualAttrOut += `- 𝙸𝚗𝚏𝚞𝚜𝚊̃𝚘${i.unlockHR6 ? "✓" : "✘"}\n\n`;
 
     manualAttrOut += `↠ *𝙰𝚔𝚞𝚖𝚊 𝚗𝚘 𝙼𝚒:* ${strCalc(AMI, bonus.ami, flatBonus.ami, itemBonus.ami, itemFlat.ami)}\n`;
-    let calcAAlcMan = Math.round(
-        (Math.round((aAlc + flatBonus.amiAlc) * (1 + bonus.amiAlc)) +
-            itemFlat.amiAlc) *
-            (1 + itemBonus.amiAlc),
-    );
-    let multMan =
-        parseFloat((i.amiAlcMult || "1").toString().replace(",", ".")) || 1;
-    let metrosMan = (calcAAlcMan / 20) * multMan;
-    manualAttrOut += `> _𝙰𝚕𝚌𝚊𝚗𝚌𝚎:_ ${strCalc(aAlc, bonus.amiAlc, flatBonus.amiAlc, itemBonus.amiAlc, itemFlat.amiAlc)} (${metrosMan.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}m)\n`;
-
-    let calcADurMan = Math.round(
-        (Math.round((aDur + flatBonus.amiDur) * (1 + bonus.amiDur)) +
-            itemFlat.amiDur) *
-            (1 + itemBonus.amiDur),
-    );
-    let cenasMan = Math.floor(calcADurMan / 500);
-    manualAttrOut += `> _𝙳𝚞𝚛𝚊𝚋𝚒𝚕𝚒𝚍𝚊𝚍𝚎:_ ${strCalc(aDur, bonus.amiDur, flatBonus.amiDur, itemBonus.amiDur, itemFlat.amiDur)} (${cenasMan} cena${cenasMan !== 1 ? "s" : ""})\n`;
-
-    let calcAPotFinalMan = Math.round(
-        (Math.round((aPot + flatBonus.amiPot) * (1 + bonus.amiPot)) +
-            itemFlat.amiPot) *
-            (1 + itemBonus.amiPot),
-    );
-    let strPotFinalMan = strCalc(
-        aPot,
-        bonus.amiPot,
-        flatBonus.amiPot,
-        itemBonus.amiPot,
-        itemFlat.amiPot,
-    );
-    let amiResPctValFichaMan = parseInt(i.amiResPct) || 0;
-    if (amiResPctValFichaMan > 0) {
-        let resCalcFinalMan =
-            calcAPotFinalMan +
-            Math.floor(calcAPotFinalMan * (amiResPctValFichaMan / 100));
-        manualAttrOut += `> _𝙿𝚘𝚝𝚎̂𝚗𝚌𝚒𝚊:_ ${strPotFinalMan} (${resCalcFinalMan.toLocaleString("pt-BR")} de Resistência)\n`;
-    } else {
-        manualAttrOut += `> _𝙿𝚘𝚝𝚎̂𝚗𝚌𝚒𝚊:_ ${strPotFinalMan}\n`;
+    let despAddMan = i.hasAmiDesp ? (aDesp || 0) : 0;
+    
+    if (i.hasAmiAlc && aAlc > 0) {
+        let baseValManAlc = aAlc + despAddMan;
+        let calcAAlcMan = Math.round(
+            (Math.round((baseValManAlc + flatBonus.amiAlc) * (1 + bonus.amiAlc)) +
+                itemFlat.amiAlc) *
+                (1 + itemBonus.amiAlc),
+        );
+        let multMan =
+            parseFloat((i.amiAlcMult || "1").toString().replace(",", ".")) || 1;
+        let metrosMan = (calcAAlcMan / 20) * multMan;
+        manualAttrOut += `> _𝙰𝚕𝚌𝚊𝚗𝚌𝚎:_ ${strCalc(baseValManAlc, bonus.amiAlc, flatBonus.amiAlc, itemBonus.amiAlc, itemFlat.amiAlc)} (${metrosMan.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}m)\n`;
     }
 
-    let calcAVelFinalOutMan = Math.round(
-        (Math.round((aVel + flatBonus.amiVel) * (1 + bonus.amiVel)) +
-            itemFlat.amiVel) *
-            (1 + itemBonus.amiVel),
-    );
-    let strVelFinalMan = strCalc(
-        aVel,
-        bonus.amiVel,
-        flatBonus.amiVel,
-        itemBonus.amiVel,
-        itemFlat.amiVel,
-    );
-    let baseAkumaVelUIOutMan = Math.floor(
-        calcAVelFinalOutMan * (controlePct / 100),
-    );
-    let amiVelBuffValOutMan = parseInt(i.amiVelBuff) || 0;
-    if (amiVelBuffValOutMan > 0) {
-        let finalAkumaVelUIOutMan =
-            baseAkumaVelUIOutMan +
-            Math.floor(baseAkumaVelUIOutMan * (amiVelBuffValOutMan / 100));
-        manualAttrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:_ ${strVelFinalMan} (${finalAkumaVelUIOutMan.toLocaleString("pt-BR")} de Velocidade Adicional)\n`;
-    } else {
-        manualAttrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:_ ${strVelFinalMan} (${baseAkumaVelUIOutMan.toLocaleString("pt-BR")} de Velocidade Adicional)\n`;
+    if (i.hasAmiDur && aDur > 0) {
+        let baseValManDur = aDur + despAddMan;
+        let calcADurMan = Math.round(
+            (Math.round((baseValManDur + flatBonus.amiDur) * (1 + bonus.amiDur)) +
+                itemFlat.amiDur) *
+                (1 + itemBonus.amiDur),
+        );
+        let divisorMan = i.hasAmiDesp ? 1000 : 500;
+        let cenasMan = Math.floor(calcADurMan / divisorMan);
+        manualAttrOut += `> _𝙳𝚞𝚛𝚊𝚋𝚒𝚕𝚒𝚍𝚊𝚍𝚎:_ ${strCalc(baseValManDur, bonus.amiDur, flatBonus.amiDur, itemBonus.amiDur, itemFlat.amiDur)} (${cenasMan} cena${cenasMan !== 1 ? "s" : ""})\n`;
     }
 
-    manualAttrOut += `> _𝙳𝚎𝚜𝚙𝚎𝚛𝚝𝚊𝚛:_ ${strCalc(aDesp, bonus.amiDesp, flatBonus.amiDesp, itemBonus.amiDesp, itemFlat.amiDesp)}\n`;
-    manualAttrOut += `> _𝙲𝚘𝚗𝚝𝚛ᴏ𝚕𝚎:_ ${controlePct.toLocaleString("pt-BR")}%\n\n`;
+    if (i.hasAmiPot && aPot > 0) {
+        let baseValManPot = aPot + despAddMan;
+        let calcAPotFinalMan = Math.round(
+            (Math.round((baseValManPot + flatBonus.amiPot) * (1 + bonus.amiPot)) +
+                itemFlat.amiPot) *
+                (1 + itemBonus.amiPot),
+        );
+        let strPotFinalMan = strCalc(
+            baseValManPot,
+            bonus.amiPot,
+            flatBonus.amiPot,
+            itemBonus.amiPot,
+            itemFlat.amiPot,
+        );
+        let amiResPctValFichaMan = parseInt(i.amiResPct) || 0;
+        if (amiResPctValFichaMan > 0) {
+            let resCalcFinalMan =
+                calcAPotFinalMan +
+                Math.floor(calcAPotFinalMan * (amiResPctValFichaMan / 100));
+            manualAttrOut += `> _𝙿𝚘𝚝𝚎̂𝚗𝚌𝚒𝚊:_ ${strPotFinalMan} (${resCalcFinalMan.toLocaleString("pt-BR")} de Resistência)\n`;
+        } else {
+            manualAttrOut += `> _𝙿𝚘𝚝𝚎̂𝚗𝚌𝚒𝚊:_ ${strPotFinalMan}\n`;
+        }
+    }
+
+    if (i.hasAmiVel && aVel > 0) {
+        let baseValManVel = aVel + despAddMan;
+        let calcAVelFinalOutMan = Math.round(
+            (Math.round((baseValManVel + flatBonus.amiVel) * (1 + bonus.amiVel)) +
+                itemFlat.amiVel) *
+                (1 + itemBonus.amiVel),
+        );
+        let strVelFinalMan = strCalc(
+            baseValManVel,
+            bonus.amiVel,
+            flatBonus.amiVel,
+            itemBonus.amiVel,
+            itemFlat.amiVel,
+        );
+        let baseAkumaVelUIOutMan = Math.floor(
+            calcAVelFinalOutMan * (controlePct / 100),
+        );
+        let amiVelBuffValOutMan = parseInt(i.amiVelBuff) || 0;
+        if (amiVelBuffValOutMan > 0) {
+            let finalAkumaVelUIOutMan =
+                baseAkumaVelUIOutMan +
+                Math.floor(baseAkumaVelUIOutMan * (amiVelBuffValOutMan / 100));
+            manualAttrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:_ ${strVelFinalMan} (${finalAkumaVelUIOutMan.toLocaleString("pt-BR")} de Velocidade Adicional)\n`;
+        } else {
+            manualAttrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:_ ${strVelFinalMan} (${baseAkumaVelUIOutMan.toLocaleString("pt-BR")} de Velocidade Adicional)\n`;
+        }
+    }
+
+    if (aDesp > 0 || i.hasAmiDesp) {
+        let strDespMan = strCalc(aDesp, bonus.amiDesp, flatBonus.amiDesp, itemBonus.amiDesp, itemFlat.amiDesp);
+        manualAttrOut += `> _𝙳𝚎𝚜𝚙𝚎𝚛𝚝𝚊𝚛:_ ${strDespMan}\n`;
+    }
+    
+    if (activeAmiStats > 0)
+        manualAttrOut += `> _𝙲𝚘𝚗TRᴏʟᴇ:_ ${controlePct.toLocaleString("pt-BR")}%\n\n`;
 
     let out = `*Nᴇᴡ sᴇᴀs*
 — ロールプレイングゲーム - 𝚁𝙿𝙶 [𝙾𝙽𝙴 𝙿𝙸𝙴𝙲𝙴]
