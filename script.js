@@ -4202,7 +4202,7 @@ function updateUI() {
             if (totalBase >= 15000) {
                 tBonus.d += 0.15;
                 tBonus.f += 0.15;
-                tBonus.r += 0.15;
+                tBonus.r += 0.25;
                 tBonus.v += 0.15;
             } else if (totalBase >= 10000) {
                 tBonus.d += 0.1;
@@ -4296,11 +4296,18 @@ function updateUI() {
         }
         let qEsp = parseInt(i.aliadosEspiritoContagiante) || 0;
         if (qEsp > 0) {
-            let bEsp = qEsp * 0.05;
-            tBonus.d += bEsp;
-            tBonus.f += bEsp;
-            tBonus.r += bEsp;
-            tBonus.v += bEsp;
+            let bEspVal = 0;
+            if (totalBase >= 15000) bEspVal = 0.15;
+            else if (totalBase >= 10000) bEspVal = 0.10;
+            else if (totalBase >= 5000) bEspVal = 0.05;
+
+            if (bEspVal > 0) {
+                let bEsp = qEsp * bEspVal;
+                tBonus.d += bEsp;
+                tBonus.f += bEsp;
+                tBonus.r += bEsp;
+                tBonus.v += bEsp;
+            }
         }
         for (let key in tBonus) {
             if (tBonus[key] > 1.0) tBonus[key] = 1.0;
@@ -5621,7 +5628,7 @@ function updateUI() {
         if (totalBase >= 15000) {
             bonus.d += 0.15;
             bonus.f += 0.15;
-            bonus.r += 0.15;
+            bonus.r += 0.25;
             bonus.v += 0.15;
         } else if (totalBase >= 10000) {
             bonus.d += 0.1;
@@ -5725,11 +5732,18 @@ function updateUI() {
 
     let qtdEspirito = parseInt(i.aliadosEspiritoContagiante) || 0;
     if (qtdEspirito > 0) {
-        let buffEspirito = qtdEspirito * 0.05;
-        bonus.d += buffEspirito;
-        bonus.f += buffEspirito;
-        bonus.r += buffEspirito;
-        bonus.v += buffEspirito;
+        let buffEspiritoVal = 0;
+        if (totalBase >= 15000) buffEspiritoVal = 0.15;
+        else if (totalBase >= 10000) buffEspiritoVal = 0.10;
+        else if (totalBase >= 5000) buffEspiritoVal = 0.05;
+
+        if (buffEspiritoVal > 0) {
+            let buffEspirito = qtdEspirito * buffEspiritoVal;
+            bonus.d += buffEspirito;
+            bonus.f += buffEspirito;
+            bonus.r += buffEspirito;
+            bonus.v += buffEspirito;
+        }
     }
 
     for (let key in bonus) {
@@ -6963,7 +6977,7 @@ function updateUI() {
         fontesRedEstamina.push("Espírito Contagiante");
     }
     let qtdEspiritoEst = parseInt(i.aliadosEspiritoContagiante) || 0;
-    if (qtdEspiritoEst > 0) {
+    if (qtdEspiritoEst > 0 && totalBase >= 5000) {
         totalRedEstamina += qtdEspiritoEst * 10;
         fontesRedEstamina.push(
             qtdEspiritoEst > 1
