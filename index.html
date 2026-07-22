@@ -594,36 +594,36 @@
                                     <label>Buff (%)</label>
                                     <input type="text" id="info-estaminaBuffPct" placeholder="0" oninput="formatAndSave('info', 'estaminaBuffPct', this)">
                                 </div>
-                                <div class="input-group" style="flex: 1;">
+                                <div class="input-group" style="flex: 1; align-items: flex-start;">
                                     <label>Haki Armamento?</label>
-                                    <select id="info-estaminaHakiArm" onchange="updateField('info', 'estaminaHakiArm', this.value)">
-                                        <option value="nenhum">Nenhum</option>
-                                        <option value="invisivel">Invisível (+5%)</option>
-                                        <option value="visivel">Visível (+10%)</option>
-                                        <option value="emissao">Emissão (+25%)</option>
-                                        <option value="avancado">Avançado (+50%)</option>
-                                        <option value="fullbody">Full Body (+75%)</option>
-                                    </select>
+                                    <div style="display:flex; flex-direction:column; gap:2px; margin-top:2px;">
+                                        <label style="font-size:10px; display:flex; align-items:center; gap:4px; margin:0;"><input type="checkbox" id="chk-estHArmInvisivel" onchange="updateField('info', 'estHArmInvisivel', this.checked)" style="width:auto; margin:0;"> Invisível (+5%)</label>
+                                        <label style="font-size:10px; display:flex; align-items:center; gap:4px; margin:0;"><input type="checkbox" id="chk-estHArmVisivel" onchange="updateField('info', 'estHArmVisivel', this.checked)" style="width:auto; margin:0;"> Visível (+10%)</label>
+                                        <label style="font-size:10px; display:flex; align-items:center; gap:4px; margin:0;"><input type="checkbox" id="chk-estHArmImbuicao" onchange="updateField('info', 'estHArmImbuicao', this.checked)" style="width:auto; margin:0;"> Imbuição (+15%)</label>
+                                        <label style="font-size:10px; display:flex; align-items:center; gap:4px; margin:0;"><input type="checkbox" id="chk-estHArmFullbody" onchange="updateField('info', 'estHArmFullbody', this.checked)" style="width:auto; margin:0;"> Full Body (+75%)</label>
+                                        <label style="font-size:10px; display:flex; align-items:center; gap:4px; margin:0;"><input type="checkbox" id="chk-estHArmEmissao" onchange="updateField('info', 'estHArmEmissao', this.checked)" style="width:auto; margin:0;"> Emissão (+25%)</label>
+                                        <label style="font-size:10px; display:flex; align-items:center; gap:4px; margin:0;"><input type="checkbox" id="chk-estHArmAvancado" onchange="updateField('info', 'estHArmAvancado', this.checked)" style="width:auto; margin:0;"> Avançado (+50%)</label>
+                                    </div>
                                 </div>
-                                <div class="input-group" style="flex: 1;">
+                                <div class="input-group" style="flex: 1; align-items: flex-start;">
                                     <label>Haki Observação?</label>
-                                    <select id="info-estaminaHakiObs" onchange="updateField('info', 'estaminaHakiObs', this.value)">
-                                        <option value="nenhum">Nenhum</option>
-                                        <option value="intencao">Intenção (500)</option>
-                                        <option value="premonicao">Premonição (750)</option>
-                                        <option value="avancado">Avançado (+50%)</option>
-                                    </select>
+                                    <div style="display:flex; flex-direction:column; gap:2px; margin-top:2px;">
+                                        <label style="font-size:10px; display:flex; align-items:center; gap:4px; margin:0;"><input type="checkbox" id="chk-estHObsBasico" onchange="updateField('info', 'estHObsBasico', this.checked)" style="width:auto; margin:0;"> Básico (Metros)</label>
+                                        <input type="text" id="info-estaminaHakiObsMetros" placeholder="Metros expandidos" class="no-sum" style="display: none; margin-bottom: 2px; font-size: 11px; padding: 4px;" oninput="formatAndSave('info', 'estaminaHakiObsMetros', this)">
+                                        <label style="font-size:10px; display:flex; align-items:center; gap:4px; margin:0;"><input type="checkbox" id="chk-estHObsIntencao" onchange="updateField('info', 'estHObsIntencao', this.checked)" style="width:auto; margin:0;"> Intenção (500)</label>
+                                        <label style="font-size:10px; display:flex; align-items:center; gap:4px; margin:0;"><input type="checkbox" id="chk-estHObsPremonicao" onchange="updateField('info', 'estHObsPremonicao', this.checked)" style="width:auto; margin:0;"> Premonição (750)</label>
+                                        <label style="font-size:10px; display:flex; align-items:center; gap:4px; margin:0;"><input type="checkbox" id="chk-estHObsAvancado" onchange="updateField('info', 'estHObsAvancado', this.checked)" style="width:auto; margin:0;"> Avançado (+50%)</label>
+                                    </div>
                                 </div>
-                                <div class="input-group" style="flex: 1;">
+                                <div class="input-group" style="flex: 1; align-items: flex-start;">
                                     <label>Haki do Rei?</label>
-                                    <select id="info-estaminaHakiRei" onchange="updateField('info', 'estaminaHakiRei', this.value)">
-                                        <option value="nenhum">Nenhum</option>
-                                        <option value="dominacao">Dominação (2%)</option>
-                                        <option value="incapacitacao">Incap. (5%)</option>
-                                        <option value="assassinato">Ass. (+25%)</option>
-                                        <option value="pressao">Pressão (+50%)</option>
-                                        <option value="infusao">Infusão (+90%)</option>
-                                    </select>
+                                    <div style="display:flex; flex-direction:column; gap:2px; margin-top:2px;">
+                                        <label style="font-size:10px; display:flex; align-items:center; gap:4px; margin:0;"><input type="checkbox" id="chk-estHReiDominacao" onchange="updateField('info', 'estHReiDominacao', this.checked)" style="width:auto; margin:0;"> Dominação (2%)</label>
+                                        <label style="font-size:10px; display:flex; align-items:center; gap:4px; margin:0;"><input type="checkbox" id="chk-estHReiIncapacitacao" onchange="updateField('info', 'estHReiIncapacitacao', this.checked)" style="width:auto; margin:0;"> Incap. (5%)</label>
+                                        <label style="font-size:10px; display:flex; align-items:center; gap:4px; margin:0;"><input type="checkbox" id="chk-estHReiAssassinato" onchange="updateField('info', 'estHReiAssassinato', this.checked)" style="width:auto; margin:0;"> Assass. (+25%)</label>
+                                        <label style="font-size:10px; display:flex; align-items:center; gap:4px; margin:0;"><input type="checkbox" id="chk-estHReiPressao" onchange="updateField('info', 'estHReiPressao', this.checked)" style="width:auto; margin:0;"> Pressão (+50%)</label>
+                                        <label style="font-size:10px; display:flex; align-items:center; gap:4px; margin:0;"><input type="checkbox" id="chk-estHReiInfusao" onchange="updateField('info', 'estHReiInfusao', this.checked)" style="width:auto; margin:0;"> Infusão (+90%)</label>
+                                    </div>
                                 </div>
                             </div>
                             <div style="background: rgba(0,0,0,0.3); padding: 15px; border: 1px dashed #555; border-radius: 6px; text-align: center; margin-top: 5px;">

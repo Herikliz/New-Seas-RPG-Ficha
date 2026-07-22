@@ -2019,9 +2019,22 @@ function runFallbackChecks() {
                 estaminaVelocidade: "",
                 estaminaDano: "",
                 estaminaBuffPct: "",
-                estaminaHakiArm: "nenhum",
-                estaminaHakiObs: "nenhum",
-                estaminaHakiRei: "nenhum",
+                estaminaHakiObsMetros: 0,
+                estHArmInvisivel: false,
+                estHArmVisivel: false,
+                estHArmImbuicao: false,
+                estHArmFullbody: false,
+                estHArmEmissao: false,
+                estHArmAvancado: false,
+                estHObsBasico: false,
+                estHObsIntencao: false,
+                estHObsPremonicao: false,
+                estHObsAvancado: false,
+                estHReiDominacao: false,
+                estHReiIncapacitacao: false,
+                estHReiAssassinato: false,
+                estHReiPressao: false,
+                estHReiInfusao: false,
                 boxScene: false,
                 akumaId: "",
                 selCharR1: "",
@@ -6944,43 +6957,21 @@ function updateUI() {
     let elEstAtual = document.getElementById("estamina-atual");
     if (elEstAtual) elEstAtual.value = i.estaminaAtual.toLocaleString("pt-BR");
 
-    let elEstHakiArm = document.getElementById("info-estaminaHakiArm");
-    if (
-        elEstHakiArm &&
-        Array.from(elEstHakiArm.options).some(
-            (o) => o.value === i.estaminaHakiArm,
-        )
-    ) {
-        elEstHakiArm.value = i.estaminaHakiArm;
-    } else if (elEstHakiArm) {
-        elEstHakiArm.value = "nenhum";
-        i.estaminaHakiArm = "nenhum";
-    }
+    const estCheckboxFields = [
+        "estHArmInvisivel", "estHArmVisivel", "estHArmImbuicao", "estHArmFullbody", "estHArmEmissao", "estHArmAvancado",
+        "estHObsBasico", "estHObsIntencao", "estHObsPremonicao", "estHObsAvancado",
+        "estHReiDominacao", "estHReiIncapacitacao", "estHReiAssassinato", "estHReiPressao", "estHReiInfusao"
+    ];
+    estCheckboxFields.forEach((f) => {
+        let el = document.getElementById("chk-" + f);
+        if (el) el.checked = i[f] || false;
+    });
 
-    let elEstHakiObs = document.getElementById("info-estaminaHakiObs");
-    if (
-        elEstHakiObs &&
-        Array.from(elEstHakiObs.options).some(
-            (o) => o.value === i.estaminaHakiObs,
-        )
-    ) {
-        elEstHakiObs.value = i.estaminaHakiObs;
-    } else if (elEstHakiObs) {
-        elEstHakiObs.value = "nenhum";
-        i.estaminaHakiObs = "nenhum";
-    }
-
-    let elEstHakiRei = document.getElementById("info-estaminaHakiRei");
-    if (
-        elEstHakiRei &&
-        Array.from(elEstHakiRei.options).some(
-            (o) => o.value === i.estaminaHakiRei,
-        )
-    ) {
-        elEstHakiRei.value = i.estaminaHakiRei;
-    } else if (elEstHakiRei) {
-        elEstHakiRei.value = "nenhum";
-        i.estaminaHakiRei = "nenhum";
+    let elEstHakiObsMetros = document.getElementById("info-estaminaHakiObsMetros");
+    if (elEstHakiObsMetros) {
+        elEstHakiObsMetros.style.display = i.estHObsBasico ? "block" : "none";
+        let fmtObsMetros = i.estaminaHakiObsMetros ? i.estaminaHakiObsMetros.toLocaleString("pt-BR") : "";
+        if (elEstHakiObsMetros.value !== fmtObsMetros) elEstHakiObsMetros.value = fmtObsMetros;
     }
 
     let eVel = parseInt(i.estaminaVelocidade) || 0;
@@ -6995,23 +6986,23 @@ function updateUI() {
     let percHaki = 0;
     let fixoHaki = 0;
 
-    if (i.estaminaHakiArm === "invisivel") percHaki += 5;
-    else if (i.estaminaHakiArm === "visivel") percHaki += 10;
-    else if (i.estaminaHakiArm === "emissao") percHaki += 25;
-    else if (i.estaminaHakiArm === "avancado") percHaki += 50;
-    else if (i.estaminaHakiArm === "fullbody") percHaki += 75;
+    if (i.estHArmInvisivel) percHaki += 5;
+    if (i.estHArmVisivel) percHaki += 10;
+    if (i.estHArmImbuicao) percHaki += 15;
+    if (i.estHArmFullbody) percHaki += 75;
+    if (i.estHArmEmissao) percHaki += 25;
+    if (i.estHArmAvancado) percHaki += 50;
 
-    if (i.estaminaHakiObs === "intencao") fixoHaki += 500;
-    else if (i.estaminaHakiObs === "premonicao") fixoHaki += 750;
-    else if (i.estaminaHakiObs === "avancado") percHaki += 50;
+    if (i.estHObsBasico) fixoHaki += parseInt(i.estaminaHakiObsMetros) || 0;
+    if (i.estHObsIntencao) fixoHaki += 500;
+    if (i.estHObsPremonicao) fixoHaki += 750;
+    if (i.estHObsAvancado) percHaki += 50;
 
-    if (i.estaminaHakiRei === "dominacao")
-        fixoHaki += Math.floor(estTotalVal * 0.02);
-    else if (i.estaminaHakiRei === "incapacitacao")
-        fixoHaki += Math.floor(estTotalVal * 0.05);
-    else if (i.estaminaHakiRei === "assassinato") percHaki += 25;
-    else if (i.estaminaHakiRei === "pressao") percHaki += 50;
-    else if (i.estaminaHakiRei === "infusao") percHaki += 90;
+    if (i.estHReiDominacao) fixoHaki += Math.floor(estTotalVal * 0.02);
+    if (i.estHReiIncapacitacao) fixoHaki += Math.floor(estTotalVal * 0.05);
+    if (i.estHReiAssassinato) percHaki += 25;
+    if (i.estHReiPressao) percHaki += 50;
+    if (i.estHReiInfusao) percHaki += 90;
 
     let custoHaki = Math.floor(subtotalAcao * (percHaki / 100)) + fixoHaki;
     let custoEstTotal = subtotalAcao + custoHaki;
@@ -9589,8 +9580,22 @@ window.gastarEstamina = async function () {
     currentChar.info.estaminaVelocidade = "";
     currentChar.info.estaminaDano = "";
     currentChar.info.estaminaBuffPct = "";
-    currentChar.info.estaminaHakiArm = "nao";
-    currentChar.info.estaminaHakiObs = "nao";
+    currentChar.info.estHArmInvisivel = false;
+    currentChar.info.estHArmVisivel = false;
+    currentChar.info.estHArmImbuicao = false;
+    currentChar.info.estHArmFullbody = false;
+    currentChar.info.estHArmEmissao = false;
+    currentChar.info.estHArmAvancado = false;
+    currentChar.info.estHObsBasico = false;
+    currentChar.info.estHObsIntencao = false;
+    currentChar.info.estHObsPremonicao = false;
+    currentChar.info.estHObsAvancado = false;
+    currentChar.info.estHReiDominacao = false;
+    currentChar.info.estHReiIncapacitacao = false;
+    currentChar.info.estHReiAssassinato = false;
+    currentChar.info.estHReiPressao = false;
+    currentChar.info.estHReiInfusao = false;
+    currentChar.info.estaminaHakiObsMetros = 0;
 
     saveData();
     updateUI();
