@@ -6787,6 +6787,56 @@ function updateUI() {
             : Math.round(((bonus.dano || 0) + (itemBonus.dano || 0)) * 100);
     let totalPctDano = buffDanoFinalPct + extraPctDano + favArmDanoFinal;
 
+    let danoFinalPctSources = [];
+    let danoFinalFlatSources = [];
+
+    if (buffDanoFinalPct !== 0) {
+        danoFinalPctSources.push(`${buffDanoFinalPct}% manual`);
+    }
+    if (favArmDanoFinal !== 0) {
+        danoFinalPctSources.push(`${favArmDanoFinal}% de Favoritismo Armista`);
+    }
+
+    if (i.calcQuemAtaca !== "inimigo") {
+        if (i.alcunhasList && i.alcunhaAtiva) {
+            let ativa = i.alcunhasList.find((a) => a.nome === i.alcunhaAtiva);
+            if (ativa && ativa.buffs) {
+                ativa.buffs.forEach((b) => {
+                    if (
+                        b.cond &&
+                        (!i.alcunhaCondicoes || !i.alcunhaCondicoes[b.cond])
+                    )
+                        return;
+                    if (b.stat === "dano") {
+                        if (b.type === "pct") {
+                            danoFinalPctSources.push(`${b.val}% de ${ativa.nome}`);
+                        } else {
+                            danoFinalFlatSources.push(`${b.val} de ${ativa.nome}`);
+                        }
+                    }
+                });
+            }
+        }
+
+        if (i.armasEquipadasList) {
+            i.armasEquipadasList.forEach((a) => {
+                if (a.ativo && a.stat === "dano") {
+                    let val = parseInt(a.val) || 0;
+                    if (val !== 0) {
+                        if (a.type === "pct") {
+                            danoFinalPctSources.push(`${val}% de ${a.nome || "Item"}`);
+                        } else {
+                            danoFinalFlatSources.push(`${val} de ${a.nome || "Item"}`);
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    danoFinalPctSources.sort((a, b) => a.localeCompare(b));
+    danoFinalFlatSources.sort((a, b) => a.localeCompare(b));
+
     let baseComFlat = danoFisico + extraFlatDano + danoBonusResNegativa;
     let calcDanoFinal = baseComFlat;
 
@@ -6873,14 +6923,16 @@ function updateUI() {
             danoBonusResNegativa > 0
                 ? danoFisico + danoBonusResNegativa
                 : danoFisico;
-        calcFormTexto += `<br><span style="color:#0dcaf0;">Bônus Fixo (Itens/Alcunha): ${baseSomaText.toLocaleString("pt-BR")} + ${extraFlatDano.toLocaleString("pt-BR")} = ${baseComFlat.toLocaleString("pt-BR")}</span>`;
+        let flatSourcesText = danoFinalFlatSources.length > 0 ? ` *(${danoFinalFlatSources.join(" + ")})*` : "";
+        calcFormTexto += `<br><span style="color:#0dcaf0;">Bônus Fixo: ${baseSomaText.toLocaleString("pt-BR")} + ${extraFlatDano.toLocaleString("pt-BR")}${flatSourcesText} = ${baseComFlat.toLocaleString("pt-BR")}</span>`;
     }
     if (totalPctDano !== 0) {
         let valToPrint =
             typeof calcDanoAntesIgnorado !== "undefined"
                 ? calcDanoAntesIgnorado
                 : calcDanoFinal;
-        calcFormTexto += `<br><span style="color:#ffc107;">Dano com Buff Final: ${baseComFlat.toLocaleString("pt-BR")} + ${totalPctDano}% = ${valToPrint.toLocaleString("pt-BR")}</span>`;
+        let pctSourcesText = danoFinalPctSources.length > 0 ? ` *(${danoFinalPctSources.join(" + ")})*` : "";
+        calcFormTexto += `<br><span style="color:#ffc107;">Dano com Buff Final: ${baseComFlat.toLocaleString("pt-BR")} + ${totalPctDano}%${pctSourcesText} = ${valToPrint.toLocaleString("pt-BR")}</span>`;
     }
     if (reducaoDanoGeral > 0) {
         calcFormTexto += `<br><span style="color:#dc3545;">Dano Ignorado: ${calcDanoAntesIgnorado.toLocaleString("pt-BR")} - ${reducaoDanoGeral}% = ${calcDanoFinal.toLocaleString("pt-BR")}</span>`;
