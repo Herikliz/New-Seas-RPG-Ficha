@@ -2729,8 +2729,7 @@ function changeOrdemTecnicas(val) {
         let availableStylesMap = {};
         if (
             i.raca === "Mink" ||
-            (i.linhagem === "Charlotte" && i.raca2 === "Mink") ||
-            (currentChar.isNPC && i.raca === "Outra")
+            (i.linhagem === "Charlotte" && i.raca2 === "Mink")
         )
             availableStylesMap["Electro"] = "Electro";
         if (
@@ -2809,8 +2808,7 @@ function renderTecnicas() {
     let availableStyles = [];
     let isMink =
         i.raca === "Mink" ||
-        (i.linhagem === "Charlotte" && i.raca2 === "Mink") ||
-        (currentChar.isNPC && i.raca === "Outra");
+        (i.linhagem === "Charlotte" && i.raca2 === "Mink");
     if (isMink) availableStyles.push({ id: "Electro", name: "Electro" });
     if (i.akumaNome && i.akumaNome !== "nenhuma" && i.akumaNome.trim() !== "")
         availableStyles.push({ id: "Akuma", name: i.akumaNome });
@@ -3682,10 +3680,7 @@ function updateUI() {
     }
 
     let anim1 = document.getElementById("info-animal");
-    if (
-        ["Tritão", "Wotan", "Mink"].includes(i.raca) ||
-        (isNPC && i.raca === "Outra")
-    ) {
+    if (["Tritão", "Wotan", "Mink"].includes(i.raca)) {
         anim1.style.display = "block";
         anim1.placeholder = i.raca === "Mink" ? "Mamífero" : "Animal Marinho";
     } else {
@@ -3695,8 +3690,7 @@ function updateUI() {
     let anim2 = document.getElementById("info-animal2");
     if (
         i.linhagem === "Charlotte" &&
-        (["Tritão", "Wotan", "Mink"].includes(i.raca2) ||
-            (isNPC && i.raca2 === "Outra"))
+        ["Tritão", "Wotan", "Mink"].includes(i.raca2)
     ) {
         anim2.style.display = "block";
         anim2.placeholder = i.raca2 === "Mink" ? "Mamífero" : "Animal Marinho";
@@ -3829,8 +3823,7 @@ function updateUI() {
         let availableStylesToHide = [];
         let isMinkEstiloUI =
             i.raca === "Mink" ||
-            (i.linhagem === "Charlotte" && i.raca2 === "Mink") ||
-            (currentChar.isNPC && i.raca === "Outra");
+            (i.linhagem === "Charlotte" && i.raca2 === "Mink");
         if (isMinkEstiloUI) availableStylesToHide.push("Electro");
         if (
             i.akumaNome &&
@@ -4901,8 +4894,7 @@ function updateUI() {
 
     let isMink =
         rc === "Mink" ||
-        (ln === "Charlotte" && rc2 === "Mink") ||
-        (isNPC && rc === "Outra");
+        (ln === "Charlotte" && rc2 === "Mink");
     document.getElementById("box-estilo-mink").style.display = isMink
         ? "flex"
         : "none";
@@ -7758,8 +7750,7 @@ function updateUI() {
     let availableStylesMap = {};
     let isMinkEstilo =
         i.raca === "Mink" ||
-        (i.linhagem === "Charlotte" && i.raca2 === "Mink") ||
-        (currentChar.isNPC && i.raca === "Outra");
+        (i.linhagem === "Charlotte" && i.raca2 === "Mink");
     if (isMinkEstilo) availableStylesMap["Electro"] = "Electro";
     if (i.akumaNome && i.akumaNome !== "nenhuma" && i.akumaNome.trim() !== "")
         availableStylesMap["Akuma"] = i.akumaNome;
