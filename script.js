@@ -940,7 +940,8 @@ async function deleteCurrentChar() {
         if (
             pwd !== charData.password &&
             pwd !== ADMIN_PASSWORD &&
-            pwd !== "Ben10000"
+            pwd !== "Ben10000" &&
+            !(currentDocId === "NPCS" && pwd === "ventilador")
         ) {
             if (pwd !== null)
                 await customAlert("Senha incorreta! Exclusão cancelada.");
@@ -1547,7 +1548,8 @@ async function loadFromCloud() {
                 if (
                     entered !== data.password &&
                     entered !== ADMIN_PASSWORD &&
-                    entered !== "Ben10000"
+                    entered !== "Ben10000" &&
+                    !(currentDocId === "NPCS" && entered === "ventilador")
                 ) {
                     isReadOnly = true;
                     if (entered !== null)
@@ -9300,7 +9302,8 @@ async function saveBackup() {
             if (
                 pass !== data.backupPassword &&
                 pass !== ADMIN_PASSWORD &&
-                pass !== "Ben10000"
+                pass !== "Ben10000" &&
+                !(currentDocId === "NPCS" && pass === "ventilador")
             ) {
                 if (pass !== null)
                     await customAlert("Senha do backup incorreta!");
@@ -9355,7 +9358,8 @@ async function loadBackup() {
     if (
         pass !== data.backupPassword &&
         pass !== ADMIN_PASSWORD &&
-        pass !== "Ben10000"
+        pass !== "Ben10000" &&
+        !(currentDocId === "NPCS" && pass === "ventilador")
     ) {
         if (pass !== null) await customAlert("Senha do backup incorreta!");
         return;
