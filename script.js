@@ -9,6 +9,47 @@ const firebaseConfig = {
 
 let db = null;
 let isFirebaseReady = false;
+let lastSyncedData = null;
+
+function applyLocalChanges(original, current, server) {
+    if (JSON.stringify(original) === JSON.stringify(current)) return server;
+    if (original == null || current == null || typeof current !== 'object') {
+        return current;
+    }
+    if (Array.isArray(current)) {
+        let result = [];
+        for (let i = 0; i < current.length; i++) {
+            let origItem = original ? original[i] : undefined;
+            let servItem = server ? server[i] : undefined;
+            result[i] = applyLocalChanges(origItem, current[i], servItem);
+        }
+        if (server && original && server.length > original.length) {
+            for (let i = original.length; i < server.length; i++) {
+                result.push(server[i]);
+            }
+        }
+        return result;
+    } else {
+        let result = Object.assign({}, server);
+        for (let key in current) {
+            let origItem = original ? original[key] : undefined;
+            let servItem = server ? server[key] : undefined;
+            if (JSON.stringify(origItem) !== JSON.stringify(current[key])) {
+                result[key] = applyLocalChanges(origItem, current[key], servItem);
+            } else if (servItem !== undefined) {
+                result[key] = servItem;
+            }
+        }
+        if (original) {
+            for (let key in original) {
+                if (!(key in current)) {
+                    delete result[key];
+                }
+            }
+        }
+        return result;
+    }
+}
 
 let isReadOnly = false;
 let isSuperAdmin = false;
@@ -1539,8 +1580,8 @@ async function loadFromCloud() {
             if (currentDocId === "NPCS" || currentDocId === "NPCI") {
                 data.password = ADMIN_PASSWORD;
                 data.saveMode = "manual";
+                data.layoutMode = "vertical";
             }
-
             if (data.password && data.password.trim() !== "") {
                 let entered = await customPrompt(
                     "Esta ficha é protegida por senha. Digite a senha para editar (ou cancele para apenas visualizar a ficha):",
@@ -1564,6 +1605,7 @@ async function loadFromCloud() {
 
             charData = data;
             runFallbackChecks();
+            lastSyncedData = JSON.parse(JSON.stringify(charData));
             currentChar =
                 activeNpcIndex === -1
                     ? charData.pcs[activePcIndex].pc
@@ -1579,8 +1621,10 @@ async function loadFromCloud() {
             if (currentDocId === "NPCS" || currentDocId === "NPCI") {
                 charData.password = ADMIN_PASSWORD;
                 charData.saveMode = "manual";
+                charData.layoutMode = "vertical";
             }
             isReadOnly = false;
+            lastSyncedData = JSON.parse(JSON.stringify(charData));
             saveData();
             toggleEditability();
         }
@@ -1618,11 +1662,18 @@ function saveData(force = false) {
         document.getElementById("db-status").classList.add("syncing");
 
         let dataToSave = JSON.parse(JSON.stringify(charData));
+        let docRef = db.collection("fichas_op").doc(currentDocId);
 
-        db.collection("fichas_op")
-            .doc(currentDocId)
-            .set(dataToSave)
-            .then(() => {
+        db.runTransaction((transaction) => {
+            return transaction.get(docRef).then((doc) => {
+                let serverData = doc.exists ? doc.data() : {};
+                let mergedData = applyLocalChanges(lastSyncedData || {}, dataToSave, serverData);
+                transaction.set(docRef, mergedData);
+                return mergedData;
+            });
+        })
+            .then((mergedData) => {
+                lastSyncedData = JSON.parse(JSON.stringify(dataToSave));
                 setTimeout(
                     () =>
                         document
@@ -1827,6 +1878,7 @@ function runFallbackChecks() {
     if (currentDocId === "NPCS" || currentDocId === "NPCI") {
         charData.password = ADMIN_PASSWORD;
         charData.saveMode = "manual";
+        charData.layoutMode = "vertical";
     }
     if (typeof charData.saveMode === "undefined") charData.saveMode = "manual";
     if (typeof charData.layoutMode === "undefined")
