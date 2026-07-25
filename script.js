@@ -1543,7 +1543,7 @@ async function changeDocId(newId) {
         return;
     }
     newId = newId.trim();
-
+    
     if (currentDocId === "NPCS" || currentDocId === "NPCI") {
         await customAlert(
             "Esse ID especial é permanente e não pode ser alterado.",
@@ -1551,6 +1551,12 @@ async function changeDocId(newId) {
         document.getElementById("doc-id").value = currentDocId;
         return;
     }
+    
+    if (/^\d{1,3}$/.test(newId)) {
+        newId = newId.padStart(4, '0');
+        document.getElementById("doc-id").value = newId;
+    }
+    
     if (!/^\d{4}$/.test(newId) && newId !== "NPCS" && newId !== "NPCI") {
         await customAlert(
             "O ID da ficha deve conter EXATAMENTE 4 NÚMEROS (ex: 1234).",
@@ -1558,7 +1564,7 @@ async function changeDocId(newId) {
         document.getElementById("doc-id").value = currentDocId;
         return;
     }
-
+    
     currentDocId = newId;
     loadFromCloud();
 }
