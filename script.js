@@ -1523,6 +1523,13 @@ function init() {
     updateUI();
     initFirebase();
     toggleEditability();
+    
+    setTimeout(() => {
+        let docIdInput = document.getElementById("doc-id");
+        if (docIdInput) {
+            docIdInput.focus();
+        }
+    }, 100);
 }
 
 function initFirebase() {
@@ -3538,6 +3545,29 @@ window.sofrerDano = async function () {
     updateUI();
 };
 
+window.receberSalario = async function () {
+    if (isReadOnly) return;
+    let nowBr = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+    if (nowBr.getDate() !== 1 && nowBr.getDate() !== 15) return;
+    
+    let dateStr = nowBr.getFullYear() + "-" + nowBr.getMonth() + "-" + nowBr.getDate();
+    if (currentChar.info.lastSalarioDate === dateStr) {
+        await customAlert("Você já resgatou o salário de hoje!");
+        return;
+    }
+
+    let salarioVal = parseInt(String(currentChar.info.salario).replace(/\D/g, "")) || 0;
+    if (salarioVal <= 0) return;
+    
+    let currentBerries = parseInt(String(currentChar.info.berries).replace(/\D/g, "")) || 0;
+    currentChar.info.berries = currentBerries + salarioVal;
+    currentChar.info.lastSalarioDate = dateStr;
+    
+    saveData();
+    updateUI();
+    await customAlert("Salário resgatado com sucesso!");
+};
+
 function updateUI() {
     const container = document.querySelector(".container");
     const btn = document.getElementById("btn-layout");
@@ -4695,6 +4725,22 @@ function updateUI() {
 
     let elSalario = document.getElementById("info-salario");
     if (elSalario) elSalario.value = i.salario || "";
+
+    let btnReceber = document.getElementById("btn-receber-salario");
+    if (btnReceber) {
+        let nowBr = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+        let isPayday = nowBr.getDate() === 1 || nowBr.getDate() === 15;
+        let dateStr = nowBr.getFullYear() + "-" + nowBr.getMonth() + "-" + nowBr.getDate();
+        let salarioVal = parseInt(String(i.salario).replace(/\D/g, "")) || 0;
+        
+        if (isPayday && salarioVal > 0 && !isReadOnly && i.lastSalarioDate !== dateStr) {
+            btnReceber.disabled = false;
+            btnReceber.style.opacity = "1";
+        } else {
+            btnReceber.disabled = true;
+            btnReceber.style.opacity = "0.5";
+        }
+    }
 
     let totalBaseDisplay = document.getElementById("totalBaseDisplay");
     if (totalBaseDisplay) {

@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=1400">
         <title>Ficha New Seas OP RPG</title>
+        <link rel="icon" type="image/png" href="favicon.png">
         <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="style.css">
         <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -261,7 +262,13 @@
                                 </div>
                             </div>
                             <div class="input-group"><label>Mérito</label><input type="text" id="info-merito" oninput="formatAndSave('info', 'merito', this)"></div>
-                            <div class="input-group"><label>Salário</label><input type="text" id="info-salario" disabled></div>
+                            <div class="input-group">
+                                <label>Salário</label>
+                                <input type="text" id="info-salario" disabled>
+                                <div style="display:flex; gap:5px; margin-top:5px;">
+                                    <button id="btn-receber-salario" type="button" class="btn btn-outline btn-success" style="font-size:10px; flex:1; padding:4px; opacity: 0.5;" onclick="receberSalario()" disabled>💰Receber</button>
+                                </div>
+                            </div>
                         </div>
                         
                         <label style="font-size: 10px; font-weight: bold; text-transform: uppercase; margin-bottom: 3px; display: block; border-top: 1px dashed #444; padding-top: 10px;">Estilos de Luta</label>
