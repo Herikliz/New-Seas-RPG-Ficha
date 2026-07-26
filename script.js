@@ -393,6 +393,7 @@ const akumasFixas = {
         "Hebi Hebi no Mi, Modelo: Kaijū",
         "Hebi Hebi no Mi, Modelo: Yamata no Orochi",
         "Hito Hito no Mi, Modelo: Daibutsu",
+        "Hito Hito no Mi, Modelo: Estátua",
         "Hito Hito no Mi, Modelo: O Anfitrião",
         "Hito Hito no Mi, Modelo: Ōnyūdō",
         "Inu Inu no Mi, Modelo: Bake-Danuki",
@@ -3268,6 +3269,10 @@ window.formatExpectativa = function (val) {
 };
 
 function formatIdade(val) {
+    if ((currentDocId === "NPCS" || currentDocId === "NPCI") && (val.trim() === "?" || val.trim() === "Desconhecido")) {
+        updateField("info", "idade", "Desconhecido");
+        return;
+    }
     let digits = val.replace(/\D/g, "");
     if (!digits) {
         updateField("info", "idade", "");
