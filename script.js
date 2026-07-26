@@ -1259,13 +1259,19 @@ function saveAndRenderDrag() {
     toggleEditability();
 }
 
-function getClassDisplayName(baseClassWithLevel, sexo) {
+function getClassDisplayName(baseClassWithLevel, sexo, genero) {
     if (!baseClassWithLevel) return "";
     let match = baseClassWithLevel.match(/(.+) (\d+)/);
     if (!match) return baseClassWithLevel;
     let baseClass = match[1];
     let lvl = parseInt(match[2]);
-    let gender = sexo === "Feminino" ? "f" : "m";
+    
+    let isFemale = false;
+    if (genero === "Mulher") isFemale = true;
+    else if (genero === "Homem" || genero === "Não-binário") isFemale = false;
+    else isFemale = (sexo === "Feminino");
+    
+    let gender = isFemale ? "f" : "m";
 
     let cName = baseClassGender[baseClass]
         ? baseClassGender[baseClass][gender]
@@ -3442,9 +3448,17 @@ function strCalc(
 }
 
 function formatRaceStr(rName, aName, isFem) {
+    let isFemaleRace = isFem;
+    if (currentChar && currentChar.info) {
+        let i = currentChar.info;
+        if (i.genero === "Mulher") isFemaleRace = true;
+        else if (i.genero === "Homem" || i.genero === "Não-binário") isFemaleRace = false;
+        else isFemaleRace = (i.sexo === "Feminino");
+    }
+
     if (!rName) return "";
     let res = rName.replace("Povo do Céu: ", "");
-    if (isFem) {
+    if (isFemaleRace) {
         if (res === "Bucaneiro") res = "Bucaneira";
         else if (res === "Humano") res = "Humana";
         else if (res === "Lunariano") res = "Lunariana";
@@ -4703,7 +4717,12 @@ function updateUI() {
 
         let selPatente = document.getElementById("info-patente");
         if (selPatente) {
-            let gKey = i.sexo === "Feminino" ? "f" : "m";
+            let isFemalePatente = false;
+            if (i.genero === "Mulher") isFemalePatente = true;
+            else if (i.genero === "Homem" || i.genero === "Não-binário") isFemalePatente = false;
+            else isFemalePatente = (i.sexo === "Feminino");
+            let gKey = isFemalePatente ? "f" : "m";
+            
             let dName = patenteGender[i.patente]
                 ? patenteGender[i.patente][gKey]
                 : i.patente;
@@ -4783,12 +4802,12 @@ function updateUI() {
     let html1 = '<option value="">-- Selecione --</option>';
     if (isSp) {
         allowedSpClasses.forEach((cls) => {
-            let display = getClassDisplayName(`${cls} 1`, i.sexo);
+            let display = getClassDisplayName(`${cls} 1`, i.sexo, i.genero);
             html1 += `<option value="${cls} 1">${display}</option>`;
         });
     } else {
         baseClassesList.forEach((c) => {
-            let display = getClassDisplayName(`${c} 1`, i.sexo);
+            let display = getClassDisplayName(`${c} 1`, i.sexo, i.genero);
             html1 += `<option value="${c} 1">${display}</option>`;
         });
     }
@@ -4850,37 +4869,39 @@ function updateUI() {
             let html = `<option value="">-- Selecione --</option>`;
 
             if (isSp) {
-                if (chosenSpBase) {
-                    let display = getClassDisplayName(
-                        `${chosenSpBase} ${slot.spLvl}`,
-                        i.sexo,
+            if (chosenSpBase) {
+            let display = getClassDisplayName(
+                `${chosenSpBase} ${slot.spLvl}`,
+                i.sexo,
+                i.genero
+            );
+            html += `<option value="${chosenSpBase} ${slot.spLvl}">${display}</option>`;
+        }
+    } else {
+        let counts = {};
+        baseClassesList.forEach((c) => (counts[c] = 1));
+        slot.prev.forEach((p) => {
+            if (p) {
+                let match = p.match(/(.+) (\d+)/);
+                if (match)
+                    counts[match[1]] = Math.max(
+                        counts[match[1]],
+                        parseInt(match[2]) + 1,
                     );
-                    html += `<option value="${chosenSpBase} ${slot.spLvl}">${display}</option>`;
-                }
-            } else {
-                let counts = {};
-                baseClassesList.forEach((c) => (counts[c] = 1));
-                slot.prev.forEach((p) => {
-                    if (p) {
-                        let match = p.match(/(.+) (\d+)/);
-                        if (match)
-                            counts[match[1]] = Math.max(
-                                counts[match[1]],
-                                parseInt(match[2]) + 1,
-                            );
-                    }
-                });
-
-                baseClassesList.forEach((c) => {
-                    if (counts[c] <= 5) {
-                        let display = getClassDisplayName(
-                            `${c} ${counts[c]}`,
-                            i.sexo,
-                        );
-                        html += `<option value="${c} ${counts[c]}">${display}</option>`;
-                    }
-                });
             }
+        });
+
+        baseClassesList.forEach((c) => {
+            if (counts[c] <= 5) {
+                let display = getClassDisplayName(
+                    `${c} ${counts[c]}`,
+                    i.sexo,
+                    i.genero
+                );
+                html += `<option value="${c} ${counts[c]}">${display}</option>`;
+            }
+        });
+    }
 
             if (el.innerHTML !== html) el.innerHTML = html;
 
@@ -5586,7 +5607,12 @@ function updateUI() {
     let habListHtml = "";
     let habSelectHtml = '<option value="">-- Adicionar Habilidade --</option>';
     let formatHabDisplay = (h) => {
-        if (i.sexo === "Feminino") {
+        let isFemaleHab = false;
+        if (i.genero === "Mulher") isFemaleHab = true;
+        else if (i.genero === "Homem" || i.genero === "Não-binário") isFemaleHab = false;
+        else isFemaleHab = (i.sexo === "Feminino");
+
+        if (isFemaleHab) {
             if (h === "Filho do Mar") return "Filha do Mar";
             if (h === "O Escolhido") return "A Escolhida";
             if (h === "Batedor de Carteiras") return "Batedora de Carteiras";
