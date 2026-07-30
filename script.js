@@ -1534,8 +1534,9 @@ function init() {
         let docIdInput = document.getElementById("doc-id");
         if (docIdInput) {
             docIdInput.focus();
+            docIdInput.click();
         }
-    }, 100);
+    }, 300);
 }
 
 function initFirebase() {
@@ -1601,6 +1602,17 @@ async function loadFromCloud() {
                 data.password = ADMIN_PASSWORD;
                 data.saveMode = "manual";
                 data.layoutMode = "vertical";
+                if (data.pcs) {
+                    data.pcs.forEach(pObj => {
+                        let charsToCheck = [pObj.pc, ...(pObj.npcs || [])];
+                        charsToCheck.forEach(c => {
+                            if (c && c.info) {
+                                const boxKeys = ["boxIden", "boxMec", "boxSoc", "boxHab", "boxBase", "boxEsp", "boxAmi", "boxHist", "boxLog", "boxInv", "boxTec", "boxRes", "boxCalc", "boxEstamina"];
+                                boxKeys.forEach(k => c.info[k] = true);
+                            }
+                        });
+                    });
+                }
             }
             if (data.password && data.password.trim() !== "") {
                 let entered = await customPrompt(
@@ -1642,6 +1654,17 @@ async function loadFromCloud() {
                 charData.password = ADMIN_PASSWORD;
                 charData.saveMode = "manual";
                 charData.layoutMode = "vertical";
+                if (charData.pcs) {
+                    charData.pcs.forEach(pObj => {
+                        let charsToCheck = [pObj.pc, ...(pObj.npcs || [])];
+                        charsToCheck.forEach(c => {
+                            if (c && c.info) {
+                                const boxKeys = ["boxIden", "boxMec", "boxSoc", "boxHab", "boxBase", "boxEsp", "boxAmi", "boxHist", "boxLog", "boxInv", "boxTec", "boxRes", "boxCalc", "boxEstamina"];
+                                boxKeys.forEach(k => c.info[k] = true);
+                            }
+                        });
+                    });
+                }
             }
             isReadOnly = false;
             lastSyncedData = JSON.parse(JSON.stringify(charData));
@@ -1682,6 +1705,21 @@ function saveData(force = false) {
         document.getElementById("db-status").classList.add("syncing");
 
         let dataToSave = JSON.parse(JSON.stringify(charData));
+        
+        if (currentDocId === "NPCS" || currentDocId === "NPCI") {
+            if (dataToSave.pcs) {
+                dataToSave.pcs.forEach(pObj => {
+                    let charsToCheck = [pObj.pc, ...(pObj.npcs || [])];
+                    charsToCheck.forEach(c => {
+                        if (c && c.info) {
+                            const boxKeys = ["boxIden", "boxMec", "boxSoc", "boxHab", "boxBase", "boxEsp", "boxAmi", "boxHist", "boxLog", "boxInv", "boxTec", "boxRes", "boxCalc", "boxEstamina"];
+                            boxKeys.forEach(k => c.info[k] = true);
+                        }
+                    });
+                });
+            }
+        }
+
         let docRef = db.collection("fichas_op").doc(currentDocId);
 
         db.runTransaction((transaction) => {
