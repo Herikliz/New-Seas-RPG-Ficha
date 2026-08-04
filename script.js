@@ -457,7 +457,7 @@ const racas = {
     Gigante: { f: 0.4, r: 0.35, v: -0.05 },
     Humano: {},
     Kuja: {},
-    Kumate: { d: 0.3, f: 0.15 },
+    Kumate: { f: 0.3, v: 0.15 },
     Lunariano: { v: 0.45, r: 0.5 },
     "Meio-Gigante": { f: 0.25, r: 0.25 },
     Mink: { v: 0.2, r: 0.15 },
