@@ -1907,7 +1907,8 @@ function toggleEditability() {
         ) {
             el.disabled = true;
         } else if (el.id === "info-expectativaVida") {
-            el.disabled = !isSuperAdmin;
+            let isCustomRace = isNPC && (currentChar.info.raca === "Outra" || currentChar.info.raca2 === "Outra");
+            el.disabled = !isSuperAdmin && !isCustomRace;
         } else if (el.type === "checkbox") {
             el.disabled = isReadOnly;
         } else {
@@ -2044,11 +2045,10 @@ function runFallbackChecks() {
                 customBuffR: "",
                 customBuffV: "",
                 racaNomeCustom2: "",
-                customBuffF2: "",
-                customBuffD2: "",
-                customBuffR2: "",
-                customBuffV2: "",
+                customRaceBuffs: [],
+                customRaceBuffs2: [],
                 linhagem: "",
+                linhagemNomeCustom: "",
                 selClasseDF: "d",
                 selDF: "d",
                 selRV: "r",
@@ -2192,6 +2192,23 @@ function runFallbackChecks() {
             };
             for (let k in defInfo)
                 if (typeof c.info[k] === "undefined") c.info[k] = defInfo[k];
+
+            if (typeof c.info.customBuffF !== 'undefined' || typeof c.info.customBuffD !== 'undefined' || typeof c.info.customBuffR !== 'undefined' || typeof c.info.customBuffV !== 'undefined') {
+                if (!c.info.customRaceBuffs) c.info.customRaceBuffs = [];
+                if (c.info.customBuffF) c.info.customRaceBuffs.push({stat: 'f', type: 'pct', val: c.info.customBuffF});
+                if (c.info.customBuffD) c.info.customRaceBuffs.push({stat: 'd', type: 'pct', val: c.info.customBuffD});
+                if (c.info.customBuffR) c.info.customRaceBuffs.push({stat: 'r', type: 'pct', val: c.info.customBuffR});
+                if (c.info.customBuffV) c.info.customRaceBuffs.push({stat: 'v', type: 'pct', val: c.info.customBuffV});
+                delete c.info.customBuffF; delete c.info.customBuffD; delete c.info.customBuffR; delete c.info.customBuffV;
+            }
+            if (typeof c.info.customBuffF2 !== 'undefined' || typeof c.info.customBuffD2 !== 'undefined' || typeof c.info.customBuffR2 !== 'undefined' || typeof c.info.customBuffV2 !== 'undefined') {
+                if (!c.info.customRaceBuffs2) c.info.customRaceBuffs2 = [];
+                if (c.info.customBuffF2) c.info.customRaceBuffs2.push({stat: 'f', type: 'pct', val: c.info.customBuffF2});
+                if (c.info.customBuffD2) c.info.customRaceBuffs2.push({stat: 'd', type: 'pct', val: c.info.customBuffD2});
+                if (c.info.customBuffR2) c.info.customRaceBuffs2.push({stat: 'r', type: 'pct', val: c.info.customBuffR2});
+                if (c.info.customBuffV2) c.info.customRaceBuffs2.push({stat: 'v', type: 'pct', val: c.info.customBuffV2});
+                delete c.info.customBuffF2; delete c.info.customBuffD2; delete c.info.customBuffR2; delete c.info.customBuffV2;
+            }
 
             if (!c.stats) c.stats = { f: 0, d: 0, r: 0, v: 0, esp: 0, ami: 0 };
             if (!c.substats)
@@ -3223,6 +3240,12 @@ window.handleRacaChange = async function (field, val) {
         currentChar.info.sexo = "Feminino";
         currentChar.info.genero = "Mulher";
     }
+    
+    if (val !== "Outra") {
+        if (field === 'raca' && currentChar.info.raca2 !== "Outra") currentChar.info.expectativaVidaOverride = 0;
+        if (field === 'raca2' && currentChar.info.raca !== "Outra") currentChar.info.expectativaVidaOverride = 0;
+    }
+
     updateField("info", field, val);
 
     if (currentChar.info.idade) {
@@ -3304,15 +3327,32 @@ function formatAltura(val) {
 }
 
 window.formatExpectativa = function (val) {
-    if (!isSuperAdmin) return;
-    let num = parseInt(val.replace(/\D/g, ""));
-    if (isNaN(num)) num = 0;
+    let isCustomRace = currentChar.isNPC && (currentChar.info.raca === "Outra" || currentChar.info.raca2 === "Outra");
+    if (!isSuperAdmin && !isCustomRace) return;
+
+    if ((currentDocId === "NPCS" || currentDocId === "NPCI") && (val.trim() === "?" || val.trim() === "Desconhecido")) {
+        currentChar.info.expectativaVidaOverride = "Desconhecido";
+        saveData();
+        updateUI();
+        return;
+    }
+
+    let digits = val.replace(/\D/g, "");
+    if (!digits) {
+        currentChar.info.expectativaVidaOverride = "";
+        saveData();
+        updateUI();
+        return;
+    }
+
+    let num = parseInt(digits, 10);
     currentChar.info.expectativaVidaOverride = num;
+    
     let ageStr = String(currentChar.info.idade).replace(/\D/g, "");
     if (ageStr) {
         let currentAge = parseInt(ageStr, 10);
         if (currentAge > num && num > 0) {
-            currentChar.info.idade = num + " anos";
+            currentChar.info.idade = num + (num === 1 ? " ano" : " anos");
         }
     }
     saveData();
@@ -3345,11 +3385,12 @@ function formatIdade(val) {
         )
     )
         calcExp = baseExp * 2;
-    let expFinal = i.expectativaVidaOverride || calcExp;
+    let expFinal = i.expectativaVidaOverride !== undefined && i.expectativaVidaOverride !== "" ? i.expectativaVidaOverride : calcExp;
 
-    if (age > expFinal) {
+    if (expFinal !== "Desconhecido" && age > expFinal) {
         age = expFinal;
-        customAlert("A idade máxima para esta raça é " + expFinal + " anos.");
+        let textoLimite = expFinal === 1 ? " ano." : " anos.";
+        customAlert("A idade máxima para esta raça é " + expFinal + textoLimite);
     }
 
     let textoIdade = age === 1 ? " ano" : " anos";
@@ -3700,23 +3741,103 @@ function updateUI() {
             continue;
         rHtml += `<option value="${r}">${r}</option>`;
     }
+    window.addCustomRaceBuffRow = function(num) {
+        if (isReadOnly) return;
+        let fieldList = num === 1 ? 'customRaceBuffs' : 'customRaceBuffs2';
+        if (!currentChar.info[fieldList]) currentChar.info[fieldList] = [];
+        currentChar.info[fieldList].push({ stat: "d", type: "pct", val: "" });
+        saveData();
+        updateUI();
+    };
+    window.removeCustomRaceBuffRow = function(num, idx) {
+        if (isReadOnly) return;
+        let fieldList = num === 1 ? 'customRaceBuffs' : 'customRaceBuffs2';
+        currentChar.info[fieldList].splice(idx, 1);
+        saveData();
+        updateUI();
+    };
+    window.updateCustomRaceBuff = function(num, idx, field, val) {
+        if (isReadOnly) return;
+        let fieldList = num === 1 ? 'customRaceBuffs' : 'customRaceBuffs2';
+        if (field === 'val') {
+            let clean = val.replace(/\D/g, "");
+            let numVal = clean ? parseInt(clean, 10) : "";
+            if (currentChar.info[fieldList][idx].type === "pct" && numVal > 100) numVal = 100;
+            currentChar.info[fieldList][idx][field] = numVal;
+        } else if (field === "type" && val === "pct") {
+            let currentVal = currentChar.info[fieldList][idx].val;
+            if (currentVal > 100) currentChar.info[fieldList][idx].val = 100;
+            currentChar.info[fieldList][idx][field] = val;
+        } else {
+            currentChar.info[fieldList][idx][field] = val;
+        }
+        saveData();
+        updateUI();
+    };
+
     let sRaca = document.getElementById("info-raca");
     if (sRaca.innerHTML !== rHtml) sRaca.innerHTML = rHtml;
     sRaca.value = i.raca;
+    
+    const renderCustomBuffs = (num) => {
+        let fieldList = num === 1 ? 'customRaceBuffs' : 'customRaceBuffs2';
+        let listId = num === 1 ? 'raca-custom-buffs-list' : 'raca-custom-buffs-list-2';
+        let container = document.getElementById(listId);
+        if (!container) return;
+        let html = '';
+        (i[fieldList] || []).forEach((b, idx) => {
+            let valFmt = b.val !== "" && b.val !== undefined ? b.val.toLocaleString("pt-BR") : "";
+            html += `<div style="display: flex; gap: 5px; align-items: center; margin-bottom: 3px;">
+                <select onchange="updateCustomRaceBuff(${num}, ${idx}, 'stat', this.value)" style="flex: 1; padding: 4px; font-size: 11px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
+                    <optgroup label="Atributos">
+                        <option value="d" ${b.stat === 'd' ? 'selected' : ''}>Destreza</option>
+                        <option value="f" ${b.stat === 'f' ? 'selected' : ''}>Força</option>
+                        <option value="r" ${b.stat === 'r' ? 'selected' : ''}>Resistência</option>
+                        <option value="v" ${b.stat === 'v' ? 'selected' : ''}>Velocidade</option>
+                        <option value="refl" ${b.stat === 'refl' ? 'selected' : ''}>Reflexo</option>
+                        <option value="vcorp" ${b.stat === 'vcorp' ? 'selected' : ''}>Vel. Corporal</option>
+                        <option value="vAgua" ${b.stat === 'vAgua' ? 'selected' : ''}>Velocidade (Água)</option>
+                        <option value="reflAgua" ${b.stat === 'reflAgua' ? 'selected' : ''}>Reflexo (Água)</option>
+                        <option value="vcorpAgua" ${b.stat === 'vcorpAgua' ? 'selected' : ''}>Vel. Corporal (Água)</option>
+                    </optgroup>
+                    <optgroup label="Espírito">
+                        <option value="esp" ${b.stat === 'esp' ? 'selected' : ''}>Espírito</option>
+                        <option value="ha" ${b.stat === 'ha' ? 'selected' : ''}>Armamento</option>
+                        <option value="ho" ${b.stat === 'ho' ? 'selected' : ''}>Observação</option>
+                        <option value="hr" ${b.stat === 'hr' ? 'selected' : ''}>Rei</option>
+                    </optgroup>
+                    <optgroup label="Akuma no Mi">
+                        <option value="amiAlc" ${b.stat === 'amiAlc' ? 'selected' : ''}>Alcance</option>
+                        <option value="amiDur" ${b.stat === 'amiDur' ? 'selected' : ''}>Durabilidade</option>
+                        <option value="amiPot" ${b.stat === 'amiPot' ? 'selected' : ''}>Potência</option>
+                        <option value="amiVel" ${b.stat === 'amiVel' ? 'selected' : ''}>Velocidade</option>
+                        <option value="amiDesp" ${b.stat === 'amiDesp' ? 'selected' : ''}>Despertar</option>
+                    </optgroup>
+                    <optgroup label="Combate">
+                        <option value="dano" ${b.stat === 'dano' ? 'selected' : ''}>Dano</option>
+                        <option value="ignRes" ${b.stat === 'ignRes' ? 'selected' : ''}>Ignorar Resistência</option>
+                        <option value="ignDanoGeral" ${b.stat === 'ignDanoGeral' ? 'selected' : ''}>Ignorar Dano Geral</option>
+                        <option value="ignDanoAmi" ${b.stat === 'ignDanoAmi' ? 'selected' : ''}>Ignorar Dano Akuma</option>
+                        <option value="redEstamina" ${b.stat === 'redEstamina' ? 'selected' : ''}>Redução de Estamina</option>
+                    </optgroup>
+                </select>
+                <select onchange="updateCustomRaceBuff(${num}, ${idx}, 'type', this.value)" style="width: 50px; padding: 4px; font-size: 11px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
+                    <option value="pct" ${b.type === 'pct' ? 'selected' : ''}>%</option>
+                    <option value="flat" ${b.type === 'flat' ? 'selected' : ''}>Pts</option>
+                </select>
+                <input type="text" class="no-sum" placeholder="Valor" value="${valFmt}" oninput="let cursor = this.selectionStart; let oldLen = this.value.length; updateCustomRaceBuff(${num}, ${idx}, 'val', this.value); let formatted = currentChar.info['${fieldList}'][${idx}].val ? currentChar.info['${fieldList}'][${idx}].val.toLocaleString('pt-BR') : ''; if(this.value !== formatted) { this.value = formatted; let newLen = this.value.length; try { this.setSelectionRange(cursor + (newLen - oldLen), cursor + (newLen - oldLen)); } catch(e){} }" style="width: 60px; padding: 4px; font-size: 11px; text-align: center; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
+                <button type="button" class="btn btn-outline btn-danger" style="padding: 2px 6px; font-size: 10px; margin: 0;" onclick="removeCustomRaceBuffRow(${num}, ${idx})">X</button>
+            </div>`;
+        });
+        container.innerHTML = html;
+    };
+
     let boxCustom = document.getElementById("box-racaCustom");
     if (boxCustom) {
         if (isNPC && i.raca === "Outra") {
             boxCustom.style.display = "flex";
-            document.getElementById("info-racaNomeCustom").value =
-                i.racaNomeCustom || "";
-            document.getElementById("info-customBuffF").value =
-                i.customBuffF || "";
-            document.getElementById("info-customBuffD").value =
-                i.customBuffD || "";
-            document.getElementById("info-customBuffR").value =
-                i.customBuffR || "";
-            document.getElementById("info-customBuffV").value =
-                i.customBuffV || "";
+            document.getElementById("info-racaNomeCustom").value = i.racaNomeCustom || "";
+            renderCustomBuffs(1);
         } else {
             boxCustom.style.display = "none";
         }
@@ -3725,16 +3846,8 @@ function updateUI() {
     if (boxCustom2) {
         if (isNPC && i.linhagem === "Charlotte" && i.raca2 === "Outra") {
             boxCustom2.style.display = "flex";
-            document.getElementById("info-racaNomeCustom2").value =
-                i.racaNomeCustom2 || "";
-            document.getElementById("info-customBuffF2").value =
-                i.customBuffF2 || "";
-            document.getElementById("info-customBuffD2").value =
-                i.customBuffD2 || "";
-            document.getElementById("info-customBuffR2").value =
-                i.customBuffR2 || "";
-            document.getElementById("info-customBuffV2").value =
-                i.customBuffV2 || "";
+            document.getElementById("info-racaNomeCustom2").value = i.racaNomeCustom2 || "";
+            renderCustomBuffs(2);
         } else {
             boxCustom2.style.display = "none";
         }
@@ -3778,19 +3891,15 @@ function updateUI() {
                         }
                     }
                 } else if (isNPC && racaName === "Outra") {
-                    let f = parseInt(i["customBuffF" + suffix]) || 0;
-                    let d = parseInt(i["customBuffD" + suffix]) || 0;
-                    let r = parseInt(i["customBuffR" + suffix]) || 0;
-                    let v = parseInt(i["customBuffV" + suffix]) || 0;
-                    if (f > 0)
-                        html += `<option value="f">${nomes["f"]} (+${f}%)</option>`;
-                    if (d > 0)
-                        html += `<option value="d">${nomes["d"]} (+${d}%)</option>`;
-                    if (r > 0)
-                        html += `<option value="r">${nomes["r"]} (+${r}%)</option>`;
-                    if (v > 0)
-                        html += `<option value="v">${nomes["v"]} (+${v}%)</option>`;
-                }
+                let cBuffs = suffix === "" ? (i.customRaceBuffs || []) : (i.customRaceBuffs2 || []);
+                let allowedStats = ["f", "d", "r", "v"];
+                cBuffs.forEach(b => {
+                    if (allowedStats.includes(b.stat) && b.type === "pct") {
+                        let val = parseInt(b.val) || 0;
+                        if (val > 0) html += `<option value="${b.stat}">${nomes[b.stat]} (+${val}%)</option>`;
+                    }
+                });
+            }
                 return html;
             };
 
@@ -3854,21 +3963,26 @@ function updateUI() {
         )
     )
         calcExp = baseExp * 2;
-    let expFinal = i.expectativaVidaOverride || calcExp;
+    let expFinal = i.expectativaVidaOverride !== undefined && i.expectativaVidaOverride !== "" ? i.expectativaVidaOverride : calcExp;
 
     let elExp = document.getElementById("info-expectativaVida");
     if (elExp) {
-        let fmtExp = expFinal + " anos";
+        let fmtExp = "";
+        if (expFinal === "Desconhecido") {
+            fmtExp = "Desconhecido";
+        } else {
+            fmtExp = expFinal + (expFinal === 1 ? " ano" : " anos");
+        }
         if (elExp.value !== fmtExp && document.activeElement !== elExp) {
             elExp.value = fmtExp;
         }
     }
 
     let currentIdadeStr = String(i.idade).replace(/\D/g, "");
-    if (currentIdadeStr) {
+    if (currentIdadeStr && expFinal !== "Desconhecido") {
         let currentAge = parseInt(currentIdadeStr, 10);
         if (currentAge > expFinal) {
-            i.idade = expFinal + " anos";
+            i.idade = expFinal + (expFinal === 1 ? " ano" : " anos");
         }
     }
 
@@ -4979,6 +5093,9 @@ function updateUI() {
     const selLin = document.getElementById("info-linhagem");
     let currentLin = i.linhagem;
     let htmlLin = '<option value="">-- Selecione --</option>';
+    if (isNPC) {
+        htmlLin += `<option value="Outra">Outra...</option>`;
+    }
     for (let l in linhagens) {
         if (
             l !== "Nenhuma" &&
@@ -4998,6 +5115,16 @@ function updateUI() {
         currentLin = "";
     }
 
+    let inpLinCustom = document.getElementById("info-linhagemNomeCustom");
+    if (inpLinCustom) {
+        if (isNPC && i.linhagem === "Outra") {
+            inpLinCustom.style.display = "block";
+            inpLinCustom.value = i.linhagemNomeCustom || "";
+        } else {
+            inpLinCustom.style.display = "none";
+        }
+    }
+
     let rc = i.raca,
         rc2 = i.raca2,
         ln = currentLin;
@@ -5008,17 +5135,17 @@ function updateUI() {
 
     document.getElementById("box-extraRaca").style.display =
         ln !== "Charlotte" &&
-        (["Humano", "Kuja", "Mink"].includes(rc) || (isNPC && rc === "Outra"))
+        ["Humano", "Kuja", "Mink"].includes(rc)
             ? "flex"
             : "none";
     document.getElementById("info-selDF").style.display =
         ln !== "Charlotte" &&
-        (["Humano", "Kuja", "Mink"].includes(rc) || (isNPC && rc === "Outra"))
+        ["Humano", "Kuja", "Mink"].includes(rc)
             ? "block"
             : "none";
     document.getElementById("info-selRV").style.display =
         ln !== "Charlotte" &&
-        (["Humano", "Kuja"].includes(rc) || (isNPC && rc === "Outra"))
+        ["Humano", "Kuja"].includes(rc)
             ? "block"
             : "none";
 
@@ -5088,7 +5215,6 @@ function updateUI() {
 
     let baseClass = (i.classe || "Arqueólogo 1").split(" ")[0];
     let allowedEstilo1 = classStyles[baseClass] || ["Freestyle"];
-    if (isNPC && i.raca === "Outra") allowedEstilo1 = allStyles;
     let elEst1 = document.getElementById("info-estilo1");
     if (elEst1) {
         let htmlE1 = '<option value="">-- Selecione --</option>';
@@ -5547,6 +5673,19 @@ function updateUI() {
         bonus[i.selClasseDF] += combatenteLevel * 0.05;
     }
 
+    let applyCustomRaceBuffToTotal = (num) => {
+        let fieldList = num === 1 ? 'customRaceBuffs' : 'customRaceBuffs2';
+        (i[fieldList] || []).forEach(b => {
+            let val = parseInt(b.val) || 0;
+            if (val === 0) return;
+            if (b.type === "pct") {
+                if (typeof bonus[b.stat] !== "undefined") bonus[b.stat] += val / 100;
+            } else {
+                if (typeof flatBonus[b.stat] !== "undefined") flatBonus[b.stat] += val;
+            }
+        });
+    };
+
     if (ln !== "Charlotte") {
         if (racas[rc]) {
             bonus.d += racas[rc].d || 0;
@@ -5554,10 +5693,7 @@ function updateUI() {
             bonus.r += racas[rc].r || 0;
             bonus.v += racas[rc].v || 0;
         } else if (isNPC && rc === "Outra") {
-            bonus.f += (parseInt(i.customBuffF) || 0) / 100;
-            bonus.d += (parseInt(i.customBuffD) || 0) / 100;
-            bonus.r += (parseInt(i.customBuffR) || 0) / 100;
-            bonus.v += (parseInt(i.customBuffV) || 0) / 100;
+            applyCustomRaceBuffToTotal(1);
         }
         if (rc === "Humano") {
             bonus[i.selDF] += 0.2;
@@ -5575,10 +5711,7 @@ function updateUI() {
                     if (racas[rName][s] < 0) bonus[s] += racas[rName][s];
                 }
             } else if (isNPC && rName === "Outra") {
-                bonus.f += (parseInt(i["customBuffF" + suffix]) || 0) / 100;
-                bonus.d += (parseInt(i["customBuffD" + suffix]) || 0) / 100;
-                bonus.r += (parseInt(i["customBuffR" + suffix]) || 0) / 100;
-                bonus.v += (parseInt(i["customBuffV" + suffix]) || 0) / 100;
+                applyCustomRaceBuffToTotal(suffix === "2" ? 2 : 1);
             }
             if (selVal) {
                 if (rName === "Humano") bonus[selVal] += 0.2;
@@ -6872,6 +7005,27 @@ function updateUI() {
         ignResSourcesTexts.push(`${calcResIgnManual}% manual`);
     }
 
+    let extractRaceCombatBuffs = (num, rName) => {
+        if (isNPC && rName === "Outra") {
+            let fieldList = num === 1 ? 'customRaceBuffs' : 'customRaceBuffs2';
+            (i[fieldList] || []).forEach(b => {
+                let val = parseInt(b.val) || 0;
+                if (val > 0) {
+                    if (b.stat === "ignRes") {
+                        totalIgnRes += val;
+                        ignResSourcesTexts.push(`${val}% da Raça`);
+                    }
+                }
+            });
+        }
+    };
+    if (ln !== "Charlotte") {
+        extractRaceCombatBuffs(1, rc);
+    } else {
+        extractRaceCombatBuffs(1, rc);
+        extractRaceCombatBuffs(2, rc2);
+    }
+
     let calcResBruta = calcResInimiga;
     if (totalIgnRes > 0) {
         calcResBruta =
@@ -6912,6 +7066,19 @@ function updateUI() {
         }
         if (i.armasEquipadasList)
             getReductions(i.armasEquipadasList.filter((a) => a.ativo));
+            
+        let applyRaceReductions = (num, rName) => {
+            if (isNPC && rName === "Outra") {
+                let fieldList = num === 1 ? 'customRaceBuffs' : 'customRaceBuffs2';
+                getReductions(i[fieldList] || []);
+            }
+        };
+        if (ln !== "Charlotte") {
+            applyRaceReductions(1, rc);
+        } else {
+            applyRaceReductions(1, rc);
+            applyRaceReductions(2, rc2);
+        }
     }
 
     if (
@@ -6986,6 +7153,28 @@ function updateUI() {
     }
 
     if (i.calcQuemAtaca !== "inimigo") {
+        let applyRaceDanoBreakdown = (num, rName) => {
+            if (isNPC && rName === "Outra") {
+                let fieldList = num === 1 ? 'customRaceBuffs' : 'customRaceBuffs2';
+                (i[fieldList] || []).forEach(b => {
+                    let val = parseInt(b.val) || 0;
+                    if (val !== 0 && b.stat === "dano") {
+                        if (b.type === "pct") {
+                            danoFinalPctSources.push(`${val}% da Raça`);
+                        } else {
+                            danoFinalFlatSources.push(`${val} da Raça`);
+                        }
+                    }
+                });
+            }
+        };
+        if (ln !== "Charlotte") {
+            applyRaceDanoBreakdown(1, rc);
+        } else {
+            applyRaceDanoBreakdown(1, rc);
+            applyRaceDanoBreakdown(2, rc2);
+        }
+
         if (i.alcunhasList && i.alcunhaAtiva) {
             let ativa = i.alcunhasList.find((a) => a.nome === i.alcunhaAtiva);
             if (ativa && ativa.buffs) {
@@ -7207,6 +7396,25 @@ function updateUI() {
     if (hasHab("QI Avançado")) {
         totalRedEstamina += 50;
         fontesRedEstamina.push("QI Avançado");
+    }
+
+    let extractRaceEstamina = (num, rName) => {
+        if (isNPC && rName === "Outra") {
+            let fieldList = num === 1 ? 'customRaceBuffs' : 'customRaceBuffs2';
+            (i[fieldList] || []).forEach(b => {
+                let val = parseInt(b.val) || 0;
+                if (val > 0 && b.stat === "redEstamina") {
+                    totalRedEstamina += val;
+                    fontesRedEstamina.push("Raça Custom");
+                }
+            });
+        }
+    };
+    if (ln !== "Charlotte") {
+        extractRaceEstamina(1, rc);
+    } else {
+        extractRaceEstamina(1, rc);
+        extractRaceEstamina(2, rc2);
     }
 
     if (i.alcunhasList && i.alcunhaAtiva) {
@@ -8266,9 +8474,12 @@ function updateUI() {
         }
     }
 
-    let displayLinhagem = i.linhagem
-        ? i.linhagem.replace("Tenryūbito: Família ", "")
-        : "Nenhuma";
+    let displayLinhagem = "Nenhuma";
+    if (i.linhagem === "Outra" && isNPC) {
+        displayLinhagem = i.linhagemNomeCustom || "Linhagem Customizada";
+    } else if (i.linhagem) {
+        displayLinhagem = i.linhagem.replace("Tenryūbito: Família ", "");
+    }
     let recompensaOutText = "";
 
     if (i.orgTipo === "Pirata" && i.pirataStatus === "Shichibukai") {
