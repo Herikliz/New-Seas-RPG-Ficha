@@ -6710,7 +6710,10 @@ function updateUI() {
 
     let K = 25000;
 
-    let calcAPot = Math.round((aPot + flatBonus.amiPot) * (1 + bonus.amiPot));
+    let despAddCalc = i.hasAmiDesp ? (aDesp || 0) : 0;
+    let calcAPot = Math.round(
+        (Math.round(((aPot + despAddCalc) + flatBonus.amiPot) * (1 + bonus.amiPot)) + itemFlat.amiPot) * (1 + itemBonus.amiPot)
+    );
     let danoAmi = 0;
     let buffAmiVal = parseInt(i.amiPotBuff) || 0;
     let baseDanoAmi = 0;
@@ -7059,10 +7062,11 @@ function updateUI() {
             if (i.calcQuemAtaca === "inimigo") {
                 calcFormTexto += ` <span style="color:#dc3545;">+ ${danoAmi.toLocaleString("pt-BR")} (Akuma no Mi Manual) = ${somaAtual.toLocaleString("pt-BR")}</span>`;
             } else {
+                let baseAmiPotDisp = aPot + (i.hasAmiDesp ? (aDesp || 0) : 0);
                 if (buffAmiVal > 0) {
-                    calcFormTexto += ` <span style="color:#dc3545;">+ ${danoAmi.toLocaleString("pt-BR")} (Akuma no Mi: ${controlePct.toLocaleString("pt-BR")}% de ${aPot.toLocaleString("pt-BR")} + ${buffAmiVal}%) = ${somaAtual.toLocaleString("pt-BR")}</span>`;
+                    calcFormTexto += ` <span style="color:#dc3545;">+ ${danoAmi.toLocaleString("pt-BR")} (Akuma no Mi: ${controlePct.toLocaleString("pt-BR")}% de ${baseAmiPotDisp.toLocaleString("pt-BR")} + ${buffAmiVal}%) = ${somaAtual.toLocaleString("pt-BR")}</span>`;
                 } else {
-                    calcFormTexto += ` <span style="color:#dc3545;">+ ${danoAmi.toLocaleString("pt-BR")} (Akuma no Mi: ${controlePct.toLocaleString("pt-BR")}% de ${aPot.toLocaleString("pt-BR")}) = ${somaAtual.toLocaleString("pt-BR")}</span>`;
+                    calcFormTexto += ` <span style="color:#dc3545;">+ ${danoAmi.toLocaleString("pt-BR")} (Akuma no Mi: ${controlePct.toLocaleString("pt-BR")}% de ${baseAmiPotDisp.toLocaleString("pt-BR")}) = ${somaAtual.toLocaleString("pt-BR")}</span>`;
                 }
             }
         }
