@@ -6240,10 +6240,16 @@ function updateUI() {
         );
     }
 
-    let tempAVelBase = (currentChar.substats.amiVel || 0) + (i.hasAmiDesp ? (currentChar.substats.amiDesp || 0) : 0);
+    let calcDespertarTotalGeral = 0;
+    if (i.hasAmiDesp && (currentChar.substats.amiDesp || 0) > 0) {
+        calcDespertarTotalGeral = Math.round(
+            (Math.round(((currentChar.substats.amiDesp || 0) + flatBonus.amiDesp) * (1 + bonus.amiDesp)) + itemFlat.amiDesp) * (1 + itemBonus.amiDesp)
+        );
+    }
+
+    let tempAVelBase = (currentChar.substats.amiVel || 0) + calcDespertarTotalGeral;
     let calcAVelFinalBox = Math.round(
-        (tempAVelBase + flatBonus.amiVel) *
-            (1 + bonus.amiVel),
+        (Math.round((tempAVelBase + flatBonus.amiVel) * (1 + bonus.amiVel)) + itemFlat.amiVel) * (1 + itemBonus.amiVel)
     );
     let finalAkumaVelBox = 0;
     if (i.hasAmiVel && calcAVelFinalBox > 0) {
@@ -6710,9 +6716,8 @@ function updateUI() {
 
     let K = 25000;
 
-    let despAddCalc = i.hasAmiDesp ? (aDesp || 0) : 0;
     let calcAPot = Math.round(
-        (Math.round(((aPot + despAddCalc) + flatBonus.amiPot) * (1 + bonus.amiPot)) + itemFlat.amiPot) * (1 + itemBonus.amiPot)
+        (Math.round(((aPot + calcDespertarTotalGeral) + flatBonus.amiPot) * (1 + bonus.amiPot)) + itemFlat.amiPot) * (1 + itemBonus.amiPot)
     );
     let danoAmi = 0;
     let buffAmiVal = parseInt(i.amiPotBuff) || 0;
@@ -7062,7 +7067,7 @@ function updateUI() {
             if (i.calcQuemAtaca === "inimigo") {
                 calcFormTexto += ` <span style="color:#dc3545;">+ ${danoAmi.toLocaleString("pt-BR")} (Akuma no Mi Manual) = ${somaAtual.toLocaleString("pt-BR")}</span>`;
             } else {
-                let baseAmiPotDisp = aPot + (i.hasAmiDesp ? (aDesp || 0) : 0);
+                let baseAmiPotDisp = aPot + calcDespertarTotalGeral;
                 if (buffAmiVal > 0) {
                     calcFormTexto += ` <span style="color:#dc3545;">+ ${danoAmi.toLocaleString("pt-BR")} (Akuma no Mi: ${controlePct.toLocaleString("pt-BR")}% de ${baseAmiPotDisp.toLocaleString("pt-BR")} + ${buffAmiVal}%) = ${somaAtual.toLocaleString("pt-BR")}</span>`;
                 } else {
@@ -7713,7 +7718,7 @@ function updateUI() {
 
     if (AMI > 0) {
         attrOut += `↠ *𝙰𝚔𝚞𝚖𝚊 𝚗𝚘 𝙼𝚒:* ${strCalc(AMI, bonus.ami, flatBonus.ami, itemBonus.ami, itemFlat.ami)}\n`;
-        let despAdd = i.hasAmiDesp ? (aDesp || 0) : 0;
+        let despAdd = calcDespertarTotalGeral;
         if (i.hasAmiAlc && aAlc > 0) {
             let baseVal = aAlc + despAdd;
             let calcAAlc = Math.round(
@@ -8771,7 +8776,7 @@ function updateUI() {
     manualAttrOut += `- 𝙸𝚗𝚏𝚞𝚜𝚊̃𝚘${i.unlockHR6 ? "✓" : "✘"}\n\n`;
 
     manualAttrOut += `↠ *𝙰𝚔𝚞𝚖𝚊 𝚗𝚘 𝙼𝚒:* ${strCalc(AMI, bonus.ami, flatBonus.ami, itemBonus.ami, itemFlat.ami)}\n`;
-    let despAddMan = i.hasAmiDesp ? (aDesp || 0) : 0;
+    let despAddMan = calcDespertarTotalGeral;
     
     if (i.hasAmiAlc && aAlc > 0) {
         let baseValManAlc = aAlc + despAddMan;
