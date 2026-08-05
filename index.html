@@ -6,7 +6,20 @@
         <title>Ficha New Seas OP RPG</title>
         <link rel="icon" type="image/png" href="favicon.png">
         <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
         <link rel="stylesheet" href="style.css">
+        <style>
+            .iti { width: 100%; display: block; margin-top: 5px; }
+            .iti__flag { background-image: url("https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/img/flags.png"); }
+            @media (min-resolution: 2x) {
+              .iti__flag { background-image: url("https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/img/flags@2x.png"); }
+            }
+            .iti__country-list { background-color: #222; color: #fff; border: 1px solid #444; text-align: left; }
+            .iti__country-name { color: #fff; }
+            .iti__dial-code { color: #aaa; }
+            .iti__country.iti__highlight { background-color: rgba(255,255,255,0.1); }
+        </style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
         <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
         <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
         <script src="https://unpkg.com/drag-drop-touch"></script>
@@ -116,7 +129,7 @@
                         </div>
                         <div class="input-group">
                             <label>Telefone do Jogador (Oculto na Ficha)</label>
-                            <input type="text" id="info-telefone" placeholder="(DD) 9XXXX-XXXX" oninput="formatPhone(this)">
+                            <input type="tel" id="info-telefone" oninput="formatPhone(this)">
                         </div>
                     </div>
                 </div>

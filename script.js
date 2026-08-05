@@ -10,6 +10,7 @@ const firebaseConfig = {
 let db = null;
 let isFirebaseReady = false;
 let lastSyncedData = null;
+let iti = null;
 
 function applyLocalChanges(original, current, server) {
     if (JSON.stringify(original) === JSON.stringify(current)) return server;
@@ -1463,6 +1464,16 @@ function init() {
         activeNpcIndex === -1
             ? charData.pcs[activePcIndex].pc
             : charData.pcs[activePcIndex].npcs[activeNpcIndex];
+
+    const phoneInput = document.querySelector("#info-telefone");
+    if (phoneInput && !iti) {
+        iti = window.intlTelInput(phoneInput, {
+            initialCountry: "br",
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+            autoPlaceholder: "aggressive",
+            formatOnDisplay: true
+        });
+    }
 
     document.querySelectorAll(".box").forEach((box) => {
         if (box.querySelector(".box-inner")) return;
@@ -3242,8 +3253,8 @@ window.handleRacaChange = async function (field, val) {
     }
     
     if (val !== "Outra") {
-        if (field === 'raca' && currentChar.info.raca2 !== "Outra") currentChar.info.expectativaVidaOverride = 0;
-        if (field === 'raca2' && currentChar.info.raca !== "Outra") currentChar.info.expectativaVidaOverride = 0;
+        if (field === 'raca' && currentChar.info.raca2 !== "Outra") currentChar.info.expectativaVidaOverride = "";
+        if (field === 'raca2' && currentChar.info.raca !== "Outra") currentChar.info.expectativaVidaOverride = "";
     }
 
     updateField("info", field, val);
@@ -3385,7 +3396,7 @@ function formatIdade(val) {
         )
     )
         calcExp = baseExp * 2;
-    let expFinal = i.expectativaVidaOverride !== undefined && i.expectativaVidaOverride !== "" ? i.expectativaVidaOverride : calcExp;
+    let expFinal = i.expectativaVidaOverride !== undefined && i.expectativaVidaOverride !== "" && i.expectativaVidaOverride !== 0 ? i.expectativaVidaOverride : calcExp;
 
     if (expFinal !== "Desconhecido" && age > expFinal) {
         age = expFinal;
@@ -3471,18 +3482,23 @@ function formatCurrency(category, field, el) {
 }
 
 function formatPhone(el) {
-    let v = el.value.replace(/\D/g, "").substring(0, 11);
-    if (v.length > 2 && v[2] !== "9") {
-        v = v.substring(0, 2) + "9" + v.substring(2);
-        v = v.substring(0, 11);
-    }
-    let res = v;
-    if (v.length > 2) res = "(" + v.substring(0, 2) + ") " + v.substring(2);
-    if (v.length > 7) res = res.substring(0, 10) + "-" + res.substring(10);
-    el.value = res;
-    currentChar.info.telefone = res;
+    currentChar.info.telefone = el.value;
     saveData();
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const telInput = document.getElementById("info-telefone");
+    if (telInput) {
+        telInput.addEventListener("blur", () => {
+            if (iti && iti.isValidNumber()) {
+                let formatted = iti.getNumber();
+                iti.setNumber(formatted);
+                currentChar.info.telefone = formatted;
+                saveData();
+            }
+        });
+    }
+});
 
 function strCalc(
     base,
@@ -3963,7 +3979,7 @@ function updateUI() {
         )
     )
         calcExp = baseExp * 2;
-    let expFinal = i.expectativaVidaOverride !== undefined && i.expectativaVidaOverride !== "" ? i.expectativaVidaOverride : calcExp;
+    let expFinal = i.expectativaVidaOverride !== undefined && i.expectativaVidaOverride !== "" && i.expectativaVidaOverride !== 0 ? i.expectativaVidaOverride : calcExp;
 
     let elExp = document.getElementById("info-expectativaVida");
     if (elExp) {
@@ -4003,7 +4019,6 @@ function updateUI() {
         "sexo",
         "genero",
         "sangue",
-        "telefone",
         "nacionalidade",
         "localizacao",
         "tripulacao",
@@ -4030,6 +4045,14 @@ function updateUI() {
             if (el.value != val) el.value = val;
         }
     });
+
+    let telEl = document.getElementById("info-telefone");
+    if (telEl && iti) {
+        let telVal = i.telefone || "";
+        if (telEl.value !== telVal) iti.setNumber(telVal);
+    } else if (telEl) {
+        telEl.value = i.telefone || "";
+    }
 
     const checkFields = [
         "unlockHA1",
