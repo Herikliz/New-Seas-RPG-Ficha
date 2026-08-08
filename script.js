@@ -2082,6 +2082,7 @@ function runFallbackChecks() {
                 nacionalidade: "",
                 localizacao: "",
                 telefone: "",
+                recrutadoPor: "",
                 orgTipo: "",
                 tripulacao: "",
                 pirataStatus: "Normal",
@@ -4021,6 +4022,7 @@ function updateUI() {
         "sangue",
         "nacionalidade",
         "localizacao",
+        "recrutadoPor",
         "tripulacao",
         "pirataStatus",
         "akumaNome",
@@ -9122,7 +9124,10 @@ ${sexoGeneroOut}
 > ${i.sangue || ""}
 ${histPersOut}
   : ᓩ _𝐀ᴘᴀʀᴇ̂ɴᴄɪᴀ:_
-> ${i.aparencia || ""}${currentDocId === "NPCS" || currentDocId === "NPCI" ? "" : `\n\n  : ᓩ _𝐈ᴅ:_ ${currentDocId || ""}`}${(parseInt(i.aliadosEspiritoContagiante) || 0) > 0 ? `\n\n  : ᓩ _𝐀ʟɪᴀᴅᴏs ᴄᴏᴍ 𝐄sᴘɪ́ʀɪᴛᴏ 𝐂ᴏɴᴛᴀɢɪᴀɴᴛᴇ:_\n> ${parseInt(i.aliadosEspiritoContagiante)}` : ""}
+> ${i.aparencia || ""}
+
+  : ᓩ _𝐑ᴇᴄʀᴜᴛᴀᴅᴏ ᴘᴏʀ:_
+> ${i.recrutadoPor || ""}${currentDocId === "NPCS" || currentDocId === "NPCI" ? "" : `\n\n  : ᓩ _𝐈ᴅ:_\n> ${currentDocId || ""}`}${(parseInt(i.aliadosEspiritoContagiante) || 0) > 0 ? `\n\n  : ᓩ _𝐀ʟɪᴀᴅᴏs ᴄᴏᴍ 𝐄sᴘɪ́ʀɪᴛᴏ 𝐂ᴏɴᴛᴀɢɪᴀɴᴛᴇ:_\n> ${parseInt(i.aliadosEspiritoContagiante)}` : ""}
 
   : ᓩ _𝐍ᴀᴄɪᴏɴᴀʟɪᴅᴀᴅᴇ:_
 > ${i.nacionalidade || "Desconhecida"}
@@ -9402,7 +9407,10 @@ ${recompensaOutText}
 > ${i.sangue || ""}
 ${manualHistPersOut}
   : ᓩ _𝐀ᴘᴀʀᴇ̂ɴᴄɪᴀ:_
-> ${i.aparencia || ""}${currentDocId === "NPCS" || currentDocId === "NPCI" ? "" : `\n\n  : ᓩ _𝐈ᴅ:_ ${currentDocId || ""}`}${(parseInt(i.aliadosEspiritoContagiante) || 0) > 0 ? `\n\n  : ᓩ _𝐀ʟɪᴀᴅᴏs ᴄᴏᴍ 𝐄sᴘɪ́ʀɪᴛᴏ 𝐂ᴏɴᴛᴀɢɪᴀɴᴛᴇ:_\n> ${parseInt(i.aliadosEspiritoContagiante)}` : ""}
+> ${i.aparencia || ""}
+
+  : ᓩ _𝐑ᴇᴄʀᴜᴛᴀᴅᴏ ᴘᴏʀ:_
+> ${i.recrutadoPor || ""}${currentDocId === "NPCS" || currentDocId === "NPCI" ? "" : `\n\n  : ᓩ _𝐈ᴅ:_\n> ${currentDocId || ""}`}${(parseInt(i.aliadosEspiritoContagiante) || 0) > 0 ? `\n\n  : ᓩ _𝐀ʟɪᴀᴅᴏs ᴄᴏᴍ 𝐄sᴘɪ́ʀɪᴛᴏ 𝐂ᴏɴᴛᴀɢɪᴀɴᴛᴇ:_\n> ${parseInt(i.aliadosEspiritoContagiante)}` : ""}
 
   : ᓩ _𝐍ᴀᴄɪᴏɴᴀʟɪᴅᴀᴅᴇ:_
 > ${i.nacionalidade || ""}
