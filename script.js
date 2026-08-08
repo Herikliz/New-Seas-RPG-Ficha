@@ -6584,6 +6584,28 @@ function updateUI() {
     let hoPts = finalHO;
     let hrPts = finalHR;
 
+    if (haPts <= 0) i.unlockHA1 = false;
+    if (haPts <= 0 || !i.unlockHA1) i.unlockHA2 = false;
+    if (haPts < 3000 || !i.unlockHA2) i.unlockHA3 = false;
+    if (haPts < 5000 || !i.unlockHA2) i.unlockHA4 = false;
+    if (haPts < 7000 || !i.unlockHA2) i.unlockHA5 = false;
+    if (haPts < 8000 || !i.unlockHA5) i.unlockHA6 = false;
+
+    if (hoPts < 3000) i.unlockHO2 = false;
+    if (hoPts < 5000 || !i.unlockHO2) i.unlockHO3 = false;
+    if (hoPts < 8000 || !i.unlockHO3) i.unlockHO4 = false;
+
+    if (hrPts < 1000) i.unlockHR2 = false;
+    if (hrPts < 3000 || !i.unlockHR2) i.unlockHR3 = false;
+    if (hrPts < 5000 || !i.unlockHR3) i.unlockHR4 = false;
+    if (hrPts < 7500 || hoPts < 8000 || !i.unlockHO4) i.unlockHR5 = false;
+    if (hrPts < 10000 || !i.unlockHA1 || !i.unlockHA2 || !i.unlockHA3 || !i.unlockHA4 || !i.unlockHA5 || !i.unlockHO2 || !i.unlockHO3 || !i.unlockHR2 || !i.unlockHR3 || !i.unlockHR4) i.unlockHR6 = false;
+
+    ["unlockHA1", "unlockHA2", "unlockHA3", "unlockHA4", "unlockHA5", "unlockHA6", "unlockHO2", "unlockHO3", "unlockHO4", "unlockHR2", "unlockHR3", "unlockHR4", "unlockHR5", "unlockHR6"].forEach(f => {
+        let el = document.getElementById("chk-" + f);
+        if (el && el.checked !== (i[f] || false)) el.checked = i[f] || false;
+    });
+
     document.getElementById("cont-ha1").style.display =
         haPts > 0 ? "block" : "none";
     document.getElementById("cont-ha2").style.display =
@@ -6596,14 +6618,12 @@ function updateUI() {
         haPts >= 7000 && i.unlockHA2 ? "block" : "none";
     document.getElementById("cont-ha6").style.display =
         haPts >= 8000 && i.unlockHA5 ? "block" : "none";
-
     document.getElementById("cont-ho2").style.display =
         hoPts >= 3000 ? "block" : "none";
     document.getElementById("cont-ho3").style.display =
         hoPts >= 5000 && i.unlockHO2 ? "block" : "none";
     document.getElementById("cont-ho4").style.display =
         hoPts >= 8000 && i.unlockHO3 ? "block" : "none";
-
     document.getElementById("cont-hr2").style.display =
         hrPts >= 1000 ? "block" : "none";
     document.getElementById("cont-hr3").style.display =
@@ -6626,7 +6646,6 @@ function updateUI() {
         i.unlockHR4
             ? "block"
             : "none";
-
     ["amiAlc", "amiDur", "amiPot", "amiVel"].forEach((f) => {
         let chk = document.getElementById("chk-" + f);
         let inp = document.getElementById("sub-" + f);
@@ -7566,12 +7585,12 @@ function updateUI() {
     }
 
     let attrOut = "";
-    if (D > 0)
-        attrOut += `↠ *𝙳𝚎𝚜𝚝𝚛𝚎𝚣𝚊:* ${strCalc(D, bonus.d, flatBonus.d, itemBonus.d, itemFlat.d, zBonus.d)}\n\n`;
-    if (F > 0)
-        attrOut += `↠ *𝙵𝚘𝚛𝚌̧𝚊:* ${strCalc(F, bonus.f, flatBonus.f, itemBonus.f, itemFlat.f, zBonus.f)}\n\n`;
-    if (R > 0) {
-        attrOut += `↠ *𝚁𝚎𝚜𝚒𝚜𝚝𝚎̂𝚗𝚌𝚒𝚊:* ${strCalc(R, bonus.r, flatBonus.r, itemBonus.r, itemFlat.r, zBonus.r)}\n> 𝙴𝚜𝚝𝚊𝚖𝚒𝚗𝚊: ${i.estaminaAtual.toLocaleString("pt-BR")} / ${estTotalVal.toLocaleString("pt-BR")}\n\n`;
+    if (D > 0 || window.isGeneratingManual)
+        attrOut += `↠ *𝙳𝚎𝚜𝚝𝚛𝚎𝚣𝚊:* ${D > 0 ? strCalc(D, bonus.d, flatBonus.d, itemBonus.d, itemFlat.d, zBonus.d) : ""}\n\n`;
+    if (F > 0 || window.isGeneratingManual)
+        attrOut += `↠ *𝙵𝚘𝚛𝚌̧𝚊:* ${F > 0 ? strCalc(F, bonus.f, flatBonus.f, itemBonus.f, itemFlat.f, zBonus.f) : ""}\n\n`;
+    if (R > 0 || window.isGeneratingManual) {
+        attrOut += `↠ *𝚁𝚎𝚜𝚒𝚜𝚝𝚎̂𝚗𝚌𝚒𝚊:* ${R > 0 ? strCalc(R, bonus.r, flatBonus.r, itemBonus.r, itemFlat.r, zBonus.r) : ""}\n> 𝙴𝚜𝚝𝚊𝚖𝚒𝚗𝚊: ${i.estaminaAtual.toLocaleString("pt-BR")} / ${estTotalVal.toLocaleString("pt-BR")}\n\n`;
     }
     let aVelOut = currentChar.substats.amiVel || 0;
     let calcAVelFinal = Math.round(
@@ -7589,6 +7608,9 @@ function updateUI() {
         }
     }
 
+    if (V === 0 && window.isGeneratingManual) {
+        attrOut += `↠ *𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:*\n> _𝚁𝚎𝚏𝚕𝚎𝚡𝚘:_\n> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎 𝙲𝚘𝚛𝚙𝚘𝚛𝚊𝚕:_\n\n`;
+    }
     if (V > 0) {
         let velNormalStr = strCalc(
             V,
@@ -7907,133 +7929,135 @@ function updateUI() {
         attrOut += `\n`;
     }
 
-    if (totalFinal >= reqEsp && ESP > 0) {
-        attrOut += `↠ *𝙴𝚜𝚙𝚒́𝚛𝚒𝚝𝚘:* ${strCalc(ESP, bonus.esp, flatBonus.esp, itemBonus.esp, itemFlat.esp)}\n`;
-        if (HA > 0) {
-            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝙰𝚛𝚖𝚊𝚖𝚎𝚗𝚝𝚘:_ ${strCalc(HA, bonus.ha, flatBonus.ha, itemBonus.ha, itemFlat.ha)}\n`;
-            let hasHigherHA =
-                i.unlockHA3 || i.unlockHA4 || i.unlockHA5 || i.unlockHA6;
-            if (i.unlockHA1 && !i.unlockHA2 && !hasHigherHA)
-                attrOut += `- 𝙸𝚗𝚟𝚒𝚜𝚒́𝚟𝚎𝚕✓\n`;
-            if (i.unlockHA2 && !hasHigherHA) attrOut += `- 𝚅𝚒𝚜𝚒́𝚟𝚎𝚕✓\n`;
-            if (i.unlockHA3) attrOut += `- 𝙸𝚖𝚋𝚞𝚒𝚌̧𝚊̃𝚘✓\n`;
-            if (i.unlockHA4) attrOut += `- 𝙵𝚞𝚕𝚕 𝙱𝚘𝚍𝚢✓\n`;
-            if (i.unlockHA5) attrOut += `- 𝙴𝚖𝚒𝚜𝚜𝚊̃𝚘✓\n`;
-            if (i.unlockHA6) attrOut += `- 𝙰𝚟𝚊𝚗𝚌̧𝚊𝚍𝚘✓\n`;
+    if ((totalFinal >= reqEsp && ESP > 0) || window.isGeneratingManual) {
+        attrOut += `↠ *𝙴𝚜𝚙𝚒́𝚛𝚒𝚝𝚘:* ${ESP > 0 ? strCalc(ESP, bonus.esp, flatBonus.esp, itemBonus.esp, itemFlat.esp) : ""}\n`;
+        if (HA > 0 || window.isGeneratingManual) {
+            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝙰𝚛𝚖𝚊𝚖𝚎𝚗𝚝𝚘:_ ${HA > 0 ? strCalc(HA, bonus.ha, flatBonus.ha, itemBonus.ha, itemFlat.ha) : ""}\n`;
+            let hasHigherHA = i.unlockHA3 || i.unlockHA4 || i.unlockHA5 || i.unlockHA6;
+            if (window.isGeneratingManual) {
+                if (!hasHigherHA) {
+                    attrOut += `* 𝙸𝚗𝚟𝚒𝚜𝚒́𝚟𝚎𝚕${i.unlockHA1 ? "✓" : "✘"}\n`;
+                    attrOut += `* 𝚅𝚒𝚜𝚒́𝚟𝚎𝚕${i.unlockHA2 ? "✓" : "✘"}\n`;
+                }
+                attrOut += `* 𝙸𝚖𝚋𝚞𝚒𝚌̧𝚊̃𝚘${i.unlockHA3 ? "✓" : "✘"}\n`;
+                attrOut += `* 𝙵𝚞𝚕𝚕 𝙱𝚘𝚍𝚢${i.unlockHA4 ? "✓" : "✘"}\n`;
+                attrOut += `* 𝙴𝚖𝚒𝚜𝚜𝚊̃𝚘${i.unlockHA5 ? "✓" : "✘"}\n`;
+                attrOut += `* 𝙰𝚟𝚊𝚗𝚌̧𝚊𝚍𝚘${i.unlockHA6 ? "✓" : "✘"}\n`;
+            } else {
+                if (i.unlockHA1 && !i.unlockHA2 && !hasHigherHA) attrOut += `* 𝙸𝚗𝚟𝚒𝚜𝚒́𝚟𝚎𝚕✓\n`;
+                if (i.unlockHA2 && !hasHigherHA) attrOut += `* 𝚅𝚒𝚜𝚒́𝚟𝚎𝚕✓\n`;
+                if (i.unlockHA3) attrOut += `* 𝙸𝚖𝚋𝚞𝚒𝚌̧𝚊̃𝚘✓\n`;
+                if (i.unlockHA4) attrOut += `* 𝙵𝚞𝚕𝚕 𝙱𝚘𝚍𝚢✓\n`;
+                if (i.unlockHA5) attrOut += `* 𝙴𝚖𝚒𝚜𝚜𝚊̃𝚘✓\n`;
+                if (i.unlockHA6) attrOut += `* 𝙰𝚟𝚊𝚗𝚌̧𝚊𝚍𝚘✓\n`;
+            }
         }
-        if (HO > 0) {
+        if (HO > 0 || window.isGeneratingManual) {
             let passiveHO = Math.round((HO + flatBonus.ho) * (1 + bonus.ho));
-            let totalHO = Math.round(
-                (passiveHO + itemFlat.ho) * (1 + itemBonus.ho),
-            );
+            let totalHO = Math.round((passiveHO + itemFlat.ho) * (1 + itemBonus.ho));
             let alcanceHO = Math.floor(totalHO / 10);
-            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚊 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘:_ ${strCalc(HO, bonus.ho, flatBonus.ho, itemBonus.ho, itemFlat.ho)} (${alcanceHO.toLocaleString("pt-BR")}m)\n`;
-            if (i.unlockHO2) attrOut += `- 𝙸𝚗𝚝𝚎𝚗𝚌̧𝚊̃𝚘✓\n`;
-            if (i.unlockHO3) attrOut += `- 𝙿𝚛𝚎𝚖𝚘𝚗𝚒𝚌̧𝚊̃𝚘✓\n`;
-            if (i.unlockHO4) attrOut += `- 𝙰𝚟𝚊𝚗𝚌̧𝚊𝚍𝚘✓\n`;
+            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚊 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘:_ ${HO > 0 ? strCalc(HO, bonus.ho, flatBonus.ho, itemBonus.ho, itemFlat.ho) + ` (${alcanceHO.toLocaleString("pt-BR")}m)` : ""}\n`;
+            if (window.isGeneratingManual) {
+                attrOut += `* 𝙸𝚗𝚝𝚎𝚗𝚌̧𝚊̃𝚘${i.unlockHO2 ? "✓" : "✘"}\n`;
+                attrOut += `* 𝙿𝚛𝚎𝚖𝚘𝚗𝚒𝚌̧𝚊̃𝚘${i.unlockHO3 ? "✓" : "✘"}\n`;
+                attrOut += `* 𝙰𝚟𝚊𝚗𝚌̧𝚊𝚍𝚘${i.unlockHO4 ? "✓" : "✘"}\n`;
+            } else {
+                if (i.unlockHO2) attrOut += `* 𝙸𝚗𝚝𝚎𝚗𝚌̧𝚊̃𝚘✓\n`;
+                if (i.unlockHO3) attrOut += `* 𝙿𝚛𝚎𝚖𝚘𝚗𝚒𝚌̧𝚊̃𝚘✓\n`;
+                if (i.unlockHO4) attrOut += `* 𝙰𝚟𝚊𝚗𝚌̧𝚊𝚍𝚘✓\n`;
+            }
         }
-        if (HR > 0) {
+        if (HR > 0 || window.isGeneratingManual) {
             let passiveHR = Math.round((HR + flatBonus.hr) * (1 + bonus.hr));
-            let totalHR = Math.round(
-                (passiveHR + itemFlat.hr) * (1 + itemBonus.hr),
-            );
+            let totalHR = Math.round((passiveHR + itemFlat.hr) * (1 + itemBonus.hr));
             let alcanceHR = Math.floor(totalHR / 10);
-            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝚁𝚎𝚒:_ ${strCalc(HR, bonus.hr, flatBonus.hr, itemBonus.hr, itemFlat.hr)}\n`;
-            if (i.unlockHR2) attrOut += `- 𝙳𝚘𝚖𝚒𝚗𝚊𝚌̧𝚊̃𝚘✓\n`;
-            if (i.unlockHR3) attrOut += `- 𝙸𝚗𝚌𝚊𝚙𝚊𝚌𝚒𝚝𝚊𝚌̧𝚊̃𝚘✓\n`;
-            if (i.unlockHR4)
-                attrOut += `- 𝙿𝚛𝚎𝚜𝚜𝚊̃𝚘✓ (${alcanceHR.toLocaleString("pt-BR")}m)\n`;
-            if (i.unlockHR5) attrOut += `- 𝙰𝚜𝚜𝚊𝚜𝚜𝚒𝚗𝚊𝚝𝚘 𝚍𝚎 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘✓\n`;
-            if (i.unlockHR6) attrOut += `- 𝙸𝚗𝚏𝚞𝚜𝚊̃𝚘✓\n`;
+            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝚁𝚎𝚒:_ ${HR > 0 ? strCalc(HR, bonus.hr, flatBonus.hr, itemBonus.hr, itemFlat.hr) : ""}\n`;
+            if (window.isGeneratingManual) {
+                attrOut += `* 𝙳𝚘𝚖𝚒𝚗𝚊𝚌̧𝚊̃𝚘${i.unlockHR2 ? "✓" : "✘"}\n`;
+                attrOut += `* 𝙸𝚗𝚌𝚊𝚙𝚊𝚌𝚒𝚝𝚊𝚌̧𝚊̃𝚘${i.unlockHR3 ? "✓" : "✘"}\n`;
+                attrOut += `* 𝙿𝚛𝚎𝚜𝚜𝚊̃𝚘${i.unlockHR4 ? "✓" : "✘"} ${HR > 0 ? `(${alcanceHR.toLocaleString("pt-BR")}m)` : ""}\n`;
+                attrOut += `* 𝙰𝚜𝚜𝚊𝚜𝚜𝚒𝚗𝚊𝚝𝚘 𝚍𝚎 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘${i.unlockHR5 ? "✓" : "✘"}\n`;
+                attrOut += `* 𝙸𝚗𝚏𝚞𝚜𝚊̃𝚘${i.unlockHR6 ? "✓" : "✘"}\n`;
+            } else {
+                if (i.unlockHR2) attrOut += `* 𝙳𝚘𝚖𝚒𝚗𝚊𝚌̧𝚊̃𝚘✓\n`;
+                if (i.unlockHR3) attrOut += `* 𝙸𝚗𝚌𝚊𝚙𝚊𝚌𝚒𝚝𝚊𝚌̧𝚊̃𝚘✓\n`;
+                if (i.unlockHR4) attrOut += `* 𝙿𝚛𝚎𝚜𝚜𝚊̃𝚘✓ (${alcanceHR.toLocaleString("pt-BR")}m)\n`;
+                if (i.unlockHR5) attrOut += `* 𝙰𝚜𝚜𝚊𝚜𝚜𝚒𝚗𝚊𝚝𝚘 𝚍𝚎 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘✓\n`;
+                if (i.unlockHR6) attrOut += `* 𝙸𝚗𝚏𝚞𝚜𝚊̃𝚘✓\n`;
+            }
         }
         attrOut += `\n`;
     }
 
-    if (AMI > 0) {
-        attrOut += `↠ *𝙰𝚔𝚞𝚖𝚊 𝚗𝚘 𝙼𝚒:* ${strCalc(AMI, bonus.ami, flatBonus.ami, itemBonus.ami, itemFlat.ami)}\n`;
+    if (AMI > 0 || (window.isGeneratingManual && (i.akumaNome && i.akumaNome !== "nenhuma"))) {
+        attrOut += `↠ *𝙰𝚔𝚞𝚖𝚊 𝚗𝚘 𝙼𝚒:* ${AMI > 0 ? strCalc(AMI, bonus.ami, flatBonus.ami, itemBonus.ami, itemFlat.ami) : ""}\n`;
         let despAdd = calcDespertarTotalGeral;
-        if (i.hasAmiAlc && aAlc > 0) {
-            let baseVal = aAlc + despAdd;
-            let calcAAlc = Math.round(
-                (Math.round((baseVal + flatBonus.amiAlc) * (1 + bonus.amiAlc)) +
-                    itemFlat.amiAlc) *
-                    (1 + itemBonus.amiAlc),
-            );
-            let mult =
-                parseFloat(
-                    (i.amiAlcMult || "1").toString().replace(",", "."),
-                ) || 1;
-            let metros = (calcAAlc / 20) * mult;
-            attrOut += `> _𝙰𝚕𝚌𝚊𝚗𝚌𝚎:_ ${strCalc(baseVal, bonus.amiAlc, flatBonus.amiAlc, itemBonus.amiAlc, itemFlat.amiAlc)} (${metros.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}m)\n`;
-        }
-        if (i.hasAmiDur && aDur > 0) {
-            let baseVal = aDur + despAdd;
-            let calcADur = Math.round(
-                (Math.round((baseVal + flatBonus.amiDur) * (1 + bonus.amiDur)) +
-                    itemFlat.amiDur) *
-                    (1 + itemBonus.amiDur),
-            );
-            let divisor = i.hasAmiDesp ? 1000 : 500;
-            let cenas = Math.floor(calcADur / divisor);
-            attrOut += `> _𝙳𝚞𝚛𝚊𝚋𝚒𝚕𝚒𝚍𝚊𝚍𝚎:_ ${strCalc(baseVal, bonus.amiDur, flatBonus.amiDur, itemBonus.amiDur, itemFlat.amiDur)} (${cenas} cena${cenas !== 1 ? "s" : ""})\n`;
-        }
-        if (i.hasAmiPot && aPot > 0) {
-            let baseVal = aPot + despAdd;
-            let calcAPotFinal = Math.round(
-                (Math.round((baseVal + flatBonus.amiPot) * (1 + bonus.amiPot)) +
-                    itemFlat.amiPot) *
-                    (1 + itemBonus.amiPot),
-            );
-            let strPotFinal = strCalc(
-                baseVal,
-                bonus.amiPot,
-                flatBonus.amiPot,
-                itemBonus.amiPot,
-                itemFlat.amiPot,
-            );
-            let amiResPctValFicha = parseInt(i.amiResPct) || 0;
-            if (amiResPctValFicha > 0) {
-                let resCalcFinal =
-                    calcAPotFinal +
-                    Math.floor(calcAPotFinal * (amiResPctValFicha / 100));
-                attrOut += `> _𝙿𝚘𝚝𝚎̂𝚗𝚌𝚒𝚊:_ ${strPotFinal} (${resCalcFinal.toLocaleString("pt-BR")} de Resistência)\n`;
-            } else {
-                attrOut += `> _𝙿𝚘𝚝𝚎̂𝚗𝚌𝚒𝚊:_ ${strPotFinal}\n`;
+        if (i.hasAmiAlc || window.isGeneratingManual) {
+            if (i.hasAmiAlc && aAlc > 0) {
+                let baseVal = aAlc + despAdd;
+                let calcAAlc = Math.round(((baseVal + flatBonus.amiAlc) * (1 + bonus.amiAlc) + itemFlat.amiAlc) * (1 + itemBonus.amiAlc));
+                let mult = parseFloat((i.amiAlcMult || "1").toString().replace(",", ".")) || 1;
+                let metros = (calcAAlc / 20) * mult;
+                attrOut += `> _𝙰𝚕𝚌𝚊𝚗𝚌𝚎:_ ${strCalc(baseVal, bonus.amiAlc, flatBonus.amiAlc, itemBonus.amiAlc, itemFlat.amiAlc)} (${metros.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}m)\n`;
+            } else if (window.isGeneratingManual) {
+                attrOut += `> _𝙰𝚕𝚌𝚊𝚗𝚌𝚎:_ \n`;
             }
         }
-        if (i.hasAmiVel && aVel > 0) {
-            let baseVal = aVel + despAdd;
-            let calcAVelFinalOut = Math.round(
-                (Math.round((baseVal + flatBonus.amiVel) * (1 + bonus.amiVel)) +
-                    itemFlat.amiVel) *
-                    (1 + itemBonus.amiVel),
-            );
-            let strVelFinal = strCalc(
-                baseVal,
-                bonus.amiVel,
-                flatBonus.amiVel,
-                itemBonus.amiVel,
-                itemFlat.amiVel,
-            );
-            let baseAkumaVelUIOut = Math.floor(
-                calcAVelFinalOut * (controlePct / 100),
-            );
-            let amiVelBuffValOut = parseInt(i.amiVelBuff) || 0;
-            if (amiVelBuffValOut > 0) {
-                let finalAkumaVelUIOut =
-                    baseAkumaVelUIOut +
-                    Math.floor(baseAkumaVelUIOut * (amiVelBuffValOut / 100));
-                attrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:_ ${strVelFinal} (${finalAkumaVelUIOut.toLocaleString("pt-BR")} de Velocidade Adicional)\n`;
-            } else {
-                attrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:_ ${strVelFinal} (${baseAkumaVelUIOut.toLocaleString("pt-BR")} de Velocidade Adicional)\n`;
+        if (i.hasAmiDur || window.isGeneratingManual) {
+            if (i.hasAmiDur && aDur > 0) {
+                let baseVal = aDur + despAdd;
+                let calcADur = Math.round(((baseVal + flatBonus.amiDur) * (1 + bonus.amiDur) + itemFlat.amiDur) * (1 + itemBonus.amiDur));
+                let divisor = i.hasAmiDesp ? 1000 : 500;
+                let cenas = Math.floor(calcADur / divisor);
+                attrOut += `> _𝙳𝚞𝚛𝚊𝚋𝚒𝚕𝚒𝚍𝚊𝚍𝚎:_ ${strCalc(baseVal, bonus.amiDur, flatBonus.amiDur, itemBonus.amiDur, itemFlat.amiDur)} (${cenas} cena${cenas !== 1 ? "s" : ""})\n`;
+            } else if (window.isGeneratingManual) {
+                attrOut += `> _𝙳𝚞𝚛𝚊𝚋𝚒𝚕𝚒𝚍𝚊𝚍𝚎:_ \n`;
             }
         }
-        if (aDesp > 0 || i.hasAmiDesp) {
-            let strDesp = strCalc(aDesp, bonus.amiDesp, flatBonus.amiDesp, itemBonus.amiDesp, itemFlat.amiDesp);
-            attrOut += `> _𝙳𝚎𝚜𝚙𝚎𝚛𝚝𝚊𝚛:_ ${strDesp}\n`;
+        if (i.hasAmiPot || window.isGeneratingManual) {
+            if (i.hasAmiPot && aPot > 0) {
+                let baseVal = aPot + despAdd;
+                let calcAPotFinal = Math.round(((baseVal + flatBonus.amiPot) * (1 + bonus.amiPot) + itemFlat.amiPot) * (1 + itemBonus.amiPot));
+                let strPotFinal = strCalc(baseVal, bonus.amiPot, flatBonus.amiPot, itemBonus.amiPot, itemFlat.amiPot);
+                let amiResPctValFicha = parseInt(i.amiResPct) || 0;
+                if (amiResPctValFicha > 0) {
+                    let resCalcFinal = calcAPotFinal + Math.floor(calcAPotFinal * (amiResPctValFicha / 100));
+                    attrOut += `> _𝙿𝚘𝚝𝚎̂𝚗𝚌𝚒𝚊:_ ${strPotFinal} (${resCalcFinal.toLocaleString("pt-BR")} de Resistência)\n`;
+                } else {
+                    attrOut += `> _𝙿𝚘𝚝𝚎̂𝚗𝚌𝚒𝚊:_ ${strPotFinal}\n`;
+                }
+            } else if (window.isGeneratingManual) {
+                attrOut += `> _𝙿𝚘𝚝𝚎̂𝚗𝚌𝚒𝚊:_ \n`;
+            }
         }
-        if (activeAmiStats > 0)
-            attrOut += `> _𝙲𝚘𝚗𝚝𝚛ᴏ𝚕𝚎:_ ${controlePct.toLocaleString("pt-BR")}%\n`;
+        if (i.hasAmiVel || window.isGeneratingManual) {
+            if (i.hasAmiVel && aVel > 0) {
+                let baseVal = aVel + despAdd;
+                let calcAVelFinalOut = Math.round(((baseVal + flatBonus.amiVel) * (1 + bonus.amiVel) + itemFlat.amiVel) * (1 + itemBonus.amiVel));
+                let strVelFinal = strCalc(baseVal, bonus.amiVel, flatBonus.amiVel, itemBonus.amiVel, itemFlat.amiVel);
+                let baseAkumaVelUIOut = Math.floor(calcAVelFinalOut * (controlePct / 100));
+                let amiVelBuffValOut = parseInt(i.amiVelBuff) || 0;
+                if (amiVelBuffValOut > 0) {
+                    let finalAkumaVelUIOut = baseAkumaVelUIOut + Math.floor(baseAkumaVelUIOut * (amiVelBuffValOut / 100));
+                    attrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:_ ${strVelFinal} (${finalAkumaVelUIOut.toLocaleString("pt-BR")} de Velocidade Adicional)\n`;
+                } else {
+                    attrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:_ ${strVelFinal} (${baseAkumaVelUIOut.toLocaleString("pt-BR")} de Velocidade Adicional)\n`;
+                }
+            } else if (window.isGeneratingManual) {
+                attrOut += `> _𝚅𝚎𝚕𝚘𝚌𝚒𝚍𝚊𝚍𝚎:_ \n`;
+            }
+        }
+        if (aDesp > 0 || i.hasAmiDesp || window.isGeneratingManual) {
+            if (aDesp > 0 || i.hasAmiDesp) {
+                let strDesp = strCalc(aDesp, bonus.amiDesp, flatBonus.amiDesp, itemBonus.amiDesp, itemFlat.amiDesp);
+                attrOut += `> _𝙳𝚎𝚜𝚙𝚎𝚛𝚝𝚊𝚛:_ ${strDesp}\n`;
+            } else {
+                attrOut += `> _𝙳𝚎𝚜𝚙𝚎𝚛𝚝𝚊𝚛:_ \n`;
+            }
+        }
+        if (activeAmiStats > 0 || window.isGeneratingManual) {
+            attrOut += `> _𝙲𝚘𝚗𝚝𝚛ᴏ𝚕𝚎:_ ${activeAmiStats > 0 ? controlePct.toLocaleString("pt-BR") : "0"}%\n`;
+        }
         attrOut += `\n`;
     }
 
@@ -8089,7 +8113,7 @@ function updateUI() {
 
     let outNpcsE = "";
     let listE = [...(i.npcsEspeciaisList || [])];
-    if (listE.length > 0) {
+    if (listE.length > 0 || window.isGeneratingManual) {
         let getDisplayClasses = (n) => {
             let maxLvl = {};
             [n.classe, n.classe2, n.classe3].forEach((c) => {
@@ -8121,42 +8145,40 @@ function updateUI() {
 
         ["Dominação", "Evento", "Extra-Narrada"].forEach((origem) => {
             let filtrados = listE.filter((n) => n.origem === origem);
-            if (filtrados.length > 0) {
-                filtrados.sort((a, b) => {
-                    let pA =
-                        parseInt(String(a.pontos || "").replace(/\D/g, "")) ||
-                        0;
-                    let pB =
-                        parseInt(String(b.pontos || "").replace(/\D/g, "")) ||
-                        0;
-                    if (pA !== pB) return pB - pA;
-                    let nA = (a.nome || "").toLowerCase();
-                    let nB = (b.nome || "").toLowerCase();
-                    return nA.localeCompare(nB);
-                });
+            if (filtrados.length > 0 || (window.isGeneratingManual && origem !== "Evento")) {
                 outNpcsE += `➾ ${origem === "Dominação" ? "𝐃𝐨𝐦𝐢𝐧𝐚𝐜̧𝐚̃𝐨" : origem === "Evento" ? "𝐄𝐯𝐞𝐧𝐭𝐨" : "𝐄𝐱𝐭𝐫𝐚-𝐍𝐚𝐫𝐫𝐚𝐝𝐚"}\n`;
-                filtrados.forEach((n, idx) => {
-                    let cleanPtsStr = String(n.pontos || "").replace(/\D/g, "");
-                    let ptsNum = parseInt(cleanPtsStr) || 0;
-                    let ptsStr = ptsNum.toLocaleString("pt-BR");
-                    let classStr = getDisplayClasses(n);
-
-                    let displayStr = "";
-                    if (classStr === "Sem Classe") {
-                        displayStr = ptsNum > 0 ? `${ptsStr} pontos` : "";
-                    } else {
-                        displayStr =
-                            ptsNum > 0
-                                ? `${classStr} - ${ptsStr} pontos`
-                                : classStr;
+                if (filtrados.length > 0) {
+                    filtrados.sort((a, b) => {
+                        let pA = parseInt(String(a.pontos || "").replace(/\D/g, "")) || 0;
+                        let pB = parseInt(String(b.pontos || "").replace(/\D/g, "")) || 0;
+                        if (pA !== pB) return pB - pA;
+                        let nA = (a.nome || "").toLowerCase();
+                        let nB = (b.nome || "").toLowerCase();
+                        return nA.localeCompare(nB);
+                    });
+                    filtrados.forEach((n, idx) => {
+                        let cleanPtsStr = String(n.pontos || "").replace(/\D/g, "");
+                        let ptsNum = parseInt(cleanPtsStr) || 0;
+                        let ptsStr = ptsNum.toLocaleString("pt-BR");
+                        let classStr = getDisplayClasses(n);
+                        let displayStr = "";
+                        if (classStr === "Sem Classe") {
+                            displayStr = ptsNum > 0 ? `${ptsStr} pontos` : "";
+                        } else {
+                            displayStr = ptsNum > 0 ? `${classStr} - ${ptsStr} pontos` : classStr;
+                        }
+                        if (displayStr === "") {
+                            outNpcsE += `${idx + 1}. ${n.nome || "Desconhecido"}\n`;
+                        } else {
+                            outNpcsE += `${idx + 1}. ${n.nome || "Desconhecido"} [${displayStr}]\n`;
+                        }
+                    });
+                }
+                if (window.isGeneratingManual && (origem === "Dominação" || origem === "Extra-Narrada") && filtrados.length < 3) {
+                    for(let j = filtrados.length + 1; j <= 3; j++) {
+                        outNpcsE += `${j}. \n`;
                     }
-
-                    if (displayStr === "") {
-                        outNpcsE += `${idx + 1}. ${n.nome || "Desconhecido"}\n`;
-                    } else {
-                        outNpcsE += `${idx + 1}. ${n.nome || "Desconhecido"} [${displayStr}]\n`;
-                    }
-                });
+                }
             }
         });
         outNpcsE = outNpcsE.trim();
@@ -9163,292 +9185,6 @@ HP: ${i.hpAtual.toLocaleString("pt-BR")} / ${totalHP.toLocaleString("pt-BR")}
 
 ${attrOut}${tecnicasOut}`;
 
-    let formatAlcunhaManual = (alcObj) => {
-        if (alcObj && alcObj.buffs && alcObj.buffs.length > 0) {
-            let names = {
-                tudo: "Todos os Atributos",
-                tudoAttr: "Todos os Atributos",
-                tudoEsp: "Todo o Espírito",
-                tudoAmi: "Toda a Akuma",
-                d: "Destreza",
-                f: "Força",
-                r: "Resistência",
-                v: "Velocidade",
-                refl: "Reflexo",
-                vcorp: "Vel. Corporal",
-                vAgua: "Velocidade (Água)",
-                reflAgua: "Reflexo (Água)",
-                vcorpAgua: "Vel. Corporal (Água)",
-                esp: "Espírito",
-                ha: "Haki do Armamento",
-                ho: "Haki da Observação",
-                hr: "Haki do Rei",
-                amiAlc: "Alcance",
-                amiDur: "Durabilidade",
-                amiPot: "Potência",
-                amiVel: "Velocidade",
-                amiDesp: "Despertar",
-                dano: "Dano Final",
-                ignRes: "Ignorar Resistência",
-                ignDanoGeral: "Ignorar Dano Geral",
-                ignDanoAmi: "Ignorar Dano Akuma",
-                redEstamina: "Redução de Estamina",
-            };
-            let condGroups = { "": [] };
-            alcObj.buffs.forEach((b) => {
-                let cName = b.cond && b.cond.trim() !== "" ? b.cond.trim() : "";
-                if (!condGroups[cName]) condGroups[cName] = [];
-                condGroups[cName].push(b);
-            });
-            let buildStringForGroup = (buffArray) => {
-                let buffGroups = {};
-                buffArray.forEach((b) => {
-                    let key =
-                        (b.val >= 0 ? "+" : "") +
-                        b.val +
-                        (b.type === "pct" ? "%" : "");
-                    if (!buffGroups[key]) buffGroups[key] = [];
-                    buffGroups[key].push(names[b.stat] || b.stat);
-                });
-                let buffStrings = [];
-                for (let k in buffGroups) {
-                    let items = buffGroups[k];
-                    let joined =
-                        items.length > 1
-                            ? items.slice(0, -1).join(", ") +
-                              " e " +
-                              items[items.length - 1]
-                            : items[0];
-                    buffStrings.push(`${k} em ${joined}`);
-                }
-                return `[${buffStrings.join("; ")}]`;
-            };
-            let lines = [];
-            if (condGroups[""].length > 0) {
-                lines.push(
-                    `${alcObj.nome} ${buildStringForGroup(condGroups[""])}`,
-                );
-            } else {
-                lines.push(`${alcObj.nome}`);
-            }
-            for (let cond in condGroups) {
-                if (cond !== "") {
-                    lines.push(
-                        `> - Quando '${cond}': ${buildStringForGroup(condGroups[cond])}`,
-                    );
-                }
-            }
-            return lines.join("\n");
-        }
-        return alcObj ? alcObj.nome : "";
-    };
-
-    let manualAlcunhaOut = "";
-    let manualAlcunhaAtiva =
-        i.alcunhasList && i.alcunhasList.length > 0 && i.alcunhaAtiva
-            ? formatAlcunhaManual(
-                  i.alcunhasList.find((a) => a.nome === i.alcunhaAtiva),
-              )
-            : "";
-    manualAlcunhaOut = manualAlcunhaAtiva;
-    let manualReservas = (i.alcunhasList || []).filter(
-        (a) => a.nome !== i.alcunhaAtiva,
-    );
-    manualAlcunhaOut += `\n\n  : ᓩ _𝐀ʟᴄᴜɴʜᴀs 𝐑ᴇsᴇʀᴠᴀs:_`;
-    if (manualReservas.length > 0) {
-        manualReservas.sort((a, b) => a.nome.localeCompare(b.nome));
-        manualAlcunhaOut +=
-            `\n` +
-            manualReservas.map((r) => `> ${formatAlcunhaManual(r)}`).join("\n");
-    } else {
-        manualAlcunhaOut += `\n> `;
-    }
-
-    let manualHistPersOut = "";
-    manualHistPersOut += `\n  : ᓩ _𝐏ᴇʀsᴏɴᴀʟɪᴅᴀᴅᴇ:_\n${i.personalidade && i.personalidade.trim() !== "" ? formatHistPers(i.personalidade) : "> "}\n`;
-    manualHistPersOut += `\n  : ᓩ _𝐇ɪsᴛᴏ́ʀɪᴀ:_\n${i.historia && i.historia.trim() !== "" ? formatHistPers(i.historia) : "> "}\n`;
-
-    let manualTecnicasOut = "";
-    let manualTecnicasOutCopy = "";
-    if (hasValidTecnica || trAcum > 0) {
-        manualTecnicasOut += "▬▬▬▬  [ 𝐓ᴇ́ᴄɴɪᴄᴀs ]  ▬▬▬▬\n\n";
-        manualTecnicasOut += `Treinos Acumulados: ${trAcum.toLocaleString("pt-BR")}\n\n`;
-        manualTecnicasOutCopy += "▬▬▬▬  [ 𝐓ᴇ́ᴄɴɪᴄᴀs ]  ▬▬▬▬\n\n";
-        manualTecnicasOutCopy += `Treinos Acumulados: ${trAcum.toLocaleString("pt-BR")}\n\n`;
-
-        let tecnicasOrdenadas = [...currentChar.tecnicasList].filter(
-            (t) => t.nome || t.desc || t.efeito,
-        );
-        if (i.ordemTecnicas !== "manual") {
-            tecnicasOrdenadas.sort((a, b) => {
-                let nA = (a.nome || "").trim().toLowerCase();
-                let nB = (b.nome || "").trim().toLowerCase();
-                return nA.localeCompare(nB);
-            });
-        }
-
-        let agrupadoManual = {};
-        tecnicasOrdenadas.forEach((t) => {
-            let stNome = "Sem Estilo";
-            if (t.estilo) {
-                if (availableStylesMap[t.estilo]) {
-                    stNome = availableStylesMap[t.estilo];
-                } else {
-                    let foundId = Object.keys(availableStylesMap).find(
-                        (k) => availableStylesMap[k] === t.estilo,
-                    );
-                    if (foundId) {
-                        stNome = availableStylesMap[foundId];
-                        t.estilo = foundId;
-                    }
-                }
-            }
-            if (!agrupadoManual[stNome]) agrupadoManual[stNome] = [];
-            agrupadoManual[stNome].push(t);
-        });
-
-        let estilosKeysManual = Object.keys(agrupadoManual).sort((a, b) => {
-            let aIsAmi = a === i.akumaNome;
-            let bIsAmi = b === i.akumaNome;
-            let aIsSem = a === "Sem Estilo";
-            let bIsSem = b === "Sem Estilo";
-
-            if (aIsAmi && !bIsAmi) return 1;
-            if (!aIsAmi && bIsAmi) return -1;
-            if (aIsSem && !bIsSem) return 1;
-            if (!aIsSem && bIsSem) return -1;
-
-            return a.localeCompare(b);
-        });
-
-        estilosKeysManual.forEach((stKey) => {
-            let stKeyContent = "";
-            let stKeyContentCopy = "";
-            agrupadoManual[stKey].forEach((t) => {
-                if (i.hideNaoTreinadas && t.naoTreinada) return;
-                if (i.showApenasNaoTreinadas && !t.naoTreinada) return;
-                let tContent = "";
-                let tContentCopy = "";
-                let unt = t.naoTreinada ? "~" : "";
-                let untCopy =
-                    t.naoTreinada && !i.showApenasNaoTreinadas ? "~" : "";
-
-                if (t.nome) {
-                    tContent += `* ${unt}${t.nome}${unt}\n`;
-                    tContentCopy += `* ${untCopy}${t.nome}${untCopy}\n`;
-                }
-                if (t.desc) {
-                    t.desc.split("\n").forEach((line) => {
-                        let trimLine = line.trim();
-                        if (trimLine !== "") {
-                            tContent += `> ${unt}${trimLine.replace(/^>\s*/, "")}${unt}\n`;
-                            tContentCopy += `> ${untCopy}${trimLine.replace(/^>\s*/, "")}${untCopy}\n`;
-                        }
-                    });
-                }
-                if (t.efeito) {
-                    t.efeito.split("\n").forEach((line, idx) => {
-                        let trimLine = line.trim();
-                        if (trimLine !== "") {
-                            if (idx === 0) {
-                                tContent += `> ${unt}Efeito: ${trimLine.replace(/^>\s*/, "")}${unt}\n`;
-                                tContentCopy += `> ${untCopy}Efeito: ${trimLine.replace(/^>\s*/, "")}${untCopy}\n`;
-                            } else {
-                                tContent += `> ${unt}${trimLine.replace(/^>\s*/, "")}${unt}\n`;
-                                tContentCopy += `> ${untCopy}${trimLine.replace(/^>\s*/, "")}${untCopy}\n`;
-                            }
-                        }
-                    });
-                }
-
-                if (tContent !== "") {
-                    stKeyContent += tContent + "\n";
-                    stKeyContentCopy += tContentCopy + "\n";
-                }
-            });
-
-            if (stKeyContent !== "") {
-                manualTecnicasOut += `« ${stKey} »\n` + stKeyContent;
-                manualTecnicasOutCopy += `« ${stKey} »\n` + stKeyContentCopy;
-            }
-        });
-
-        manualTecnicasOut += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;
-        manualTecnicasOutCopy += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;
-    } else {
-        manualTecnicasOut += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;
-        manualTecnicasOutCopy += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;
-    }
-
-    let outManual = `*Nᴇᴡ sᴇᴀs*
-— ロールプレイングゲーム - 𝚁𝙿𝙶 [𝙾𝙽𝙴 𝙿𝙸𝙴𝙲𝙴]
-     — 新しい海 - 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 ~*ɴꜱ*~
-                          ${isNPC ? "ᖴIᑕᕼᗩ ᗞᕮ ᘉᑭᑕ" : "ᖴIᑕᕼᗩ"}
-Iີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີີ່້ິູຸູິິ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊໊ີ້ີ້ີ້ີ້ີ້ິ້ິີີີີີີ່່່່່່້້້່ີ໌ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້ິ້໌໌໌ີ້ຼຼຼຼຼຼຼຼຼຼຼຼ໋໋໋໋໋໋໋໊໊໊໊໊
-  : ᓩ _𝐍ᴏᴍᴇ:_
-> ${currentChar.name || ""}
-
-  : ᓩ _𝐀ʟᴄᴜɴʜᴀ:_
-> ${manualAlcunhaOut}
-${recompensaOutText}
-  : ᓩ _𝐀ʟᴛᴜʀᴀ:_
-> ${i.altura || ""}
-
-  : ᓩ _𝐈ᴅᴀᴅᴇ:_
-> ${i.idade || ""}
-
-  : ᓩ _${i.linhagem && i.linhagem !== "Nenhuma" ? "𝐑ᴀᴄ̧ᴀ | 𝐋ɪɴʜᴀɢᴇᴍ" : "𝐑ᴀᴄ̧ᴀ"}:_
-> ${i.linhagem && i.linhagem !== "Nenhuma" ? racaOutput + " | " + displayLinhagem : racaOutput}
-
-  : ᓩ _𝐒ᴇxᴏ:_
-> ${i.sexo || ""}
-
-  : ᓩ _𝐒ᴀɴɢᴜᴇ:_
-> ${i.sangue || ""}
-${manualHistPersOut}
-  : ᓩ _𝐀ᴘᴀʀᴇ̂ɴᴄɪᴀ:_
-> ${i.aparencia || ""}
-
-  : ᓩ _𝐑ᴇᴄʀᴜᴛᴀᴅᴏ ᴘᴏʀ:_
-> ${i.recrutadoPor || ""}${currentDocId === "NPCS" || currentDocId === "NPCI" ? "" : `\n\n  : ᓩ _𝐈ᴅ:_\n> ${currentDocId || ""}`}${(parseInt(i.aliadosEspiritoContagiante) || 0) > 0 ? `\n\n  : ᓩ _𝐀ʟɪᴀᴅᴏs ᴄᴏᴍ 𝐄sᴘɪ́ʀɪᴛᴏ 𝐂ᴏɴᴛᴀɢɪᴀɴᴛᴇ:_\n> ${parseInt(i.aliadosEspiritoContagiante)}` : ""}
-
-  : ᓩ _𝐍ᴀᴄɪᴏɴᴀʟɪᴅᴀᴅᴇ:_
-> ${i.nacionalidade || ""}
-
-  : ᓩ _𝐋ᴏᴄᴀʟɪᴢᴀᴄ̧ᴀ̃ᴏ ᴀᴛᴜᴀʟ:_
-> ${i.localizacao || ""}
-
-▬▬▬▬▬▬▬▬▬▬▬▬
-
-  : ᓩ _Cʟᴀssᴇ(s):_
-1. *${c1Out}*
-2. *${c2Out}*
-3. *${c3Out}*
-4. *${c4Out}*
-5. *${c5Out}*
-
-${orgOut}
-  : ᓩ _𝐄sᴛɪʟᴏs ᴅᴇ ʟᴜᴛᴀ:_
-${estilosText.trim()}
-${berriesOutText}${npcsOutText}
-> _𝐈ɴᴠᴇɴᴛᴀ́ʀɪᴏ:_
-${inventarioFormatado}
-
-${habilidadesOut}  : ᓩ _𝐀ᴋᴜᴍᴀ ɴᴏ ᴍɪ:_
-> ${i.akumaNome || ""}
-
-▬▬▬▬  [ 𝐒ᴛᴀᴛᴜs ]  ▬▬▬▬
-HP: ${i.hpAtual.toLocaleString("pt-BR")} / ${totalHP.toLocaleString("pt-BR")}
-
-↠  *𝐀ᴛʀɪʙᴜᴛᴏs*
-* Base: ${totalBase.toLocaleString("pt-BR")}
-* Total: ${totalFinal.toLocaleString("pt-BR")}
-
-${manualAttrOut}${manualTecnicasOut}`;
-
-    window.copyDataFichaManual = outManual
-        .replace(manualTecnicasOut, manualTecnicasOutCopy)
-        .trim();
     window.copyDataAtributos =
         `▬▬▬▬  [ 𝐒ᴛᴀᴛᴜs ]  ▬▬▬▬\nHP: ${i.hpAtual.toLocaleString("pt-BR")} / ${totalHP.toLocaleString("pt-BR")}\n\n↠  *𝐀ᴛʀɪʙᴜᴛᴏs*\n* Base: ${totalBase.toLocaleString("pt-BR")}\n* Total: ${totalFinal.toLocaleString("pt-BR")}\n\n${attrOut}`.trim();
     window.copyDataTecnicas = tecnicasOutCopy.trim();
@@ -9485,7 +9221,51 @@ async function copyFicha() {
 }
 
 async function copyFichaManual() {
-    let text = window.copyDataFichaManual || "";
+    if (!currentChar || !currentChar.info) {
+        await customAlert("Nada para copiar!");
+        return;
+    }
+    let i = currentChar.info;
+    let oldHidePers = i.hidePersonality;
+    let oldHideHist = i.hideHistoria;
+    let oldHideSexo = i.hideSexo;
+    let oldHideGenero = i.hideGenero;
+    let oldHideTecNome = i.hideTecNome;
+    let oldHideTecDesc = i.hideTecDesc;
+    let oldHideTecEfeito = i.hideTecEfeito;
+    let oldHideNao = i.hideNaoTreinadas;
+    let oldShowApenas = i.showApenasNaoTreinadas;
+    let oldHiddenStyles = i.hiddenStyles;
+
+    i.hidePersonality = false;
+    i.hideHistoria = false;
+    i.hideSexo = false;
+    i.hideGenero = false;
+    i.hideTecNome = false;
+    i.hideTecDesc = false;
+    i.hideTecEfeito = false;
+    i.hideNaoTreinadas = false;
+    i.showApenasNaoTreinadas = false;
+    i.hiddenStyles = [];
+
+    window.isGeneratingManual = true;
+    updateUI();
+    let text = window.copyDataFichaPronta || "";
+    window.isGeneratingManual = false;
+
+    i.hidePersonality = oldHidePers;
+    i.hideHistoria = oldHideHist;
+    i.hideSexo = oldHideSexo;
+    i.hideGenero = oldHideGenero;
+    i.hideTecNome = oldHideTecNome;
+    i.hideTecDesc = oldHideTecDesc;
+    i.hideTecEfeito = oldHideTecEfeito;
+    i.hideNaoTreinadas = oldHideNao;
+    i.showApenasNaoTreinadas = oldShowApenas;
+    i.hiddenStyles = oldHiddenStyles;
+
+    updateUI();
+
     if (!text) {
         await customAlert("Nada para copiar!");
         return;
