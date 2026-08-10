@@ -2015,13 +2015,20 @@ function runFallbackChecks() {
         delete charData.stats;
         delete charData.substats;
     }
+
     if (charData.pcs.length === 0) {
         charData.pcs.push({ pc: createEmptyChar(false), npcs: [] });
     }
-
     charData.pcs.forEach((pObj) => {
-        let charsToCheck = [pObj.pc, ...pObj.npcs];
+        if (!pObj) return;
+        if (!pObj.npcs) pObj.npcs = [];
+        let charsToCheck = [];
+        if (pObj.pc) charsToCheck.push(pObj.pc);
+        if (Array.isArray(pObj.npcs)) {
+            pObj.npcs.forEach(npc => { if (npc) charsToCheck.push(npc); });
+        }
         charsToCheck.forEach((c) => {
+            if (!c) return;
             if (!c.info) c.info = {};
             if (typeof c.info.recompensa === "string")
                 c.info.recompensa =
@@ -9139,8 +9146,8 @@ ${recompensaOutText}
   : ᓩ _𝐈ᴅᴀᴅᴇ:_
 > ${i.idade || "(Mínimo: 15)"}
 
-  : ᓩ _${i.linhagem && i.linhagem !== "Nenhuma" ? "𝐑ᴀᴄ̧ᴀ | 𝐋ɪɴʜᴀɢᴇᴍ" : "𝐑ᴀᴄ̧ᴀ"}:_
-> ${i.linhagem && i.linhagem !== "Nenhuma" ? racaOutput + " | " + displayLinhagem : racaOutput}
+  : ᓩ _${(i.linhagem && i.linhagem !== "Nenhuma") || !i.raca ? "𝐑ᴀᴄ̧ᴀ | 𝐋ɪɴʜᴀɢᴇᴍ" : "𝐑ᴀᴄ̧ᴀ"}:_
+> ${(!i.raca && (!i.linhagem || i.linhagem === "Nenhuma")) ? "" : ((i.linhagem && i.linhagem !== "Nenhuma") ? (racaOutput ? racaOutput + " | " : " | ") + displayLinhagem : racaOutput)}
 ${sexoGeneroOut}
   : ᓩ _𝐒ᴀɴɢᴜᴇ:_
 > ${i.sangue || ""}
