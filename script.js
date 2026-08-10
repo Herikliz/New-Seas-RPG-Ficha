@@ -8330,8 +8330,13 @@ function updateUI() {
         tecnicasOut += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;
         tecnicasOutCopy += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;
     } else {
-        tecnicasOut += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;
-        tecnicasOutCopy += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;
+        if (window.isGeneratingManual) {
+            tecnicasOut += `▬▬▬▬  [ 𝐓ᴇ́ᴄɴɪᴄᴀs ]  ▬▬▬▬\n\nTreinos Acumulados: 0\n\n« Sem Estilo »\n* Nome da Técnica\n> Descrição da Técnica\n> Efeito: \n«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;
+            tecnicasOutCopy += `▬▬▬▬  [ 𝐓ᴇ́ᴄɴɪᴄᴀs ]  ▬▬▬▬\n\nTreinos Acumulados: 0\n\n« Sem Estilo »\n* Nome da Técnica\n> Descrição da Técnica\n> Efeito: \n\n«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;
+        } else {
+            tecnicasOut += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;
+            tecnicasOutCopy += `«▬▬▬▬▬▬  [ 𝙽𝚎𝚠 𝚂𝚎𝚊𝚜 𝙾𝙿 𝚁𝙿𝙶 ]  ▬▬▬▬▬▬»`;
+        }
     }
 
     let orgOut = "";
@@ -8386,14 +8391,14 @@ function updateUI() {
     if (totalFinal >= 5000) {
         let e3 = formatStyle(3);
         if (e3) estilosText += `* ${e3}\n`;
-        else estilosText += `* (Vazio)\n`;
+        else estilosText += `* ${window.isGeneratingManual ? "" : "(Vazio)"}\n`;
     } else {
         estilosText += `* 🔒 (Libera com 5.000)\n`;
     }
     if (totalFinal >= 10000) {
         let e4 = formatStyle(4);
         if (e4) estilosText += `* ${e4}\n`;
-        else estilosText += `* (Vazio)\n`;
+        else estilosText += `* ${window.isGeneratingManual ? "" : "(Vazio)"}\n`;
     } else {
         estilosText += `* 🔒 (Libera com 10.000)\n`;
     }
@@ -8431,8 +8436,8 @@ function updateUI() {
 
     let alcunhaOut = "";
     if (!i.alcunhasList || i.alcunhasList.length === 0) {
-        alcunhaOut = "🔒";
-    } else if (i.alcunhaAtiva) {
+        alcunhaOut = "🔒" + (window.isGeneratingManual ? "\n\n  : ᓩ _𝐀ʟᴄᴜɴʜᴀs 𝐑ᴇsᴇʀᴠᴀs:_\n> 🔒" : "");
+    } else {
         let formatAlcunha = (alcObj) => {
             if (alcObj && alcObj.buffs && alcObj.buffs.length > 0) {
                 let names = {
@@ -8525,6 +8530,8 @@ function updateUI() {
             alcunhaOut +=
                 `\n\n  : ᓩ _${title}:_\n` +
                 reservas.map((r) => `> ${formatAlcunha(r)}`).join("\n");
+        } else if (window.isGeneratingManual) {
+            alcunhaOut += `\n\n  : ᓩ _𝐀ʟᴄᴜɴʜᴀs 𝐑ᴇsᴇʀᴠᴀs:_\n> 🔒`;
         }
     }
 
@@ -9175,7 +9182,7 @@ ${histPersOut}
 
 ${orgOut}
   : ᓩ _𝐄sᴛɪʟᴏs ᴅᴇ ʟᴜᴛᴀ:_
-${estilosText.trim()}
+${estilosText.replace(/\n$/, "")}
 ${berriesOutText}${npcsOutText}
 > _𝐈ɴᴠᴇɴᴛᴀ́ʀɪᴏ:_
 ${inventarioFormatado}
