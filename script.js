@@ -5794,14 +5794,20 @@ function updateUI() {
     let mandHab = linhagemHabilidades[ln] ? [...linhagemHabilidades[ln]] : [];
     if (rc === "Bucaneiro") mandHab.push("Constituição Única");
     if (rc === "Lunariano") mandHab.push("Fúria Ardente");
-    if (rc === "Oni") mandHab.push("Contração Muscular");
+    if (rc === "Oni") mandHab.push("Contra o Muscular");
     if (i.linhagem === "Charlotte") {
         if (rc2 === "Bucaneiro") mandHab.push("Constituição Única");
         if (rc2 === "Lunariano") mandHab.push("Fúria Ardente");
-        if (rc2 === "Oni") mandHab.push("Contração Muscular");
+        if (rc2 === "Oni") mandHab.push("Contra o Muscular");
     }
-
+    let todasMandatorias = ["Constituição Única", "Fúria Ardente", "Contra o Muscular"];
+    for (let l in linhagemHabilidades) {
+        linhagemHabilidades[l].forEach(h => {
+            if (!todasMandatorias.includes(h)) todasMandatorias.push(h);
+        });
+    }
     let currentList = i.habilidadesExclusivas || [];
+    currentList = currentList.filter(h => !todasMandatorias.includes(h) || mandHab.includes(h));
     mandHab.forEach((h) => {
         if (!currentList.includes(h)) currentList.push(h);
     });
