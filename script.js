@@ -5800,14 +5800,32 @@ function updateUI() {
         if (rc2 === "Lunariano") mandHab.push("Fúria Ardente");
         if (rc2 === "Oni") mandHab.push("Contra o Muscular");
     }
-    let todasMandatorias = ["Constituição Única", "Fúria Ardente", "Contra o Muscular"];
-    for (let l in linhagemHabilidades) {
-        linhagemHabilidades[l].forEach(h => {
-            if (!todasMandatorias.includes(h)) todasMandatorias.push(h);
-        });
-    }
+    
     let currentList = i.habilidadesExclusivas || [];
-    currentList = currentList.filter(h => !todasMandatorias.includes(h) || mandHab.includes(h));
+    
+    if (i.lastRaca !== undefined || i.lastLinhagem !== undefined) {
+        let oldRc = i.lastRaca || "";
+        let oldRc2 = i.lastRaca2 || "";
+        let oldLn = i.lastLinhagem || "";
+
+        if (oldRc !== rc || oldRc2 !== rc2 || oldLn !== ln) {
+            let oldMand = linhagemHabilidades[oldLn] ? [...linhagemHabilidades[oldLn]] : [];
+            if (oldRc === "Bucaneiro") oldMand.push("Constituição Única");
+            if (oldRc === "Lunariano") oldMand.push("Fúria Ardente");
+            if (oldRc === "Oni") oldMand.push("Contra o Muscular");
+            if (oldLn === "Charlotte") {
+                if (oldRc2 === "Bucaneiro") oldMand.push("Constituição Única");
+                if (oldRc2 === "Lunariano") oldMand.push("Fúria Ardente");
+                if (oldRc2 === "Oni") oldMand.push("Contra o Muscular");
+            }
+            currentList = currentList.filter(h => !oldMand.includes(h) || mandHab.includes(h));
+        }
+    }
+
+    i.lastRaca = rc;
+    i.lastRaca2 = rc2;
+    i.lastLinhagem = ln;
+
     mandHab.forEach((h) => {
         if (!currentList.includes(h)) currentList.push(h);
     });
