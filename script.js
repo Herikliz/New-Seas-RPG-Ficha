@@ -9184,10 +9184,7 @@ ${sexoGeneroOut}
 > ${i.sangue || ""}
 ${histPersOut}
   : ᓩ _𝐀ᴘᴀʀᴇ̂ɴᴄɪᴀ:_
-> ${i.aparencia || ""}
-
-  : ᓩ _𝐑ᴇᴄʀᴜᴛᴀᴅᴏ ᴘᴏʀ:_
-> ${i.recrutadoPor || ""}${currentDocId === "NPCS" || currentDocId === "NPCI" ? "" : `\n\n  : ᓩ _𝐈ᴅ:_\n> ${currentDocId || ""}`}${(parseInt(i.aliadosEspiritoContagiante) || 0) > 0 ? `\n\n  : ᓩ _𝐀ʟɪᴀᴅᴏs ᴄᴏᴍ 𝐄sᴘɪ́ʀɪᴛᴏ 𝐂ᴏɴᴛᴀɢɪᴀɴᴛᴇ:_\n> ${parseInt(i.aliadosEspiritoContagiante)}` : ""}
+> ${i.aparencia || ""}${(!i.recrutadoPor || i.recrutadoPor.trim() === "") && !window.isGeneratingManual ? "" : `\n\n  : ᓩ _𝐑ᴇᴄʀᴜᴛᴀᴅᴏ ᴘᴏʀ:_\n> ${i.recrutadoPor || ""}`}${currentDocId === "NPCS" || currentDocId === "NPCI" ? "" : `\n\n  : ᓩ _𝐈ᴅ:_\n> ${currentDocId || ""}`}${((parseInt(i.aliadosEspiritoContagiante) || 0) > 0 || window.isGeneratingManual) ? `\n\n  : ᓩ _𝐀ʟɪᴀᴅᴏs ᴄᴏᴍ 𝐄sᴘɪ́ʀɪᴛᴏ 𝐂ᴏɴᴛᴀɢɪᴀɴᴛᴇ:_\n> ${(parseInt(i.aliadosEspiritoContagiante) || 0) > 0 ? parseInt(i.aliadosEspiritoContagiante) : ""}` : ""}
 
   : ᓩ _𝐍ᴀᴄɪᴏɴᴀʟɪᴅᴀᴅᴇ:_
 > ${i.nacionalidade || "Desconhecida"}
