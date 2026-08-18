@@ -562,6 +562,7 @@ const linhagemHabilidades = {
     "Kozuki": ["Favoritismo Armista"],
     "Laufey": ["Constituição Única", "Vontade Inabalável"],
     "Mokomo": ["Vontade Inabalável"],
+    "Nefertari": ["Vontade Inabalável"],
     "Neptune": ["Filho do Mar", "Flexibilidade"],
     "Newgate": ["Contração Muscular", "Espírito Contagiante"],
     "Sakazuki": ["Fúria Ardente"],
