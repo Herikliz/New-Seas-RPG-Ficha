@@ -4395,10 +4395,13 @@ function updateUI() {
                 tBonus.r += racas[tempRc].r || 0;
                 tBonus.v += racas[tempRc].v || 0;
             } else if (currentChar.isNPC && tempRc === "Outra") {
-                tBonus.f += (parseInt(i.customBuffF) || 0) / 100;
-                tBonus.d += (parseInt(i.customBuffD) || 0) / 100;
-                tBonus.r += (parseInt(i.customBuffR) || 0) / 100;
-                tBonus.v += (parseInt(i.customBuffV) || 0) / 100;
+                (i.customRaceBuffs || []).forEach(b => {
+                    let val = parseInt(b.val) || 0;
+                    if (val !== 0) {
+                        if (b.type === "pct" && tBonus[b.stat] !== undefined) tBonus[b.stat] += val / 100;
+                        else if (b.type === "flat" && tFlat[b.stat] !== undefined) tFlat[b.stat] += val;
+                    }
+                });
             }
             if (tempRc === "Humano") {
                 tBonus[i.selDF] += 0.2;
@@ -4417,14 +4420,14 @@ function updateUI() {
                             tBonus[s] += racas[rName][s];
                     }
                 } else if (currentChar.isNPC && rName === "Outra") {
-                    tBonus.f +=
-                        (parseInt(i["customBuffF" + suffix]) || 0) / 100;
-                    tBonus.d +=
-                        (parseInt(i["customBuffD" + suffix]) || 0) / 100;
-                    tBonus.r +=
-                        (parseInt(i["customBuffR" + suffix]) || 0) / 100;
-                    tBonus.v +=
-                        (parseInt(i["customBuffV" + suffix]) || 0) / 100;
+                    let fieldList = suffix === "2" ? "customRaceBuffs2" : "customRaceBuffs";
+                    (i[fieldList] || []).forEach(b => {
+                        let val = parseInt(b.val) || 0;
+                        if (val !== 0) {
+                            if (b.type === "pct" && tBonus[b.stat] !== undefined) tBonus[b.stat] += val / 100;
+                            else if (b.type === "flat" && tFlat[b.stat] !== undefined) tFlat[b.stat] += val;
+                        }
+                    });
                 }
                 if (selVal && tBonus[selVal] !== undefined) {
                     if (rName === "Humano") tBonus[selVal] += 0.2;
