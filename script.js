@@ -4321,12 +4321,17 @@ function updateUI() {
         if (berEl && berEl.value !== fmtBerries) berEl.value = fmtBerries;
     }
 
-    let D = currentChar.stats.d,
-        F = currentChar.stats.f,
-        R = currentChar.stats.r,
-        V = currentChar.stats.v;
-    let totalBase = D + F + R + V;
+    let D = currentChar.stats.d || 0,
+        F = currentChar.stats.f || 0,
+        R = currentChar.stats.r || 0,
+        V = currentChar.stats.v || 0;
 
+    currentChar.stats.d = D;
+    currentChar.stats.f = F;
+    currentChar.stats.r = R;
+    currentChar.stats.v = V;
+
+    let totalBase = D + F + R + V;
     let totalFinal = totalBase;
     let finalHA = 0,
         finalHO = 0,
@@ -6127,9 +6132,13 @@ function updateUI() {
     statFields.forEach((f) => {
         let el = document.getElementById("stat-" + f);
         if (el) {
-            let formatted = currentChar.stats[f]
-                ? currentChar.stats[f].toLocaleString("pt-BR")
-                : "";
+            let val = currentChar.stats[f] || 0;
+            let formatted = "";
+            if (f === "esp" || f === "ami") {
+                formatted = val ? val.toLocaleString("pt-BR") : "";
+            } else {
+                formatted = val.toLocaleString("pt-BR");
+            }
             if (el.value !== formatted) el.value = formatted;
         }
     });
