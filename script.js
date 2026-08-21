@@ -3304,8 +3304,25 @@ function updateField(category, field, value) {
         renderTabs();
     } else {
         currentChar[category][field] = value;
+        if (field === 'classe') {
+            currentChar[category]['classe2'] = "";
+            currentChar[category]['classe3'] = "";
+            currentChar[category]['classe4'] = "";
+            currentChar[category]['classe5'] = "";
+        }
+        if (field === 'classe2') {
+            currentChar[category]['classe3'] = "";
+            currentChar[category]['classe4'] = "";
+            currentChar[category]['classe5'] = "";
+        }
+        if (field === 'classe3') {
+            currentChar[category]['classe4'] = "";
+            currentChar[category]['classe5'] = "";
+        }
+        if (field === 'classe4') {
+            currentChar[category]['classe5'] = "";
+        }
     }
-
     saveData();
     updateUI();
     if (
@@ -4782,18 +4799,65 @@ function updateUI() {
             else if (i.patente.startsWith("Capitão Tático de "))
                 baseCurrentPatente = "Capitão Tático";
         }
-
         let currentIdx = rankOrder.indexOf(baseCurrentPatente);
+
+        while (currentIdx !== -1 && currentIdx < rankOrder.length - 1) {
+            let checkNextRank = rankOrder[currentIdx + 1];
+            let checkPtsReq = 0;
+            let checkMeritReq = 0;
+
+            if (["Almirante-de-Frota", "Eixo"].includes(checkNextRank)) {
+                checkMeritReq = Infinity;
+            }
+
+            if (orgTipo === "Marinha") {
+                let reqs = { Recruta: 1000, Cabo: 2000, Sargento: 3000, Tenente: 5000, Comandante: 10000, Capitão: 15000, Comodoro: 20000, "Contra-Almirante": 25000, "Vice-Almirante": 30000, Almirante: 45000, "Almirante-de-Frota": 50000 };
+                checkPtsReq = reqs[checkNextRank] * modifier;
+                if (checkNextRank === "Vice-Almirante") checkMeritReq = modifier === 0.9 ? 8 : modifier === 1.1 ? 12 : 10;
+                if (checkNextRank === "Almirante") checkMeritReq = modifier === 0.9 ? 16 : modifier === 1.1 ? 20 : 18;
+            } else if (orgTipo === "Governo Mundial") {
+                let reqs = { "CP-1": 2500, "CP-2": 5000, "CP-3": 7500, "CP-4": 10000, "CP-5": 15000, "CP-6": 20000, "CP-7": 25000, "CP-8": 30000, "CP-9": 40000, "CP-0": 50000 };
+                checkPtsReq = reqs[checkNextRank] * modifier;
+                if (checkNextRank === "CP-8") checkMeritReq = modifier === 0.9 ? 8 : modifier === 1.1 ? 12 : 10;
+                if (checkNextRank === "CP-9") checkMeritReq = modifier === 0.9 ? 16 : modifier === 1.1 ? 20 : 18;
+                if (checkNextRank === "CP-0") checkMeritReq = modifier === 0.9 ? 24 : modifier === 1.1 ? Infinity : 26;
+            } else if (orgTipo === "Vanguarda Popular Revolucionária") {
+                let reqs = { Operador: 1000, Infiltrador: 2500, "Soldado Revolucionário": 5000, "Coordenador De Operações": 10000, Esquadrão: 15000, "Comandante Tático": 20000, "Capitão Tático": 25000, Pilar: 30000, "Vice-Líder": 30000, Eixo: 30000 };
+                checkPtsReq = reqs[checkNextRank];
+                if (checkNextRank === "Capitão Tático") checkMeritReq = 6;
+                if (checkNextRank === "Pilar") checkMeritReq = 10;
+                if (checkNextRank === "Vice-Líder") checkMeritReq = 18;
+            }
+
+            if (currentPts >= checkPtsReq && checkMeritReq === 0) {
+                if (orgTipo === "Vanguarda Popular Revolucionária") {
+                    if (checkNextRank === "Esquadrão") i.patente = "Esquadrão de Combate";
+                    else if (checkNextRank === "Comandante Tático") i.patente = "Comandante Tático de Combate";
+                    else if (checkNextRank === "Capitão Tático") i.patente = "Capitão Tático de Combate";
+                    else i.patente = checkNextRank;
+                } else {
+                    i.patente = checkNextRank;
+                }
+                baseCurrentPatente = checkNextRank;
+                currentIdx++;
+            } else {
+                break;
+            }
+        }
+
         let nextRank =
             currentIdx !== -1 && currentIdx < rankOrder.length - 1
                 ? rankOrder[currentIdx + 1]
                 : null;
         let prevRank = currentIdx > 0 ? rankOrder[currentIdx - 1] : null;
-
         let ptsReq = 0;
         let meritReq = 0;
 
         if (nextRank) {
+            if (["Almirante-de-Frota", "Eixo"].includes(nextRank)) {
+                meritReq = Infinity;
+            }
+
             if (orgTipo === "Marinha") {
                 let reqs = {
                     Recruta: 1000,
@@ -4815,7 +4879,6 @@ function updateUI() {
                 if (nextRank === "Almirante")
                     meritReq =
                         modifier === 0.9 ? 16 : modifier === 1.1 ? 20 : 18;
-                if (nextRank === "Almirante-de-Frota") meritReq = 0;
             } else if (orgTipo === "Governo Mundial") {
                 let reqs = {
                     "CP-1": 2500,
@@ -4862,21 +4925,23 @@ function updateUI() {
                 if (nextRank === "Vice-Líder") meritReq = 18;
             }
         }
-
         let btn = document.getElementById("btn-promover");
         if (nextRank) {
-            btn.style.display = "block";
-            btn.dataset.nextRank = nextRank;
-            btn.dataset.meritReq = meritReq;
-            if (currentPts >= ptsReq) {
-                btn.disabled =
-                    i.merito < meritReq &&
-                    nextRank !== "Almirante-de-Frota" &&
-                    nextRank !== "Eixo";
-                btn.dataset.needsSuperAdmin = "false";
+            if (isSuperAdmin || meritReq > 0) {
+                btn.style.display = "block";
+                btn.dataset.nextRank = nextRank;
+                btn.dataset.meritReq = meritReq === Infinity ? 0 : meritReq;
+                if (isSuperAdmin) {
+                    btn.disabled = false;
+                } else {
+                    if (currentPts >= ptsReq) {
+                        btn.disabled = meritReq === Infinity || i.merito < meritReq;
+                    } else {
+                        btn.disabled = true;
+                    }
+                }
             } else {
-                btn.disabled = false;
-                btn.dataset.needsSuperAdmin = "true";
+                btn.style.display = "none";
             }
         } else {
             btn.style.display = "none";
@@ -5057,7 +5122,12 @@ function updateUI() {
     classSlots.forEach((slot) => {
         let el = document.getElementById("info-" + slot.id);
         let hasClassAssigned = i[slot.id] && i[slot.id] !== "";
-        if (isSuperAdmin || totalFinal >= slot.req || hasClassAssigned) {
+        let prevClassFilled = true;
+        if (slot.id === "classe2" && (!i.classe || i.classe === "")) prevClassFilled = false;
+        if (slot.id === "classe3" && (!i.classe2 || i.classe2 === "")) prevClassFilled = false;
+        if (slot.id === "classe4" && (!i.classe3 || i.classe3 === "")) prevClassFilled = false;
+        if (slot.id === "classe5" && (!i.classe4 || i.classe4 === "")) prevClassFilled = false;
+        if ((isSuperAdmin || totalFinal >= slot.req || hasClassAssigned) && prevClassFilled) {
             el.disabled = isReadOnly ? true : false;
             let html = `<option value="">-- Selecione --</option>`;
 
@@ -5114,7 +5184,8 @@ function updateUI() {
                 if (!isSuperAdmin && !hasClassAssigned) i[slot.id] = "";
             }
         } else {
-            el.innerHTML = `<option value="">🔒 Requer ${slot.req.toLocaleString("pt-BR")}</option>`;
+            let failMsg = !prevClassFilled ? "🔒Preencha o nível anterior" : `🔒Requer ${slot.req.toLocaleString("pt-BR")}`;
+            el.innerHTML = `<option value="">${failMsg}</option>`;
             el.disabled = true;
             i[slot.id] = "";
         }
