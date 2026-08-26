@@ -386,6 +386,7 @@ const akumasFixas = {
         "Ryū Ryū no Mi, Modelo: Espinossauro",
         "Ryū Ryū no Mi, Modelo: Paquicefalossauro",
         "Ryū Ryū no Mi, Modelo: Pteranodonte",
+        "Ryū Ryū no Mi, Modelo: Tiranossauro Rex",
         "Ryū Ryū no Mi, Modelo: Triceratops",
         "Zou Zou no Mi, Modelo: Mamute",
     ],
