@@ -435,15 +435,38 @@
                         </div>
                         <div id="wrapper-boxEsp" class="box-content">
                             <div style="margin-bottom: 10px;">
-                                <label style="font-size: 10px;">Espírito Base</label>
-                                <input type="text" id="stat-esp" placeholder="🔒 Bloqueado" disabled oninput="formatAndSave('stats', 'esp', this)" style="font-size: 16px; font-weight: bold; font-family: 'Cinzel', serif; text-align: right;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <label style="font-size: 10px;">Espírito Base</label>
+                                </div>
+                                <input type="text" id="stat-esp" placeholder="  Bloqueado" disabled oninput="formatAndSave('stats', 'esp', this)" style="font-size: 16px; font-weight: bold; font-family: 'Cinzel', serif; text-align: right;">
                                 <span id="total-esp" class="attr-total" style="display:block; text-align:right;">Total: 0</span>
                             </div>
                             <div id="box-haki" style="display:none; padding-top:10px; border-top: 1px dashed #444;">
                                 <div style="display:flex; gap: 10px; margin-bottom: 5px;">
-                                    <div style="flex:1"><label style="font-size: 10px;">Armamento</label><input type="text" id="sub-hArm" placeholder="0" oninput="formatAndSave('substats', 'hArm', this)"></div>
-                                    <div style="flex:1"><label style="font-size: 10px;">Observação</label><input type="text" id="sub-hObs" placeholder="0" oninput="formatAndSave('substats', 'hObs', this)"></div>
-                                    <div style="flex:1"><label style="font-size: 10px;">Rei</label><input type="text" id="sub-hRei" placeholder="0" oninput="formatAndSave('substats', 'hRei', this)"></div>
+                                    <div style="flex:1">
+                                        <label style="font-size: 10px; display:block;">Armamento</label>
+                                        <div style="display:flex; justify-content:flex-end; align-items:center; gap: 4px; margin-bottom: 2px;">
+                                            <label style="font-size: 9px; color: var(--warning); margin:0;">Trancar</label>
+                                            <input type="checkbox" id="chk-lockHArm" onchange="toggleLockHaki('hArm', this.checked)" style="width:auto; margin:0;">
+                                        </div>
+                                        <input type="text" id="sub-hArm" placeholder="0" oninput="formatAndSave('substats', 'hArm', this)">
+                                    </div>
+                                    <div style="flex:1">
+                                        <label style="font-size: 10px; display:block;">Observação</label>
+                                        <div style="display:flex; justify-content:flex-end; align-items:center; gap: 4px; margin-bottom: 2px;">
+                                            <label style="font-size: 9px; color: var(--warning); margin:0;">Trancar</label>
+                                            <input type="checkbox" id="chk-lockHObs" onchange="toggleLockHaki('hObs', this.checked)" style="width:auto; margin:0;">
+                                        </div>
+                                        <input type="text" id="sub-hObs" placeholder="0" oninput="formatAndSave('substats', 'hObs', this)">
+                                    </div>
+                                    <div style="flex:1">
+                                        <label style="font-size: 10px; display:block;">Rei</label>
+                                        <div style="display:flex; justify-content:flex-end; align-items:center; gap: 4px; margin-bottom: 2px;">
+                                            <label style="font-size: 9px; color: var(--warning); margin:0;">Trancar</label>
+                                            <input type="checkbox" id="chk-lockHRei" onchange="toggleLockHaki('hRei', this.checked)" style="width:auto; margin:0;">
+                                        </div>
+                                        <input type="text" id="sub-hRei" placeholder="0" oninput="formatAndSave('substats', 'hRei', this)">
+                                    </div>
                                 </div>
                                 <div id="avisoEsp" class="avisoErro"></div>
                                 <div style="margin-top:15px; display:grid; grid-template-columns: 1fr 1fr 1fr; font-size:11px; border-top: 1px dashed #444; padding-top: 15px;">

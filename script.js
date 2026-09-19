@@ -2205,6 +2205,10 @@ function runFallbackChecks() {
                 unlockHR4: false,
                 unlockHR5: false,
                 unlockHR6: false,
+                lockEsp: false,
+                lockHArm: false,
+                lockHObs: false,
+                lockHRei: false,
                 zoanBuffF: 0,
                 zoanBuffD: 0,
                 zoanBuffR: 0,
@@ -2273,6 +2277,13 @@ window.toggleBox = function (id) {
 window.toggleBox = function (id) {
     if (!currentChar) return;
     currentChar.info[id] = !currentChar.info[id];
+    saveData();
+    updateUI();
+};
+
+window.toggleLockHaki = function (type, isChecked) {
+    if (isReadOnly) return;
+    currentChar.info['lock' + type.charAt(0).toUpperCase() + type.slice(1)] = isChecked;
     saveData();
     updateUI();
 };
@@ -4083,6 +4094,10 @@ function updateUI() {
     }
 
     const checkFields = [
+        "lockEsp",
+        "lockHArm",
+        "lockHObs",
+        "lockHRei",
         "unlockHA1",
         "unlockHA2",
         "unlockHA3",
@@ -6722,6 +6737,36 @@ function updateUI() {
         if (el && el.checked !== (i[f] || false)) el.checked = i[f] || false;
     });
 
+    ["estHArmInvisivel", "estHArmVisivel", "estHArmImbuicao", "estHArmFullbody", "estHArmEmissao", "estHArmAvancado"].forEach(f => {
+        let el = document.getElementById("chk-" + f);
+        if (el) {
+            if (i.lockHArm) { el.disabled = true; el.checked = false; i[f] = false; }
+            else { el.disabled = isReadOnly; }
+        }
+    });
+
+    ["estHObsBasico", "estHObsIntencao", "estHObsPremonicao", "estHObsAvancado"].forEach(f => {
+        let el = document.getElementById("chk-" + f);
+        if (el) {
+            if (i.lockHObs) { el.disabled = true; el.checked = false; i[f] = false; }
+            else { el.disabled = isReadOnly; }
+        }
+    });
+
+    ["estHReiDominacao", "estHReiIncapacitacao", "estHReiAssassinato", "estHReiPressao", "estHReiInfusao"].forEach(f => {
+        let el = document.getElementById("chk-" + f);
+        if (el) {
+            if (i.lockHRei) { el.disabled = true; el.checked = false; i[f] = false; }
+            else { el.disabled = isReadOnly; }
+        }
+    });
+
+    let obsMetrosEl = document.getElementById("info-estaminaHakiObsMetros");
+    if (obsMetrosEl) {
+        if (i.lockHObs) { obsMetrosEl.disabled = true; obsMetrosEl.value = ""; i.estaminaHakiObsMetros = ""; }
+        else { obsMetrosEl.disabled = isReadOnly; }
+    }
+
     document.getElementById("cont-ha1").style.display =
         haPts > 0 ? "block" : "none";
     document.getElementById("cont-ha2").style.display =
@@ -7031,17 +7076,19 @@ function updateUI() {
     let calcHA = Math.round((HA + flatBonus.ha) * (1 + bonus.ha));
     let elCalcUseHakiSelect = document.getElementById("info-calcUseHaki");
     if (elCalcUseHakiSelect) {
-        let htmlHaki = '<option value="nao">Não</option>';
-        if (i.unlockHA1)
-            htmlHaki += '<option value="invisivel">Invisível</option>';
-        if (i.unlockHA2) htmlHaki += '<option value="visivel">Visível</option>';
-        if (i.unlockHA3)
-            htmlHaki += '<option value="imbuicao">Imbuição</option>';
-        if (i.unlockHA4)
-            htmlHaki += '<option value="fullbody">Full Body</option>';
-        if (i.unlockHA5) htmlHaki += '<option value="emissao">Emissão</option>';
-        if (i.unlockHA6)
-            htmlHaki += '<option value="avancado">Avançado</option>';
+        let htmlHaki = '<option value="nao">N o</option>';
+        if (!i.lockHArm) {
+            if (i.unlockHA1)
+                htmlHaki += '<option value="invisivel">Invis vel</option>';
+            if (i.unlockHA2) htmlHaki += '<option value="visivel">Vis vel</option>';
+            if (i.unlockHA3)
+                htmlHaki += '<option value="imbuicao">Imbui o</option>';
+            if (i.unlockHA4)
+                htmlHaki += '<option value="fullbody">Full Body</option>';
+            if (i.unlockHA5) htmlHaki += '<option value="emissao">Emiss o</option>';
+            if (i.unlockHA6)
+                htmlHaki += '<option value="avancado">Avan ado</option>';
+        }
         if (elCalcUseHakiSelect.innerHTML !== htmlHaki)
             elCalcUseHakiSelect.innerHTML = htmlHaki;
         if (
@@ -7059,11 +7106,13 @@ function updateUI() {
     let calcHR = Math.round((HR + flatBonus.hr) * (1 + bonus.hr));
     let elCalcUseHakiReiSelect = document.getElementById("info-calcUseHakiRei");
     if (elCalcUseHakiReiSelect) {
-        let htmlHakiRei = '<option value="nao">Não</option>';
-        if (i.unlockHR4)
-            htmlHakiRei += '<option value="pressao">Pressão</option>';
-        if (i.unlockHR6)
-            htmlHakiRei += '<option value="infusao">Infusão</option>';
+        let htmlHakiRei = '<option value="nao">N o</option>';
+        if (!i.lockHRei) {
+            if (i.unlockHR4)
+                htmlHakiRei += '<option value="pressao">Press o</option>';
+            if (i.unlockHR6)
+                htmlHakiRei += '<option value="infusao">Infus o</option>';
+        }
         if (elCalcUseHakiReiSelect.innerHTML !== htmlHakiRei)
             elCalcUseHakiReiSelect.innerHTML = htmlHakiRei;
         if (
@@ -7083,7 +7132,7 @@ function updateUI() {
     if (i.calcQuemAtaca === "inimigo") {
         danoHaki = parseInt(i.calcHakiManual) || 0;
     } else {
-        if (calcHA > 0) {
+        if (calcHA > 0 && !i.lockHArm) {
             if (i.calcUseHaki === "invisivel")
                 danoHaki = Math.floor(calcHA * 0.25);
             else if (i.calcUseHaki === "visivel")
@@ -7106,7 +7155,7 @@ function updateUI() {
         danoHakiRei = parseInt(i.calcHakiReiManual) || 0;
         textRei = "Rei: Manual";
     } else {
-        if (calcHR > 0) {
+        if (calcHR > 0 && !i.lockHRei) {
             if (i.calcUseHakiRei === "pressao") {
                 danoHakiRei = Math.floor(calcHR * 0.5);
                 textRei = "Rei: Pressão";
@@ -7485,7 +7534,8 @@ function updateUI() {
     const estCheckboxFields = [
         "estHArmInvisivel", "estHArmVisivel", "estHArmImbuicao", "estHArmFullbody", "estHArmEmissao", "estHArmAvancado",
         "estHObsBasico", "estHObsIntencao", "estHObsPremonicao", "estHObsAvancado",
-        "estHReiDominacao", "estHReiIncapacitacao", "estHReiAssassinato", "estHReiPressao", "estHReiInfusao"
+        "estHReiDominacao", "estHReiIncapacitacao", "estHReiAssassinato", "estHReiPressao", "estHReiInfusao",
+        "lockHArm", "lockHObs", "lockHRei"
     ];
     estCheckboxFields.forEach((f) => {
         let el = document.getElementById("chk-" + f);
@@ -7511,23 +7561,29 @@ function updateUI() {
     let percHaki = 0;
     let fixoHaki = 0;
 
-    if (i.estHArmInvisivel) percHaki += 5;
-    if (i.estHArmVisivel) percHaki += 10;
-    if (i.estHArmImbuicao) percHaki += 15;
-    if (i.estHArmFullbody) percHaki += 75;
-    if (i.estHArmEmissao) percHaki += 25;
-    if (i.estHArmAvancado) percHaki += 50;
+    if (!i.lockHArm) {
+        if (i.estHArmInvisivel) percHaki += 5;
+        if (i.estHArmVisivel) percHaki += 10;
+        if (i.estHArmImbuicao) percHaki += 15;
+        if (i.estHArmFullbody) percHaki += 75;
+        if (i.estHArmEmissao) percHaki += 25;
+        if (i.estHArmAvancado) percHaki += 50;
+    }
 
-    if (i.estHObsBasico) fixoHaki += parseInt(i.estaminaHakiObsMetros) || 0;
-    if (i.estHObsIntencao) fixoHaki += 500;
-    if (i.estHObsPremonicao) fixoHaki += 750;
-    if (i.estHObsAvancado) percHaki += 50;
+    if (!i.lockHObs) {
+        if (i.estHObsBasico) fixoHaki += parseInt(i.estaminaHakiObsMetros) || 0;
+        if (i.estHObsIntencao) fixoHaki += 500;
+        if (i.estHObsPremonicao) fixoHaki += 750;
+        if (i.estHObsAvancado) percHaki += 50;
+    }
 
-    if (i.estHReiDominacao) fixoHaki += Math.floor(estTotalVal * 0.02);
-    if (i.estHReiIncapacitacao) fixoHaki += Math.floor(estTotalVal * 0.05);
-    if (i.estHReiAssassinato) percHaki += 25;
-    if (i.estHReiPressao) percHaki += 50;
-    if (i.estHReiInfusao) percHaki += 90;
+    if (!i.lockHRei) {
+        if (i.estHReiDominacao) fixoHaki += Math.floor(estTotalVal * 0.02);
+        if (i.estHReiIncapacitacao) fixoHaki += Math.floor(estTotalVal * 0.05);
+        if (i.estHReiAssassinato) percHaki += 25;
+        if (i.estHReiPressao) percHaki += 50;
+        if (i.estHReiInfusao) percHaki += 90;
+    }
 
     let custoHaki = Math.floor(subtotalAcao * (percHaki / 100)) + fixoHaki;
     let custoEstTotal = subtotalAcao + custoHaki;
@@ -8046,9 +8102,9 @@ function updateUI() {
     }
 
     if ((totalFinal >= reqEsp && ESP > 0) || window.isGeneratingManual) {
-        attrOut += `↠ *𝙴𝚜𝚙𝚒́𝚛𝚒𝚝𝚘:* ${ESP > 0 ? strCalc(ESP, bonus.esp, flatBonus.esp, itemBonus.esp, itemFlat.esp) : ""}\n`;
+        attrOut += `↠ *𝙴𝚜𝚙𝚒́𝚛𝚒𝚝𝚘:* ${ESP > 0 ? strCalc(ESP, bonus.esp, flatBonus.esp, itemBonus.esp, itemFlat.esp) : ""}${i.lockEsp ? ' [🔒]' : ''}\n`;
         if (HA > 0 || window.isGeneratingManual) {
-            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝙰𝚛𝚖𝚊𝚖𝚎𝚗𝚝𝚘:_ ${HA > 0 ? strCalc(HA, bonus.ha, flatBonus.ha, itemBonus.ha, itemFlat.ha) : ""}\n`;
+            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝙰𝚛𝚖𝚊𝚖𝚎𝚗𝚝𝚘:_ ${HA > 0 ? strCalc(HA, bonus.ha, flatBonus.ha, itemBonus.ha, itemFlat.ha) : ""}${i.lockHArm ? ' [🔒]' : ''}\n`;
             let hasHigherHA = i.unlockHA3 || i.unlockHA4 || i.unlockHA5 || i.unlockHA6;
             if (window.isGeneratingManual) {
                 if (!hasHigherHA) {
@@ -8072,7 +8128,7 @@ function updateUI() {
             let passiveHO = Math.round((HO + flatBonus.ho) * (1 + bonus.ho));
             let totalHO = Math.round((passiveHO + itemFlat.ho) * (1 + itemBonus.ho));
             let alcanceHO = Math.floor(totalHO / 10);
-            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚊 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘:_ ${HO > 0 ? strCalc(HO, bonus.ho, flatBonus.ho, itemBonus.ho, itemFlat.ho) + ` (${alcanceHO.toLocaleString("pt-BR")}m)` : ""}\n`;
+            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚊 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘:_ ${HO > 0 ? strCalc(HO, bonus.ho, flatBonus.ho, itemBonus.ho, itemFlat.ho) + ` (${alcanceHO.toLocaleString("pt-BR")}m)` : ""}${i.lockHObs ? ' [🔒]' : ''}\n`;
             if (window.isGeneratingManual) {
                 attrOut += `* 𝙸𝚗𝚝𝚎𝚗𝚌̧𝚊̃𝚘${i.unlockHO2 ? "✓" : "✘"}\n`;
                 attrOut += `* 𝙿𝚛𝚎𝚖𝚘𝚗𝚒𝚌̧𝚊̃𝚘${i.unlockHO3 ? "✓" : "✘"}\n`;
@@ -8087,7 +8143,7 @@ function updateUI() {
             let passiveHR = Math.round((HR + flatBonus.hr) * (1 + bonus.hr));
             let totalHR = Math.round((passiveHR + itemFlat.hr) * (1 + itemBonus.hr));
             let alcanceHR = Math.floor(totalHR / 10);
-            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝚁𝚎𝚒:_ ${HR > 0 ? strCalc(HR, bonus.hr, flatBonus.hr, itemBonus.hr, itemFlat.hr) : ""}\n`;
+            attrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝚁𝚎𝚒:_ ${HR > 0 ? strCalc(HR, bonus.hr, flatBonus.hr, itemBonus.hr, itemFlat.hr) : ""}${i.lockHRei ? ' [🔒]' : ''}\n`;
             if (window.isGeneratingManual) {
                 attrOut += `* 𝙳𝚘𝚖𝚒𝚗𝚊𝚌̧𝚊̃𝚘${i.unlockHR2 ? "✓" : "✘"}\n`;
                 attrOut += `* 𝙸𝚗𝚌𝚊𝚙𝚊𝚌𝚒𝚝𝚊𝚌̧𝚊̃𝚘${i.unlockHR3 ? "✓" : "✘"}\n`;
@@ -9125,8 +9181,8 @@ function updateUI() {
     }
     manualAttrOut += `\n`;
 
-    manualAttrOut += `↠ *𝙴𝚜𝚙𝚒́𝚛𝚒𝚝𝚘:* ${strCalc(ESP, bonus.esp, flatBonus.esp, itemBonus.esp, itemFlat.esp)}\n`;
-    manualAttrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝙰𝚛𝚖𝚊𝚖𝚎𝚗𝚝𝚘:_ ${strCalc(HA, bonus.ha, flatBonus.ha, itemBonus.ha, itemFlat.ha)}\n`;
+    manualAttrOut += `↠ *𝙴𝚜𝚙𝚒́𝚛𝚒𝚝𝚘:* ${strCalc(ESP, bonus.esp, flatBonus.esp, itemBonus.esp, itemFlat.esp)}${i.lockEsp ? ' [🔒]' : ''}\n`;
+    manualAttrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝙰𝚛𝚖𝚊𝚖𝚎𝚗𝚝𝚘:_ ${strCalc(HA, bonus.ha, flatBonus.ha, itemBonus.ha, itemFlat.ha)}${i.lockHArm ? ' [🔒]' : ''}\n`;
     manualAttrOut += `- 𝙸𝚗𝚟𝚒𝚜𝚒́𝚟𝚎𝚕${i.unlockHA1 ? "✓" : "✘"}\n`;
     manualAttrOut += `- 𝚅𝚒𝚜𝚒́𝚟𝚎𝚕${i.unlockHA2 ? "✓" : "✘"}\n`;
     manualAttrOut += `- 𝙸𝚖𝚋𝚞𝚒𝚌̧𝚊̃𝚘${i.unlockHA3 ? "✓" : "✘"}\n`;
@@ -9139,7 +9195,7 @@ function updateUI() {
         (passiveHOMan + itemFlat.ho) * (1 + itemBonus.ho),
     );
     let alcanceHOMan = Math.floor(totalHOMan / 10);
-    manualAttrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚊 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘:_ ${strCalc(HO, bonus.ho, flatBonus.ho, itemBonus.ho, itemFlat.ho)} (${alcanceHOMan.toLocaleString("pt-BR")}m)\n`;
+    manualAttrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚊 𝙾𝚋𝚜𝚎𝚛𝚟𝚊𝚌̧𝚊̃𝚘:_ ${strCalc(HO, bonus.ho, flatBonus.ho, itemBonus.ho, itemFlat.ho)} (${alcanceHOMan.toLocaleString("pt-BR")}m)${i.lockHObs ? ' [🔒]' : ''}\n`;
     manualAttrOut += `- 𝙸𝚗𝚝𝚎𝚗𝚌̧𝚊̃𝚘${i.unlockHO2 ? "✓" : "✘"}\n`;
     manualAttrOut += `- 𝙿𝚛𝚎𝚖𝚘𝚗𝚒𝚌̧𝚊̃𝚘${i.unlockHO3 ? "✓" : "✘"}\n`;
     manualAttrOut += `- 𝙰𝚟𝚊𝚗𝚌̧𝚊𝚍𝚘${i.unlockHO4 ? "✓" : "✘"}\n`;
@@ -9149,7 +9205,7 @@ function updateUI() {
         (passiveHRMan + itemFlat.hr) * (1 + itemBonus.hr),
     );
     let alcanceHRMan = Math.floor(totalHRMan / 10);
-    manualAttrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝚁𝚎𝚒:_ ${strCalc(HR, bonus.hr, flatBonus.hr, itemBonus.hr, itemFlat.hr)}\n`;
+    manualAttrOut += `> _𝙷𝚊𝚔𝚒 𝚍𝚘 𝚁𝚎𝚒:_ ${strCalc(HR, bonus.hr, flatBonus.hr, itemBonus.hr, itemFlat.hr)}${i.lockHRei ? ' [🔒]' : ''}\n`;
     manualAttrOut += `- 𝙳𝚘𝚖𝚒𝚗𝚊𝚌̧𝚊̃𝚘${i.unlockHR2 ? "✓" : "✘"}\n`;
     manualAttrOut += `- 𝙸𝚗𝚌𝚊𝚙𝚊𝚌𝚒𝚝𝚊𝚌̧𝚊̃𝚘${i.unlockHR3 ? "✓" : "✘"}\n`;
     manualAttrOut += `- 𝙿𝚛𝚎𝚜𝚜𝚊̃𝚘${i.unlockHR4 ? "✓" : "✘"} (${alcanceHRMan.toLocaleString("pt-BR")}m)\n`;
@@ -10400,4 +10456,41 @@ window.importarJSON = function (event) {
         event.target.value = "";
     };
     reader.readAsText(file);
+};
+
+window.toggleLockEspirito = function (isChecked) {
+    if (isReadOnly) return;
+    currentChar.info.lockEsp = isChecked;
+    currentChar.info.lockHArm = isChecked;
+    currentChar.info.lockHObs = isChecked;
+    currentChar.info.lockHRei = isChecked;
+    
+    let chkArm = document.getElementById("chk-lockHArm");
+    let chkObs = document.getElementById("chk-lockHObs");
+    let chkRei = document.getElementById("chk-lockHRei");
+    if (chkArm) chkArm.checked = isChecked;
+    if (chkObs) chkObs.checked = isChecked;
+    if (chkRei) chkRei.checked = isChecked;
+    
+    if (typeof saveData === "function") saveData();
+    if (typeof updateUI === "function") updateUI();
+};
+
+window.toggleLockHaki = function () {
+    if (isReadOnly) return;
+    let chkEsp = document.getElementById("chk-lockEsp");
+    let chkArm = document.getElementById("chk-lockHArm")?.checked || false;
+    let chkObs = document.getElementById("chk-lockHObs")?.checked || false;
+    let chkRei = document.getElementById("chk-lockHRei")?.checked || false;
+    
+    let allChecked = chkArm && chkObs && chkRei;
+    currentChar.info.lockEsp = allChecked;
+    currentChar.info.lockHArm = chkArm;
+    currentChar.info.lockHObs = chkObs;
+    currentChar.info.lockHRei = chkRei;
+    
+    if (chkEsp) chkEsp.checked = allChecked;
+    
+    if (typeof saveData === "function") saveData();
+    if (typeof updateUI === "function") updateUI();
 };
