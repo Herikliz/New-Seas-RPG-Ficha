@@ -369,6 +369,26 @@
                                         <option value="d">Destreza</option>
                                     </select>
                                 </div>
+                                <div id="hab-ativo-cavaleiro" style="display:none; margin-top:5px; flex-direction:column; gap:5px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px;">
+                                    <label style="font-size:10px; color:var(--info); font-weight:bold;">Treinamento de Cavaleiro</label>
+                                    
+                                    <label style="font-size:9px; color:#aaa; margin-top:2px;">Atributo Foco (Passivo)</label>
+                                    <select id="sel-cavaleiro-attr" onchange="updateField('info', 'habCavaleiroAttr', this.value)" style="font-size: 11px; background-color: #222; color: #fff; border: 1px solid #444;">
+                                        <option value="f">Força</option>
+                                        <option value="d">Destreza</option>
+                                        <option value="r">Resistência</option>
+                                        <option value="v">Velocidade</option>
+                                    </select>
+
+                                    <div id="box-cavaleiro-spec" style="display:none; flex-direction:column; gap:2px; margin-top:3px;">
+                                        <label style="font-size:9px; color:#aaa;">Especialização (10k+)</label>
+                                        <select id="sel-cavaleiro-spec" onchange="updateField('info', 'habCavaleiroSpec', this.value)" style="font-size: 11px; background-color: #222; color: #fff; border: 1px solid #444;">
+                                            <option value="nenhuma">-- Nenhuma --</option>
+                                            <option value="ofensiva">Ofensiva (-20% Estamina Armas)</option>
+                                            <option value="defensiva">Defensiva (+15% Absorção Escudo/Arma)</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

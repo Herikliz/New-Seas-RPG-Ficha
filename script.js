@@ -545,7 +545,8 @@ const habilidadesExclusivasDict = {
     "Pensamento Acelerado": "+20% em Reflexo aos 5.000 (25% aos 10k).",
     "Último Recurso": "Habilidade oculta.",
     "Vontade Inabalável": "Habilidade oculta.",
-    "Treinamento de Cavaleiro": "Habilidade oculta.",
+    "Treinamento de Cavaleiro":
+        "Aos 5k: +10% em um atributo físico escolhido. Aos 10k: Buff sobe para 15%. Especialização Ofensiva (-20% Estamina) ou Defensiva (+15% absorção). Defesa dos Fracos. Aos 15k: Buff base sobe para 20%. Pela Honra: +15% em 2 atributos por 3 turnos e imunidade a medo.",
     "QI Avançado":
         "O gasto de estamina é reduzido em 50%. Caso dure mais de 3 turnos, Reflexos aumentados em 5%."
 };
@@ -1886,16 +1887,12 @@ function toggleEditability() {
             el.disabled = true;
             return;
         }
-        let hasBerries = currentChar.info.berries > 0;
         let hasNpcC =
             currentChar.info.npcsComunsList &&
             currentChar.info.npcsComunsList.length > 0;
         let hasNpcE =
             currentChar.info.npcsEspeciaisList &&
             currentChar.info.npcsEspeciaisList.length > 0;
-
-        let isBerriesBlocked =
-            isNPC && !isSuperAdmin && !hasBerries && el.id === "info-berries";
         let isNpcCBlocked =
             isNPC &&
             !isSuperAdmin &&
@@ -1911,9 +1908,7 @@ function toggleEditability() {
         let isKuja =
             currentChar.info.raca === "Kuja" ||
             currentChar.info.raca2 === "Kuja";
-
         if (
-            isBerriesBlocked ||
             isNpcCBlocked ||
             isNpcEBlocked ||
             (isKuja && (el.id === "info-sexo" || el.id === "info-genero"))
@@ -2186,6 +2181,11 @@ function runFallbackChecks() {
                 habFavArmistaAtivo: "sem",
                 habFavArmistaAttr: "d",
                 habFuriaArdenteAttr: "f",
+                habCavaleiroAttr: "f",
+                habCavaleiroSpec: "nenhuma",
+                habCavaleiroPelaHonraAtivo: false,
+                habCavaleiroHonraAttr1: "f",
+                habCavaleiroHonraAttr2: "d",
                 habQIAvancadoAtivo: false,
                 linhagemBeckmanArma: false,
                 habRetornoUso: 1,
@@ -2215,8 +2215,15 @@ function runFallbackChecks() {
                 zoanBuffV: 0,
                 zoanForma: "Comum",
             };
-            for (let k in defInfo)
-                if (typeof c.info[k] === "undefined") c.info[k] = defInfo[k];
+            for (let k in defInfo) {
+                if (typeof c.info[k] === "undefined") {
+                    if (k === "berries" && c.isNPC) {
+                        c.info[k] = 0;
+                    } else {
+                        c.info[k] = defInfo[k];
+                    }
+                }
+            }
 
             if (typeof c.info.customBuffF !== 'undefined' || typeof c.info.customBuffD !== 'undefined' || typeof c.info.customBuffR !== 'undefined' || typeof c.info.customBuffV !== 'undefined') {
                 if (!c.info.customRaceBuffs) c.info.customRaceBuffs = [];
@@ -4347,28 +4354,25 @@ function updateUI() {
         elTreinos.value = fmtTreinos;
 
     let berEl = document.getElementById("info-berries");
-    if (isNPC && !isSuperAdmin && (!i.berries || i.berries === 0)) {
-        if (berEl && berEl.value !== "Bloqueado") berEl.value = "Bloqueado";
-    } else {
-        let fmtBerries = i.berries ? i.berries.toLocaleString("pt-BR") : "";
-        if (berEl && berEl.value !== fmtBerries) berEl.value = fmtBerries;
-    }
+    let fmtBerries = i.berries ? i.berries.toLocaleString("pt-BR") : "";
+    if (berEl && berEl.value !== fmtBerries) berEl.value = fmtBerries;
 
     let D = currentChar.stats.d || 0,
         F = currentChar.stats.f || 0,
         R = currentChar.stats.r || 0,
         V = currentChar.stats.v || 0;
-
     currentChar.stats.d = D;
     currentChar.stats.f = F;
     currentChar.stats.r = R;
     currentChar.stats.v = V;
-
     let totalBase = D + F + R + V;
     let totalFinal = totalBase;
     let finalHA = 0,
         finalHO = 0,
         finalHR = 0;
+    
+    let base = { f: F, d: D, r: R, v: V };
+
     {
         let tempRc = i.raca,
             tempRc2 = i.raca2,
@@ -5988,8 +5992,8 @@ function updateUI() {
     let hasFuria = hasHab("Fúria Ardente");
     let hasQI = hasHab("QI Avançado");
     let hasRetorno = hasHab("Golpe de Retorno");
+    let hasCavaleiro = hasHab("Treinamento de Cavaleiro");
     let isBeckman = ln === "Beckman";
-
     let habAtivosContainer = document.getElementById("hab-ativos");
     if (habAtivosContainer) {
         habAtivosContainer.style.display =
@@ -5998,7 +6002,8 @@ function updateUI() {
             hasFuria ||
             hasQI ||
             isBeckman ||
-            hasRetorno
+            hasRetorno ||
+            hasCavaleiro
                 ? "block"
                 : "none";
         let elAtirador = document.getElementById("hab-ativo-atirador");
@@ -6047,6 +6052,17 @@ function updateUI() {
             elFuria.style.display = hasFuria ? "flex" : "none";
             document.getElementById("sel-furia-attr").value =
                 i.habFuriaArdenteAttr || "f";
+        }
+        let elCavaleiro = document.getElementById("hab-ativo-cavaleiro");
+        if (elCavaleiro) {
+            elCavaleiro.style.display = hasCavaleiro ? "flex" : "none";
+            document.getElementById("sel-cavaleiro-attr").value = i.habCavaleiroAttr || "f";
+            
+            let boxSpec = document.getElementById("box-cavaleiro-spec");
+            if (boxSpec) {
+                boxSpec.style.display = totalBase >= 10000 ? "flex" : "none";
+                document.getElementById("sel-cavaleiro-spec").value = i.habCavaleiroSpec || "nenhuma";
+            }
         }
         let elRetorno = document.getElementById("hab-ativo-retorno");
         if (elRetorno) {
@@ -6163,6 +6179,15 @@ function updateUI() {
         if (totalBase >= 15000) bonus[fA] += 0.15;
         else if (totalBase >= 10000) bonus[fA] += 0.1;
         else if (totalBase >= 5000) bonus[fA] += 0.05;
+    }
+    if (hasHab("Treinamento de Cavaleiro")) {
+        let baseAttr = i.habCavaleiroAttr || "f";
+        let passivoBonus = 0;
+        if (totalBase >= 15000) passivoBonus = 0.20;
+        else if (totalBase >= 10000) passivoBonus = 0.15;
+        else if (totalBase >= 5000) passivoBonus = 0.10;
+        
+        bonus[baseAttr] += passivoBonus;
     }
     if (hasHab("O Escolhido")) {
         if (totalBase >= 20000) {
