@@ -453,6 +453,11 @@ const baseClassesList = [
     "Musicista",
     "Navegador",
 ];
+const EXTRA_CLASS_SLOTS = [
+    { id: "classe6", label: "Classe 6", req: 50000, prev: null },
+    { id: "classe7", label: "Classe 7", req: 65000, prev: "classe6" },
+    { id: "classe8", label: "Classe 8", req: 80000, prev: "classe7" },
+];
 const racas = {
     "Braços Longos": { f: 0.3, r: 0.15 },
     Bucaneiro: { f: 0.35, r: 0.4 },
@@ -1289,6 +1294,37 @@ function getClassDisplayName(baseClassWithLevel, sexo, genero) {
     return `${cName}: ${cTitle}`;
 }
 
+function getBaseClassName(baseClass, sexo, genero) {
+    if (!baseClass) return "";
+    let isFemale = false;
+    if (genero === "Mulher") isFemale = true;
+    else if (genero === "Homem" || genero === "Não-binário") isFemale = false;
+    else isFemale = sexo === "Feminino";
+    return baseClassGender[baseClass]
+        ? baseClassGender[baseClass][isFemale ? "f" : "m"]
+        : baseClass;
+}
+
+// Devolve a classe que ocupa os 5 slots do Nível 1 ao 5
+// (ex.: Arqueólogo 1, 2, 3, 4 e 5). Se não houver, devolve null.
+function getMasteredClass(info) {
+    const slots = [
+        info.classe,
+        info.classe2,
+        info.classe3,
+        info.classe4,
+        info.classe5,
+    ];
+    let base = null;
+    for (let n = 0; n < slots.length; n++) {
+        const match = slots[n] && slots[n].match(/^(.+) (\d+)$/);
+        if (!match || parseInt(match[2], 10) !== n + 1) return null;
+        if (base === null) base = match[1];
+        else if (match[1] !== base) return null;
+    }
+    return base;
+}
+
 function customPrompt(msg, numericOnly = false) {
     return new Promise((resolve) => {
         const overlay = document.getElementById("custom-prompt-overlay");
@@ -2050,6 +2086,9 @@ function runFallbackChecks() {
                 classe3: "",
                 classe4: "",
                 classe5: "",
+                classe6: "",
+                classe7: "",
+                classe8: "",
                 raca: "",
                 raca2: "",
                 animal: "",
@@ -3340,6 +3379,21 @@ function updateField(category, field, value) {
         }
         if (field === 'classe4') {
             currentChar[category]['classe5'] = "";
+            currentChar[category]['classe6'] = "";
+            currentChar[category]['classe7'] = "";
+            currentChar[category]['classe8'] = "";
+        }
+        if (field === 'classe5') {
+            currentChar[category]['classe6'] = "";
+            currentChar[category]['classe7'] = "";
+            currentChar[category]['classe8'] = "";
+        }
+        if (field === 'classe6') {
+            currentChar[category]['classe7'] = "";
+            currentChar[category]['classe8'] = "";
+        }
+        if (field === 'classe7') {
+            currentChar[category]['classe8'] = "";
         }
     }
     saveData();
@@ -5210,6 +5264,72 @@ function updateUI() {
             i[slot.id] = "";
         }
     });
+
+    // ===== CLASSES 6, 7 e 8 =====
+    // Req. 1: uma única classe ocupando os 5 slots, do Nível 1 ao 5
+    //         (ex.: Arqueólogo 1, 2, 3, 4 e 5).
+    // Req. 2: pontos totais (o mesmo "Total" que libera as classes 2-5):
+    //         Classe 6 = 50.000 | Classe 7 = 65.000 | Classe 8 = 80.000.
+    // Classe 7 e 8 devem ser iguais à Classe 6 (só essa opção é oferecida).
+    // Como nos slots 2-5, uma Classe 6-8 já escolhida não é apagada se o total
+    // oscilar (ex.: ao digitar um atributo), e cada uma exige a anterior.
+    let boxClasses678 = document.getElementById("box-classes-678");
+    if (boxClasses678) {
+        let masteredClass = getMasteredClass(i);
+        if (masteredClass) {
+            boxClasses678.style.display = "flex";
+
+            let extraOptions = '<option value="">-- Selecione --</option>';
+            baseClassesList.forEach((c) => {
+                if (c !== masteredClass) {
+                    let display = getBaseClassName(c, i.sexo, i.genero);
+                    extraOptions += `<option value="${c}">${display}</option>`;
+                }
+            });
+
+            EXTRA_CLASS_SLOTS.forEach((slot) => {
+                let el = document.getElementById("info-" + slot.id);
+                if (!el) return;
+                let hasAssigned = i[slot.id] && i[slot.id] !== "";
+                let prevFilled =
+                    !slot.prev || (i[slot.prev] && i[slot.prev] !== "");
+
+                if (
+                    prevFilled &&
+                    (isSuperAdmin || totalFinal >= slot.req || hasAssigned)
+                ) {
+                    el.disabled = isReadOnly ? true : false;
+                    let slotOptions = slot.prev
+                        ? `<option value="">-- Selecione --</option><option value="${i.classe6}">${getBaseClassName(i.classe6, i.sexo, i.genero)}</option>`
+                        : extraOptions;
+                    if (el.innerHTML !== slotOptions) el.innerHTML = slotOptions;
+                    if (
+                        hasAssigned &&
+                        Array.from(el.options).some(
+                            (o) => o.value === i[slot.id],
+                        )
+                    ) {
+                        el.value = i[slot.id];
+                    } else {
+                        el.value = "";
+                        i[slot.id] = "";
+                    }
+                } else {
+                    let failMsg = !prevFilled
+                        ? "🔒Preencha a Classe anterior"
+                        : `🔒Requer ${slot.req.toLocaleString("pt-BR")}`;
+                    el.innerHTML = `<option value="">${failMsg}</option>`;
+                    el.disabled = true;
+                    i[slot.id] = "";
+                }
+            });
+        } else {
+            boxClasses678.style.display = "none";
+            EXTRA_CLASS_SLOTS.forEach((slot) => {
+                if (i[slot.id]) i[slot.id] = "";
+            });
+        }
+    }
 
     let combatenteLevel = 0;
     [i.classe, i.classe2, i.classe3, i.classe4, i.classe5].forEach((c) => {
@@ -8611,6 +8731,16 @@ function updateUI() {
           ? "30.000"
           : "35.000";
 
+    let extraClassesOut = "";
+    if (getMasteredClass(i)) {
+        extraClassesOut = EXTRA_CLASS_SLOTS.map((slot, idx) => {
+            let extraOut = i[slot.id]
+                ? getBaseClassName(i[slot.id], i.sexo)
+                : slot.label;
+            return `\n${6 + idx}. *${extraOut}*`;
+        }).join("");
+    }
+
     let racaOutput =
         isNPC && i.raca === "Outra"
             ? i.racaNomeCustom || "Raça Custom"
@@ -9365,7 +9495,7 @@ ${histPersOut}
 2. *${c2Out}*
 3. *${c3Out}*
 4. *${c4Out}*
-5. *${c5Out}*
+5. *${c5Out}*${extraClassesOut}
 
 ${orgOut}
   : ᓩ _𝐄sᴛɪʟᴏs ᴅᴇ ʟᴜᴛᴀ:_
