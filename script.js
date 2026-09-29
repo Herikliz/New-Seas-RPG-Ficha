@@ -453,11 +453,15 @@ const baseClassesList = [
     "Musicista",
     "Navegador",
 ];
+// Classes 6, 7 e 8 funcionam como os níveis 1, 2 e 3 da classe escolhida.
 const EXTRA_CLASS_SLOTS = [
     { id: "classe6", label: "Classe 6", req: 50000, prev: null },
     { id: "classe7", label: "Classe 7", req: 65000, prev: "classe6" },
     { id: "classe8", label: "Classe 8", req: 80000, prev: "classe7" },
 ];
+
+// Classes incompatíveis: quem tem uma no nível 5 não pode ter a outra nas Classes 6-8.
+const CLASS_CONFLICTS = { Combatente: "Atirador", Atirador: "Combatente" };
 const racas = {
     "Braços Longos": { f: 0.3, r: 0.15 },
     Bucaneiro: { f: 0.35, r: 0.4 },
@@ -744,90 +748,79 @@ const baseClassGender = {
     "Navegador": { m: "Navegador", f: "Navegadora" },
 };
 
+// Títulos fixos dos níveis 1 a 4. O nível 5 não tem título fixo: o jogador escolhe o próprio.
 const classTitles = {
     "Arqueólogo": [
         { m: "Aprendiz de Arqueologia", f: "Aprendiz de Arqueologia" },
         { m: "Historiador", f: "Historiadora" },
         { m: "Mestre de Artefatos", f: "Mestra de Artefatos" },
         { m: "Dominante da História", f: "Dominante da História" },
-        { m: "Guru", f: "Guru" },
     ],
     "Artista": [
         { m: "Ilustrador", f: "Ilustradora" },
         { m: "Empresário", f: "Empresária" },
         { m: "Estilista de Mil Faces", f: "Estilista de Mil Faces" },
         { m: "Escultor de Símbolos", f: "Escultora de Símbolos" },
-        { m: "Patrono do Mundo", f: "Patrona do Mundo" },
     ],
     "Atirador": [
         { m: "Atirador Iniciante", f: "Atiradora Iniciante" },
         { m: "Atirador de Precisão", f: "Atiradora de Precisão" },
         { m: "Atirador de Elite", f: "Atiradora de Elite" },
         { m: "Criador Bélico", f: "Criadora Bélica" },
-        { m: "Rambo", f: "Rambo" },
     ],
     "Carpinteiro": [
         { m: "Aprendiz da Madeira", f: "Aprendiz da Madeira" },
         { m: "Construtor de Bordo", f: "Construtora de Bordo" },
         { m: "Engenheiro Naval", f: "Engenheira Naval" },
         { m: "Mestre da Madeira", f: "Mestra da Madeira" },
-        { m: "Irmão à Obra", f: "Irmã à Obra" },
     ],
     "Cientista": [
         { m: "Estudioso", f: "Estudiosa" },
         { m: "Biólogo", f: "Bióloga" },
         { m: "Bioengenheiro", f: "Bioengenheira" },
         { m: "Alquimista", f: "Alquimista" },
-        { m: "Gênio Científico", f: "Gênia Científica" },
     ],
     "Combatente": [
         { m: "Discípulo do Punho", f: "Discípula do Punho" },
         { m: "Guerreiro de Aço", f: "Guerreira de Aço" },
         { m: "Mestre da Guerra", f: "Mestra da Guerra" },
         { m: "Doutrinador Marcial", f: "Doutrinadora Marcial" },
-        { m: "Colosso Implacável", f: "Colosso Implacável" },
     ],
     "Cozinheiro": [
         { m: "Garçom", f: "Garçonete" },
         { m: "Especialista Culinário", f: "Especialista Culinária" },
         { m: "Nutricionista", f: "Nutricionista" },
         { m: "Chef", f: "Chef" },
-        { m: "Mestre do Paladar", f: "Mestra do Paladar" },
     ],
     "Ferreiro": [
         { m: "Artesão", f: "Artesã" },
         { m: "Forjador de Imperfeições", f: "Forjadora de Imperfeições" },
         { m: "Forjador de Lendas Menores", f: "Forjadora de Lendas Menores" },
         { m: "Mestre das Lâminas", f: "Mestra das Lâminas" },
-        { m: "Forjador Supremo", f: "Forjadora Suprema" },
     ],
     "Inventor": [
         { m: "Improvisador", f: "Improvisadora" },
         { m: "Mecânico", f: "Mecânica" },
         { m: "Arquitetônico", f: "Arquitetônica" },
         { m: "Condutor", f: "Condutora" },
-        { m: "Artífice", f: "Artífice" },
     ],
     "Médico": [
         { m: "Clínico de Campo", f: "Clínica de Campo" },
         { m: "Cirurgião", f: "Cirurgiã" },
         { m: "Biomédico Avançado", f: "Biomédica Avançada" },
         { m: "Mestre da Vida", f: "Mestra da Vida" },
-        { m: "Apóstolo da Cura", f: "Apóstola da Cura" },
     ],
     "Musicista": [
         { m: "Sonante", f: "Sonante" },
         { m: "Celebridade Local", f: "Celebridade Local" },
         { m: "Pop Star", f: "Pop Star" },
         { m: "Ídolo Mundial", f: "Ídolo Mundial" },
-        { m: "Imperador Sonoro", f: "Imperatriz Sonora" },
     ],
     "Navegador": [
         { m: "Marujo", f: "Maruja" },
         { m: "Cartógrafo", f: "Cartógrafa" },
         { m: "Timoneiro", f: "Timoneira" },
         { m: "Capitão dos Ventos", f: "Capitã dos Ventos" },
-        { m: "Semipeixe", f: "Semipeixe" },
     ],
 };
 
@@ -1305,6 +1298,32 @@ function getBaseClassName(baseClass, sexo, genero) {
         : baseClass;
 }
 
+// Classe Nível 5: não tem título fixo, o jogador escolhe o próprio.
+// Sem título escolhido, mostra só o nome da classe.
+function getLevel5ClassDisplay(classe5, titulo, sexo, genero) {
+    const m = classe5 && classe5.match(/^(.+) 5$/);
+    if (!m) return getClassDisplayName(classe5, sexo, genero);
+    const name = getBaseClassName(m[1], sexo, genero);
+    const t = (titulo || "").trim();
+    return t ? `${name}: ${t}` : name;
+}
+
+// Campo do título da Classe Nível 5: não aceita "*" nem quebra de linha
+// (estragariam o negrito *...* da ficha). Digitar ou colar esses caracteres
+// não tem efeito, e o cursor fica onde estava.
+function onTituloClasse5Input(el) {
+    const bad = /[*\r\n]/g;
+    if (bad.test(el.value)) {
+        const pos = el.selectionStart;
+        const removedBeforeCursor = el.value
+            .slice(0, pos)
+            .replace(/[^*\r\n]/g, "").length;
+        el.value = el.value.replace(bad, "");
+        el.setSelectionRange(pos - removedBeforeCursor, pos - removedBeforeCursor);
+    }
+    updateField("info", "tituloClasse5", el.value);
+}
+
 // Devolve a classe que ocupa os 5 slots do Nível 1 ao 5
 // (ex.: Arqueólogo 1, 2, 3, 4 e 5). Se não houver, devolve null.
 function getMasteredClass(info) {
@@ -1323,6 +1342,28 @@ function getMasteredClass(info) {
         else if (match[1] !== base) return null;
     }
     return base;
+}
+
+// Nível efetivo de cada classe do personagem (base para os buffs de classe).
+// Slots 1-5: vale o nível escrito ("Combatente 3" = 3).
+// Classes 6, 7 e 8: valem como os níveis 1, 2 e 3 da classe escolhida.
+function getClassLevels(info) {
+    const levels = {};
+    const add = (base, lvl) => {
+        levels[base] = Math.max(levels[base] || 0, lvl);
+    };
+    [info.classe, info.classe2, info.classe3, info.classe4, info.classe5].forEach(
+        (c) => {
+            const m = c && c.match(/^(.+) (\d+)$/);
+            if (m) add(m[1], parseInt(m[2], 10));
+        },
+    );
+    if (getMasteredClass(info)) {
+        EXTRA_CLASS_SLOTS.forEach((slot, idx) => {
+            if (info[slot.id]) add(info[slot.id], idx + 1);
+        });
+    }
+    return levels;
 }
 
 function customPrompt(msg, numericOnly = false) {
@@ -1587,6 +1628,31 @@ function init() {
             docIdInput.click();
         }
     }, 300);
+
+    // Celular: o navegador não deixa focar/abrir o teclado sem um toque do
+    // usuário. Então, no primeiro toque em área livre, foca o campo de ID.
+    if (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) {
+        const focusIdOnFirstTap = (ev) => {
+            if (!ev.isTrusted) return; // ignora cliques feitos por código (ex.: docIdInput.click())
+            document.removeEventListener("click", focusIdOnFirstTap, true);
+            let idEl = document.getElementById("doc-id");
+            if (!idEl || idEl.value !== "" || currentDocId !== "") return;
+            let t = ev.target;
+            if (
+                t &&
+                t.closest &&
+                t.closest(
+                    "input, textarea, select, button, a, label, [onclick], .modal-overlay",
+                )
+            )
+                return;
+            let ae = document.activeElement;
+            if (ae && ae !== idEl && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName))
+                return;
+            idEl.focus();
+        };
+        document.addEventListener("click", focusIdOnFirstTap, true);
+    }
 }
 
 function initFirebase() {
@@ -1600,6 +1666,26 @@ function initFirebase() {
         }
         iniciarMonitoramentoBancoDeDados();
     } catch (e) {}
+}
+
+// ---- ID da ficha: ao completar 4 caracteres já puxa, sem Enter ----
+let lastAutoDocId = "";
+
+async function onDocIdInput(el) {
+    el.value = el.value.replace(/[^0-9A-Z]/gi, "").toUpperCase();
+    if (el.value.length < 4) {
+        lastAutoDocId = "";
+        return;
+    }
+    if (el.value === lastAutoDocId) return;
+    lastAutoDocId = el.value;
+    await changeDocId(el.value);
+    lastAutoDocId = el.value; // valor final (volta ao anterior se o ID for inválido)
+}
+
+function onDocIdChange(el) {
+    if (el.value === lastAutoDocId) return; // já tratado ao digitar o 4º caractere
+    changeDocId(el.value);
 }
 
 async function changeDocId(newId) {
@@ -2089,6 +2175,7 @@ function runFallbackChecks() {
                 classe6: "",
                 classe7: "",
                 classe8: "",
+                tituloClasse5: "",
                 raca: "",
                 raca2: "",
                 animal: "",
@@ -4107,6 +4194,7 @@ function updateUI() {
 
     const textFields = [
         "selClasseDF",
+        "tituloClasse5",
         "selDF",
         "selRV",
         "selLinDF",
@@ -4439,13 +4527,7 @@ function updateUI() {
             !(currentChar.isNPC && tempRc === "Outra")
         )
             tempLn = "";
-        let tComb = 0;
-        [i.classe, i.classe2, i.classe3, i.classe4, i.classe5].forEach((c) => {
-            if (c && c.startsWith("Combatente")) {
-                let match = c.match(/Combatente (\d+)/);
-                if (match) tComb = Math.max(tComb, parseInt(match[1]));
-            }
-        });
+        let tComb = getClassLevels(i)["Combatente"] || 0;
         let tBonus = { d: 0, f: 0, r: 0, v: 0, esp: 0, ha: 0, ho: 0, hr: 0 };
         let tFlat = { d: 0, f: 0, r: 0, v: 0, esp: 0, ha: 0, ho: 0, hr: 0 };
         if (i.alcunhasList && i.alcunhaAtiva) {
@@ -5265,6 +5347,12 @@ function updateUI() {
         }
     });
 
+    // ===== TÍTULO PERSONALIZADO (exclusivo da Classe Nível 5) =====
+    let isLevel5Class = /^.+ 5$/.test(i.classe5 || "");
+    let boxTitulo5 = document.getElementById("box-titulo-classe5");
+    if (boxTitulo5) boxTitulo5.style.display = isLevel5Class ? "flex" : "none";
+    if (!isLevel5Class && i.tituloClasse5) i.tituloClasse5 = "";
+
     // ===== CLASSES 6, 7 e 8 =====
     // Req. 1: uma única classe ocupando os 5 slots, do Nível 1 ao 5
     //         (ex.: Arqueólogo 1, 2, 3, 4 e 5).
@@ -5281,7 +5369,7 @@ function updateUI() {
 
             let extraOptions = '<option value="">-- Selecione --</option>';
             baseClassesList.forEach((c) => {
-                if (c !== masteredClass) {
+                if (c !== masteredClass && CLASS_CONFLICTS[masteredClass] !== c) {
                     let display = getBaseClassName(c, i.sexo, i.genero);
                     extraOptions += `<option value="${c}">${display}</option>`;
                 }
@@ -5331,14 +5419,7 @@ function updateUI() {
         }
     }
 
-    let combatenteLevel = 0;
-    [i.classe, i.classe2, i.classe3, i.classe4, i.classe5].forEach((c) => {
-        if (c && c.startsWith("Combatente")) {
-            let match = c.match(/Combatente (\d+)/);
-            if (match)
-                combatenteLevel = Math.max(combatenteLevel, parseInt(match[1]));
-        }
-    });
+    let combatenteLevel = getClassLevels(i)["Combatente"] || 0;
     document.getElementById("box-selClasseDF").style.display =
         combatenteLevel > 0 ? "block" : "none";
 
@@ -8726,7 +8807,7 @@ function updateUI() {
           ? "15.000"
           : "20.000";
     let c5Out = i.classe5
-        ? getClassDisplayName(i.classe5, i.sexo)
+        ? getLevel5ClassDisplay(i.classe5, i.tituloClasse5, i.sexo)
         : isSp
           ? "30.000"
           : "35.000";
@@ -8735,7 +8816,7 @@ function updateUI() {
     if (getMasteredClass(i)) {
         extraClassesOut = EXTRA_CLASS_SLOTS.map((slot, idx) => {
             let extraOut = i[slot.id]
-                ? getBaseClassName(i[slot.id], i.sexo)
+                ? getClassDisplayName(`${i[slot.id]} ${idx + 1}`, i.sexo)
                 : slot.label;
             return `\n${6 + idx}. *${extraOut}*`;
         }).join("");

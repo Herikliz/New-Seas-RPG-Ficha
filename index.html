@@ -33,7 +33,7 @@
                 </select>
                 <button id="btn-save-manual" class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--success); border-color: var(--success);" onclick="manualSave()" title="Salvar Ficha">💾Salvar</button>
                 <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: #a461ff; border-color: #a461ff;" onclick="saveBackup()" title="Salvar Backup">🗄️Salvar Backup</button>
-                <input type="text" id="doc-id" maxlength="4" placeholder="ID" title="Digite 4 números (ou os IDs especiais) para salvar/puxar na nuvem" onchange="changeDocId(this.value)" oninput="this.value = this.value.replace(/[^0-9A-Z]/gi, '').toUpperCase()" autofocus>
+                <input type="text" id="doc-id" maxlength="4" placeholder="ID" title="Digite 4 números (ou os IDs especiais) para salvar/puxar na nuvem" onchange="onDocIdChange(this)" oninput="onDocIdInput(this)" autofocus>
                 <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px;" onclick="loadFromCloud()" title="Puxar dados">⬇️Puxar</button>
                 <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: #a461ff; border-color: #a461ff;" onclick="loadBackup()" title="Puxar Backup">📂Puxar Backup</button>
                 <button class="btn btn-outline" style="font-size: 0.8rem; padding: 6px; color: var(--success); border-color: var(--success);" onclick="document.getElementById('modal-importar-exportar').style.display='flex'" title="Importar ou Exportar Arquivo JSON">🔄Importar/Exportar</button>
@@ -206,6 +206,9 @@
                         <div class="input-row">
                             <div class="input-group"><label>Classe Nível 4</label><select id="info-classe4" onchange="updateField('info', 'classe4', this.value)"></select></div>
                             <div class="input-group"><label>Classe Nível 5</label><select id="info-classe5" onchange="updateField('info', 'classe5', this.value)"></select></div>
+                        </div>
+                        <div class="input-row" id="box-titulo-classe5" style="display: none;">
+                            <div class="input-group"><label>Título da Classe Nível 5</label><input type="text" id="info-tituloClasse5" maxlength="40" placeholder="Escolha o seu próprio título" oninput="onTituloClasse5Input(this)"></div>
                         </div>
                         <div class="input-row" id="box-classes-678" style="display: none; border-top: 1px dashed #444; padding-top: 12px; margin-top: 5px;">
                             <div class="input-group"><label>Classe 6</label><select id="info-classe6" onchange="updateField('info', 'classe6', this.value)"></select></div>
