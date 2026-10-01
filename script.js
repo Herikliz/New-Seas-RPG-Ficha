@@ -6738,6 +6738,17 @@ function updateUI() {
         }
     }
 
+    // Distribui o bônus geral da Akuma (ex.: linhagem D. -> "Akuma no Mi", Exaustão)
+    // entre os 5 sub-atributos ANTES de qualquer cálculo que use bonus.amiXxx.
+    // Antes isso só acontecia mais abaixo, e o box de Velocidade Adicional
+    // era calculado sem esse bônus (10.000 em vez de 12.000).
+    ["amiAlc", "amiDur", "amiPot", "amiVel", "amiDesp"].forEach((k) => {
+        bonus[k] += bonus.ami;
+        flatBonus[k] += flatBonus.ami;
+    });
+    bonus.ami = 0;
+    flatBonus.ami = 0;
+
     let tempAAlc = currentChar.substats.amiAlc || 0,
         tempADur = currentChar.substats.amiDur || 0,
         tempAPot = currentChar.substats.amiPot || 0,
