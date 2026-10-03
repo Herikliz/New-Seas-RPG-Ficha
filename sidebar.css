@@ -284,7 +284,7 @@ html.sbm-locked {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
-/* pagina atual (SALVAR FICHA): destacada, como o link ativo do site */
+/* pagina atual (FICHA): destacada, como o link ativo do site */
 .sbm-link.sbm-current {
     color: var(--sbm-accent);
     font-weight: bold;

@@ -35,7 +35,7 @@
                 { t: "LINHAGENS", href: p("linhagens.html") },
                 { t: "RAÇAS", href: p("racas.html") },
                 // É esta própria página: aparece destacado ("você está aqui") e não recarrega nada.
-                { t: "SALVAR FICHA", href: "https://herikliz.github.io/New-Seas-RPG-Ficha/", current: true },
+                { t: "FICHA AUTOMÁTICA", href: "https://herikliz.github.io/New-Seas-RPG-Ficha/", current: true },
             ],
         },
         {
