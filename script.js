@@ -1677,6 +1677,7 @@ function init() {
     renderNpcsEspeciais();
     renderLogs();
     updateUI();
+    preencherSelectsFixos();
     initFirebase();
     toggleEditability();
     
@@ -1723,7 +1724,6 @@ function initFirebase() {
         if (currentDocId !== "") {
             loadFromCloud();
         }
-        iniciarMonitoramentoBancoDeDados();
     } catch (e) {
         console.error(e);
     }
@@ -1970,7 +1970,7 @@ function updateSaveMode(mode) {
         mode !== "manual"
     ) {
         customAlert(
-            "Este ID especial deve estar sempre no modo de Save Manual.",
+            "Este ID especial deve estar sempre no modo de Salvamento Manual.",
         );
         document.getElementById("save-mode").value = "manual";
         mode = "manual";
@@ -2132,7 +2132,8 @@ function runFallbackChecks() {
         charData.saveMode = "manual";
         charData.layoutMode = "vertical";
     }
-    if (typeof charData.saveMode === "undefined") charData.saveMode = "manual";
+    // Padrão: Salvamento Automático. Fichas que já têm um modo salvo mantêm o modo delas.
+    if (typeof charData.saveMode === "undefined") charData.saveMode = "auto";
     if (typeof charData.layoutMode === "undefined")
         charData.layoutMode = "vertical";
     let saveModeEl = document.getElementById("save-mode");
@@ -3146,7 +3147,9 @@ function moveTecnica(idx, dir) {
 
 function renderTecnicas() {
     const container = document.getElementById("tecnicas-container");
-    container.innerHTML = "";
+    // Monta tudo em texto e joga na tela UMA vez (antes era "+=", que reanalisava o
+    // HTML inteiro a cada técnica e ficava muito lento com muitos itens).
+    let htmlLista = "";
     let i = currentChar.info;
     let availableStyles = [];
     let isMink =
@@ -3174,7 +3177,7 @@ function renderTecnicas() {
             styleOptions += `<option value="${st.id}" ${t.estilo === st.id ? "selected" : ""}>${st.name}</option>`;
         });
 
-        container.innerHTML += `
+        htmlLista += `
             <div style="background: rgba(0,0,0,0.3); padding: 10px; border: 1px dashed #555; border-radius: 6px; margin-bottom: 10px;">
                 <div style="display:flex; justify-content:space-between; margin-bottom: 5px; align-items:center;">
                     <div style="display:flex; align-items:center; gap:10px;">
@@ -3201,14 +3204,18 @@ function renderTecnicas() {
     });
 
     if (currentChar.tecnicasList && currentChar.tecnicasList.length > 0) {
-        container.innerHTML += `<button type="button" class="btn btn-outline btn-success" style="width: 100%; margin-bottom: 5px; margin-top: 5px; font-size: 12px; padding: 6px;" onclick="addTecnica()">+ Adicionar Entrada</button>`;
+        htmlLista += `<button type="button" class="btn btn-outline btn-success" style="width: 100%; margin-bottom: 5px; margin-top: 5px; font-size: 12px; padding: 6px;" onclick="addTecnica()">+ Adicionar Entrada</button>`;
     }
 
+    container.innerHTML = htmlLista;
+
     setTimeout(() => {
-        container.querySelectorAll("textarea").forEach((ta) => {
-            ta.style.height = "auto";
-            ta.style.height = ta.scrollHeight + "px";
-        });
+        // Em 3 etapas (zera tudo, lê tudo, escreve tudo): ler scrollHeight item por
+        // item forçava o navegador a recalcular o layout da página inteira a cada vez.
+        const areas = Array.from(container.querySelectorAll("textarea"));
+        areas.forEach((ta) => (ta.style.height = "auto"));
+        const alturas = areas.map((ta) => ta.scrollHeight);
+        areas.forEach((ta, k) => (ta.style.height = alturas[k] + "px"));
     }, 10);
 }
 
@@ -3236,9 +3243,9 @@ function updateLog(idx, field, val) {
 
 function renderLogs() {
     const container = document.getElementById("logs-container");
-    container.innerHTML = "";
+    let htmlLista = ""; // uma única atribuição no fim (ver renderTecnicas)
     currentChar.logList.forEach((l, idx) => {
-        container.innerHTML += `
+        htmlLista += `
             <div style="background: rgba(0,0,0,0.3); padding: 10px; border: 1px dashed #555; border-radius: 6px; margin-bottom: 10px;">
                 <div style="display:flex; justify-content:space-between; margin-bottom: 5px;">
                     <label style="color:var(--warning);">Entrada ${idx + 1}</label>
@@ -3251,8 +3258,10 @@ function renderLogs() {
     });
 
     if (currentChar.logList && currentChar.logList.length > 0) {
-        container.innerHTML += `<button type="button" class="btn btn-outline btn-success" style="width: 100%; margin-top: 5px; font-size: 12px; padding: 6px;" onclick="addLog()">+ Adicionar Entrada</button>`;
+        htmlLista += `<button type="button" class="btn btn-outline btn-success" style="width: 100%; margin-top: 5px; font-size: 12px; padding: 6px;" onclick="addLog()">+ Adicionar Entrada</button>`;
     }
+
+    container.innerHTML = htmlLista;
 }
 
 window.toggleAlcunhaCondicao = function (condName) {
@@ -4194,6 +4203,19 @@ function updateUI() {
             if (el.value != val) el.value = val;
         }
     });
+
+    // Select da Akuma: não tem id "info-akumaNome", então é sincronizado aqui.
+    // (Antes um setInterval fazia isso a cada segundo, o tempo todo.)
+    let selAkumaSync = document.getElementById("select-akuma");
+    if (selAkumaSync) {
+        let akumaEsperada =
+            i.akumaNome && i.akumaNome !== "" ? i.akumaNome : "nenhuma";
+        if (
+            selAkumaSync.value !== akumaEsperada &&
+            Array.from(selAkumaSync.options).some((o) => o.value === akumaEsperada)
+        )
+            selAkumaSync.value = akumaEsperada;
+    }
 
     let telEl = document.getElementById("info-telefone");
     if (telEl && iti) {
@@ -6753,6 +6775,42 @@ function updateUI() {
 
     let totalAdicionalVel = (i.amiVelAtivo ? finalAkumaVelBox : 0) + zoanVBonusPoints;
 
+    // ---- Zoan: lembra os pontos adicionais (Reflexo / Vel. Corporal) de cada forma ----
+    // Ao trocar de forma (Comum, Instável, Híbrida, Completa), guarda o que estava
+    // distribuído na forma que saiu e devolve o que havia na forma que entrou.
+    // Precisa rodar ANTES do corte pelo limite (logo abaixo); senão o excesso se perde.
+    if (hasZoanBox) {
+        let formaZoanAtual = i.zoanForma || "Comum";
+        if (
+            !i.zoanVelMem ||
+            typeof i.zoanVelMem !== "object" ||
+            i.zoanVelAkuma !== i.akumaNome
+        ) {
+            // ficha antiga ou outra Akuma: começa a memória do zero
+            i.zoanVelMem = {};
+            i.zoanVelForma = formaZoanAtual;
+            i.zoanVelAkuma = i.akumaNome;
+        }
+        if (i.zoanVelForma !== formaZoanAtual) {
+            if (i.zoanVelForma) {
+                i.zoanVelMem[i.zoanVelForma] = {
+                    refl: currentChar.substats.reflAkuma || 0,
+                    vcorp: currentChar.substats.vcorpAkuma || 0,
+                };
+            }
+            let memoriaForma = i.zoanVelMem[formaZoanAtual];
+            if (memoriaForma) {
+                currentChar.substats.reflAkuma = memoriaForma.refl || 0;
+                currentChar.substats.vcorpAkuma = memoriaForma.vcorp || 0;
+            }
+            i.zoanVelForma = formaZoanAtual;
+        }
+    } else if (i.zoanVelMem || i.zoanVelForma || i.zoanVelAkuma) {
+        delete i.zoanVelMem;
+        delete i.zoanVelForma;
+        delete i.zoanVelAkuma;
+    }
+
         let elBoxVelAkuma = document.getElementById("container-boxVelAkuma");
         if (elBoxVelAkuma) {
             if (totalAdicionalVel > 0) {
@@ -6828,6 +6886,14 @@ function updateUI() {
                     currentChar.substats.vcorpAkuma = 0;
             }
         }
+
+    // Guarda a distribuição atual como a "memória" da forma em uso.
+    if (hasZoanBox && i.zoanVelMem) {
+        i.zoanVelMem[i.zoanForma || "Comum"] = {
+            refl: currentChar.substats.reflAkuma || 0,
+            vcorp: currentChar.substats.vcorpAkuma || 0,
+        };
+    }
 
     let ESP = currentChar.stats.esp;
 
@@ -10214,7 +10280,9 @@ window.selecionarAkuma = function (novoAkumaNome) {
     if (typeof updateUI === "function") updateUI();
 };
 
-function iniciarMonitoramentoBancoDeDados() {
+// Preenche os selects de Akuma, Nacionalidade e Localização com os dados fixos do
+// jogo (akumasFixas / ilhasFixas). Não depende do Firebase: roda uma vez no init().
+function preencherSelectsFixos() {
     let selectAkuma = document.getElementById("select-akuma");
     let selectNac = document.getElementById("info-nacionalidade");
     let selectLoc = document.getElementById("info-localizacao");
@@ -10282,41 +10350,6 @@ function iniciarMonitoramentoBancoDeDados() {
         selectLoc.value = currentLocVal;
     }
 }
-
-setInterval(() => {
-    if (!currentChar || !currentChar.info) return;
-    let selectAkuma = document.getElementById("select-akuma");
-    if (selectAkuma) {
-        let expectedAkuma =
-            currentChar.info.akumaNome && currentChar.info.akumaNome !== ""
-                ? currentChar.info.akumaNome
-                : "nenhuma";
-        currentChar.info.akumaId = expectedAkuma;
-        if (
-            selectAkuma.value !== expectedAkuma &&
-            selectAkuma.querySelector(`option[value="${expectedAkuma}"]`)
-        )
-            selectAkuma.value = expectedAkuma;
-    }
-    let selectNac = document.getElementById("info-nacionalidade");
-    if (selectNac) {
-        let expectedNac = currentChar.info.nacionalidade || "";
-        if (
-            selectNac.value !== expectedNac &&
-            selectNac.querySelector(`option[value="${expectedNac}"]`)
-        )
-            selectNac.value = expectedNac;
-    }
-    let selectLoc = document.getElementById("info-localizacao");
-    if (selectLoc) {
-        let expectedLoc = currentChar.info.localizacao || "";
-        if (
-            selectLoc.value !== expectedLoc &&
-            selectLoc.querySelector(`option[value="${expectedLoc}"]`)
-        )
-            selectLoc.value = expectedLoc;
-    }
-}, 1000);
 
 function openInfoModal(title, msg) {
     document.getElementById("info-modal-title").textContent = title;
