@@ -1,0 +1,302 @@
+/* ==========================================================================
+   MENU LATERAL DO SITE INFORMATIVO (usado pelo sidebar.js)
+   Visual copiado do site New-Seas-RPG. As cores (--sbm-*) sao definidas pelo
+   sidebar.js a partir do tema salvo no site informativo (padrao: escuro);
+   os valores abaixo valem so se o JS nao conseguir ler o tema.
+   ========================================================================== */
+:root {
+    --sbm-page-bg: #121212;
+    --sbm-text: #e0e0e0;
+    --sbm-bg: #1e1e1e;
+    --sbm-border: #333333;
+    --sbm-link: #b0b0b0;
+    --sbm-hover-bg: #2d3748;
+    --sbm-accent: #f1c40f;
+    --sbm-sub-bg: #1a1a1a;
+    --sbm-radius: 12px;
+}
+
+html.sbm-locked {
+    overflow: hidden;
+}
+
+/* botao que abre o menu (mesmo estilo do botao do site: quadrado arredondado) */
+.sbm-open-btn {
+    align-self: flex-start;
+    height: 45px;
+    padding: 0 18px;
+    background-color: var(--sbm-bg);
+    border: 2px solid var(--sbm-border);
+    color: var(--sbm-text);
+    border-radius: var(--sbm-radius);
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    white-space: pre;
+}
+
+.sbm-open-btn:hover {
+    border-color: var(--sbm-accent);
+    color: var(--sbm-accent);
+}
+
+.sbm-open-btn.sbm-floating {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+}
+
+.sbm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s 0.3s;
+    z-index: 1000;
+}
+
+.sbm-overlay.sbm-show {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s;
+}
+
+/* a gaveta inteira rola (logo + pesquisa + lista), como no site */
+.sbm-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 320px;
+    max-width: 90vw;
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background-color: var(--sbm-bg);
+    border-right: 1px solid var(--sbm-border);
+    box-shadow: 6px 0 24px rgba(0, 0, 0, 0.45);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.3s ease, visibility 0s 0.3s;
+    z-index: 1001;
+    font-family: Verdana, Arial, sans-serif;
+    color: var(--sbm-text);
+    line-height: 1.5;
+    text-align: left;
+}
+
+.sbm-drawer.sbm-show {
+    transform: translateX(0);
+    visibility: visible;
+    transition: transform 0.3s ease, visibility 0s;
+}
+
+.sbm-drawer::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sbm-drawer::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 4px;
+}
+
+.sbm-logo-box {
+    position: relative;
+    padding: 30px 20px;
+    border-bottom: 1px solid var(--sbm-border);
+}
+
+.sbm-logo {
+    display: block;
+    padding-right: 44px;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--sbm-accent);
+    line-height: 1.2;
+    text-decoration: none;
+}
+
+.sbm-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 2px solid var(--sbm-border);
+    border-radius: var(--sbm-radius);
+    color: var(--sbm-text);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sbm-close:hover {
+    border-color: var(--sbm-accent);
+    color: var(--sbm-accent);
+}
+
+.sbm-search {
+    padding: 10px 20px;
+}
+
+/* #menu-search (id) para vencer as regras globais de input/focus da ficha */
+#menu-search {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--sbm-border);
+    background: var(--sbm-page-bg);
+    color: var(--sbm-text);
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+#menu-search:focus {
+    border-color: var(--sbm-accent);
+    background: var(--sbm-page-bg);
+}
+
+#menu-search::placeholder {
+    color: var(--sbm-link);
+    opacity: 0.7;
+}
+
+.sbm-list,
+.sbm-sub {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sbm-list {
+    padding: 10px 0;
+}
+
+.sbm-item[hidden] {
+    display: none;
+}
+
+/* linha = link + setinha; o hover pinta a linha toda, como no site */
+.sbm-row {
+    display: flex;
+    align-items: stretch;
+    margin: 0 10px;
+    border-radius: var(--sbm-radius);
+    transition: all 0.2s;
+}
+
+.sbm-link {
+    flex: 1;
+    min-width: 0;
+    display: block;
+    padding: 12px 20px;
+    color: var(--sbm-link);
+    text-decoration: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: left;
+    line-height: 1.5;
+    background: transparent;
+    border: none;
+    border-radius: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sbm-arrow {
+    flex: 0 0 auto;
+    padding: 0 16px;
+    background: transparent;
+    border: none;
+    color: var(--sbm-link);
+    font-size: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease, color 0.2s;
+}
+
+.sbm-row:hover,
+.sbm-row:focus-within {
+    background-color: var(--sbm-hover-bg);
+}
+
+.sbm-row:hover .sbm-link,
+.sbm-row:hover .sbm-arrow,
+.sbm-row:focus-within .sbm-link,
+.sbm-row:focus-within .sbm-arrow {
+    color: var(--sbm-accent);
+}
+
+.sbm-link:focus-visible,
+.sbm-arrow:focus-visible {
+    outline: 2px solid var(--sbm-accent);
+    outline-offset: -2px;
+}
+
+.sbm-item.sbm-open > .sbm-row > .sbm-arrow {
+    transform: rotate(180deg);
+}
+
+.sbm-sub {
+    display: none;
+    background-color: var(--sbm-sub-bg);
+    border-radius: var(--sbm-radius);
+    margin: 5px 10px;
+    overflow: hidden;
+}
+
+.sbm-item.sbm-open > .sbm-sub {
+    display: block;
+}
+
+/* itens de submenu: mais finos, sem cantos, recuados */
+.sbm-sub .sbm-row {
+    margin: 0;
+    border-radius: 0;
+}
+
+.sbm-sub .sbm-link {
+    padding: 10px 20px 10px 40px;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+/* terceiro nivel */
+.sbm-sub .sbm-sub {
+    margin-left: 10px;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.sbm-empty {
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+    color: var(--sbm-link);
+    font-size: 12px;
+}
+
+.sbm-note {
+    padding: 14px 20px 20px;
+    border-top: 1px solid var(--sbm-border);
+    color: var(--sbm-link);
+    font-size: 11px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .sbm-drawer {
+        width: 280px;
+    }
+}

@@ -55,6 +55,12 @@ function applyLocalChanges(original, current, server) {
 let isReadOnly = false;
 let isSuperAdmin = false;
 const ADMIN_PASSWORD = "Ben10";
+// ATENÇÃO: tudo que está neste arquivo é visível para qualquer visitante do site
+// (Ver código-fonte / DevTools). Estas senhas só evitam uso acidental; não
+// protegem nada de verdade. Para proteção real use Firebase Auth + regras do
+// Firestore. Estão aqui, em um lugar só, para facilitar a troca.
+const SUPER_ADMIN_PASSWORD = "Ben10000"; // libera os limites de regras (isSuperAdmin)
+const NPCS_DOC_PASSWORD = "ventilador"; // senha extra do documento especial "NPCS"
 
 let currentDocId = "";
 document.getElementById("doc-id").value = currentDocId;
@@ -984,8 +990,8 @@ async function deleteCurrentChar() {
         if (
             pwd !== charData.password &&
             pwd !== ADMIN_PASSWORD &&
-            pwd !== "Ben10000" &&
-            !(currentDocId === "NPCS" && pwd === "ventilador")
+            pwd !== SUPER_ADMIN_PASSWORD &&
+            !(currentDocId === "NPCS" && pwd === NPCS_DOC_PASSWORD)
         ) {
             if (pwd !== null)
                 await customAlert("Senha incorreta! Exclusão cancelada.");
@@ -1546,7 +1552,9 @@ function init() {
             : charData.pcs[activePcIndex].npcs[activeNpcIndex];
 
     const phoneInput = document.querySelector("#info-telefone");
-    if (phoneInput && !iti) {
+    // Se o CDN da biblioteca falhar (offline, adblock...), o campo de telefone
+    // vira um input comum em vez de derrubar a ficha inteira.
+    if (phoneInput && !iti && typeof window.intlTelInput === "function") {
         iti = window.intlTelInput(phoneInput, {
             initialCountry: "br",
             utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
@@ -1757,8 +1765,8 @@ async function loadFromCloud() {
                 if (
                     entered !== data.password &&
                     entered !== ADMIN_PASSWORD &&
-                    entered !== "Ben10000" &&
-                    !(currentDocId === "NPCS" && entered === "ventilador")
+                    entered !== SUPER_ADMIN_PASSWORD &&
+                    !(currentDocId === "NPCS" && entered === NPCS_DOC_PASSWORD)
                 ) {
                     isReadOnly = true;
                     if (entered !== null)
@@ -1766,7 +1774,7 @@ async function loadFromCloud() {
                             "Senha incorreta. A ficha foi aberta no Modo de Leitura.",
                         );
                 } else {
-                    if (entered === "Ben10000") isSuperAdmin = true;
+                    if (entered === SUPER_ADMIN_PASSWORD) isSuperAdmin = true;
                     await customAlert("Acesso concedido!");
                 }
             }
@@ -1951,9 +1959,9 @@ async function managePassword() {
         if (
             oldPass === charData.password ||
             oldPass === ADMIN_PASSWORD ||
-            oldPass === "Ben10000"
+            oldPass === SUPER_ADMIN_PASSWORD
         ) {
-            if (oldPass === "Ben10000") isSuperAdmin = true;
+            if (oldPass === SUPER_ADMIN_PASSWORD) isSuperAdmin = true;
             let newPass = await customPrompt(
                 "Digite a nova senha (ou deixe totalmente em branco para REMOVER a proteção atual):",
             );
@@ -1974,7 +1982,7 @@ async function managePassword() {
         let newPass = await customPrompt(
             "Defina uma senha para proteger a edição desta ficha:",
         );
-        if (newPass === "Ben10000") {
+        if (newPass === SUPER_ADMIN_PASSWORD) {
             isSuperAdmin = true;
             await customAlert("Modo Super ADM ativado para esta sessão!");
             toggleEditability();
@@ -2403,20 +2411,6 @@ function runFallbackChecks() {
 window.toggleBox = function (id) {
     if (!currentChar) return;
     currentChar.info[id] = !currentChar.info[id];
-    saveData();
-    updateUI();
-};
-
-window.toggleBox = function (id) {
-    if (!currentChar) return;
-    currentChar.info[id] = !currentChar.info[id];
-    saveData();
-    updateUI();
-};
-
-window.toggleLockHaki = function (type, isChecked) {
-    if (isReadOnly) return;
-    currentChar.info['lock' + type.charAt(0).toUpperCase() + type.slice(1)] = isChecked;
     saveData();
     updateUI();
 };
@@ -3606,25 +3600,6 @@ function formatAmiAlcMult(el) {
     updateUI();
 }
 
-async function handlePatenteChange(val) {
-    currentChar.info.patente = val;
-    if (val !== "" && typeof salarios[val] !== "undefined") {
-        let baseSalario = salarios[val];
-        if (
-            currentChar.info.orgTipo === "Marinha" &&
-            currentChar.info.linhagem === "Kong"
-        ) {
-            baseSalario += 50000000;
-        }
-        currentChar.info.salario =
-            baseSalario === 0 ? "0" : baseSalario.toLocaleString("pt-BR");
-    } else {
-        currentChar.info.salario = "";
-    }
-    saveData();
-    updateUI();
-}
-
 function formatAndSave(category, field, el) {
     let cleanVal = el.value.replace(/\D/g, "");
     let num = cleanVal ? parseInt(cleanVal, 10) : 0;
@@ -3770,75 +3745,6 @@ function toggleLayout() {
     updateUI();
     saveData();
 }
-
-window.puxarDestrezaDano = async function () {
-    if (currentChar.info.calcQuemAtaca === "inimigo") {
-        await customAlert(
-            "Quando o inimigo ataca, insira o Atributo Físico dele manualmente.",
-        );
-        return;
-    }
-    let val = document.getElementById("total-d").dataset.active;
-    let el = document.getElementById("info-calcUseAttr");
-    el.value = parseInt(val) || 0;
-    el.dispatchEvent(new Event("input", { bubbles: true }));
-};
-
-window.puxarForcaDano = async function () {
-    if (currentChar.info.calcQuemAtaca === "inimigo") {
-        await customAlert(
-            "Quando o inimigo ataca, insira o Atributo Físico dele manualmente.",
-        );
-        return;
-    }
-    let val = document.getElementById("total-f").dataset.active;
-    let el = document.getElementById("info-calcUseAttr");
-    el.value = parseInt(val) || 0;
-    el.dispatchEvent(new Event("input", { bubbles: true }));
-};
-
-window.puxarResistenciaDano = async function () {
-    if (currentChar.info.calcQuemAtaca === "eu") {
-        await customAlert(
-            "Quando você ataca, insira a Resistência do inimigo manualmente.",
-        );
-        return;
-    }
-    let val = document.getElementById("total-r").dataset.active;
-    let el = document.getElementById("info-calcInimigoRes");
-    el.value = parseInt(val) || 0;
-    el.dispatchEvent(new Event("input", { bubbles: true }));
-};
-
-window.sofrerDano = async function () {
-    if (isReadOnly) return;
-    let rawDano = document
-        .getElementById("calc-dano-final")
-        .textContent.replace(/\D/g, "");
-    let dano = parseInt(rawDano) || 0;
-    if (dano <= 0) return;
-
-    let currentHp = parseInt(currentChar.info.hpAtual);
-    if (isNaN(currentHp) || currentHp === -1) {
-        currentHp =
-            parseInt(
-                document
-                    .getElementById("hp-total")
-                    .textContent.replace(/\D/g, ""),
-            ) || 0;
-    }
-
-    let newHp = currentHp - dano;
-    if (newHp < 0) newHp = 0;
-
-    currentChar.info.hpAtual = newHp;
-    let elHp = document.getElementById("hp-atual");
-    if (elHp) {
-        elHp.value = newHp.toLocaleString("pt-BR");
-    }
-    saveData();
-    updateUI();
-};
 
 window.receberSalario = async function () {
     if (isReadOnly) return;
@@ -7313,18 +7219,18 @@ function updateUI() {
     let calcHA = Math.round((HA + flatBonus.ha) * (1 + bonus.ha));
     let elCalcUseHakiSelect = document.getElementById("info-calcUseHaki");
     if (elCalcUseHakiSelect) {
-        let htmlHaki = '<option value="nao">N o</option>';
+        let htmlHaki = '<option value="nao">Não</option>';
         if (!i.lockHArm) {
             if (i.unlockHA1)
-                htmlHaki += '<option value="invisivel">Invis vel</option>';
-            if (i.unlockHA2) htmlHaki += '<option value="visivel">Vis vel</option>';
+                htmlHaki += '<option value="invisivel">Invisível</option>';
+            if (i.unlockHA2) htmlHaki += '<option value="visivel">Visível</option>';
             if (i.unlockHA3)
-                htmlHaki += '<option value="imbuicao">Imbui o</option>';
+                htmlHaki += '<option value="imbuicao">Imbuição</option>';
             if (i.unlockHA4)
                 htmlHaki += '<option value="fullbody">Full Body</option>';
-            if (i.unlockHA5) htmlHaki += '<option value="emissao">Emiss o</option>';
+            if (i.unlockHA5) htmlHaki += '<option value="emissao">Emissão</option>';
             if (i.unlockHA6)
-                htmlHaki += '<option value="avancado">Avan ado</option>';
+                htmlHaki += '<option value="avancado">Avançado</option>';
         }
         if (elCalcUseHakiSelect.innerHTML !== htmlHaki)
             elCalcUseHakiSelect.innerHTML = htmlHaki;
@@ -7343,12 +7249,12 @@ function updateUI() {
     let calcHR = Math.round((HR + flatBonus.hr) * (1 + bonus.hr));
     let elCalcUseHakiReiSelect = document.getElementById("info-calcUseHakiRei");
     if (elCalcUseHakiReiSelect) {
-        let htmlHakiRei = '<option value="nao">N o</option>';
+        let htmlHakiRei = '<option value="nao">Não</option>';
         if (!i.lockHRei) {
             if (i.unlockHR4)
-                htmlHakiRei += '<option value="pressao">Press o</option>';
+                htmlHakiRei += '<option value="pressao">Pressão</option>';
             if (i.unlockHR6)
-                htmlHakiRei += '<option value="infusao">Infus o</option>';
+                htmlHakiRei += '<option value="infusao">Infusão</option>';
         }
         if (elCalcUseHakiReiSelect.innerHTML !== htmlHakiRei)
             elCalcUseHakiReiSelect.innerHTML = htmlHakiRei;
@@ -9827,7 +9733,7 @@ async function changeFichaID() {
             let conf = await customPrompt(
                 `ATENÇÃO: Já existe uma ficha salva no ID "${novoId}". Digite a SENHA DE ADM para sobrescrevê-la e apagar a ficha que está lá:`,
             );
-            if (conf !== ADMIN_PASSWORD && conf !== "Ben10000") {
+            if (conf !== ADMIN_PASSWORD && conf !== SUPER_ADMIN_PASSWORD) {
                 document
                     .getElementById("db-status")
                     .classList.remove("syncing");
@@ -9877,7 +9783,7 @@ async function deleteFichaID() {
     let conf = await customPrompt(
         `ATENÇÃO: Você está prestes a apagar COMPLETAMENTE o ID "${currentDocId}" do banco de dados. Digite a SENHA DE ADM para confirmar:`,
     );
-    if (conf !== ADMIN_PASSWORD && conf !== "Ben10000") {
+    if (conf !== ADMIN_PASSWORD && conf !== SUPER_ADMIN_PASSWORD) {
         if (conf !== null)
             await customAlert("Senha de ADM incorreta! Operação cancelada.");
         return;
@@ -9929,8 +9835,8 @@ async function saveBackup() {
             if (
                 pass !== data.backupPassword &&
                 pass !== ADMIN_PASSWORD &&
-                pass !== "Ben10000" &&
-                !(currentDocId === "NPCS" && pass === "ventilador")
+                pass !== SUPER_ADMIN_PASSWORD &&
+                !(currentDocId === "NPCS" && pass === NPCS_DOC_PASSWORD)
             ) {
                 if (pass !== null)
                     await customAlert("Senha do backup incorreta!");
@@ -9985,8 +9891,8 @@ async function loadBackup() {
     if (
         pass !== data.backupPassword &&
         pass !== ADMIN_PASSWORD &&
-        pass !== "Ben10000" &&
-        !(currentDocId === "NPCS" && pass === "ventilador")
+        pass !== SUPER_ADMIN_PASSWORD &&
+        !(currentDocId === "NPCS" && pass === NPCS_DOC_PASSWORD)
     ) {
         if (pass !== null) await customAlert("Senha do backup incorreta!");
         return;
@@ -10049,6 +9955,12 @@ window.puxarVelocidade = async function () {
 
 window.puxarDestrezaDano = async function () {
     if (isReadOnly) return;
+    if (currentChar.info.calcQuemAtaca === "inimigo") {
+        await customAlert(
+            "Quando o inimigo ataca, insira o Atributo Físico dele manualmente.",
+        );
+        return;
+    }
     let el = document.getElementById("total-d");
     let passivo = parseInt(el.dataset.passive) || 0;
     let ativo = parseInt(el.dataset.active) || 0;
@@ -10070,6 +9982,12 @@ window.puxarDestrezaDano = async function () {
 
 window.puxarForcaDano = async function () {
     if (isReadOnly) return;
+    if (currentChar.info.calcQuemAtaca === "inimigo") {
+        await customAlert(
+            "Quando o inimigo ataca, insira o Atributo Físico dele manualmente.",
+        );
+        return;
+    }
     let el = document.getElementById("total-f");
     let passivo = parseInt(el.dataset.passive) || 0;
     let ativo = parseInt(el.dataset.active) || 0;
@@ -10091,6 +10009,12 @@ window.puxarForcaDano = async function () {
 
 window.puxarResistenciaDano = async function () {
     if (isReadOnly) return;
+    if (currentChar.info.calcQuemAtaca === "eu") {
+        await customAlert(
+            "Quando você ataca, insira a Resistência do inimigo manualmente.",
+        );
+        return;
+    }
     let el = document.getElementById("total-r");
     let passivo = parseInt(el.dataset.passive) || 0;
     let ativo = parseInt(el.dataset.active) || 0;
@@ -10125,12 +10049,19 @@ window.sofrerDano = async function () {
     let conf = await customPrompt(
         `ATENÇÃO: Você está prestes a subtrair ${dano.toLocaleString("pt-BR")} de dano da SUA PRÓPRIA VIDA (HP Atual), e não da vida do inimigo. Digite 'SIM' para confirmar que deseja receber esse dano:`,
     );
-    if (conf !== "SIM" && conf !== "sim" && conf !== "Sim") {
+    if (String(conf).trim().toUpperCase() !== "SIM") {
         if (conf !== null) await customAlert("Operação cancelada.");
         return;
     }
 
-    let hpAtual = currentChar.info.hpAtual;
+    // HP vazio/inválido/-1 = "ainda cheio": parte do HP total, senão viraria NaN
+    let hpAtual = parseInt(currentChar.info.hpAtual);
+    if (isNaN(hpAtual) || hpAtual === -1) {
+        hpAtual =
+            parseInt(
+                document.getElementById("hp-total").textContent.replace(/\D/g, ""),
+            ) || 0;
+    }
     let novoHp = hpAtual - dano;
     if (novoHp < 0) novoHp = 0;
 
@@ -10391,7 +10322,7 @@ window.promoverCargo = async function () {
         let pwd = await customPrompt(
             "Requisitos não atendidos. Digite a senha de SUPER ADM para forçar a promoção:",
         );
-        if (pwd !== "Ben10000") {
+        if (pwd !== SUPER_ADMIN_PASSWORD) {
             if (pwd !== null) await customAlert("Senha incorreta.");
             return;
         }
@@ -10402,7 +10333,7 @@ window.promoverCargo = async function () {
         let pwd = await customPrompt(
             "A promoção para Almirante-de-Frota exige autorização. Digite a senha de ADM:",
         );
-        if (pwd !== ADMIN_PASSWORD && pwd !== "Ben10000") {
+        if (pwd !== ADMIN_PASSWORD && pwd !== SUPER_ADMIN_PASSWORD) {
             await customAlert("Senha incorreta.");
             return;
         }
@@ -10410,7 +10341,7 @@ window.promoverCargo = async function () {
         let pwd = await customPrompt(
             "A promoção para Eixo exige autorização. Digite a senha de ADM:",
         );
-        if (pwd !== ADMIN_PASSWORD && pwd !== "Ben10000") {
+        if (pwd !== ADMIN_PASSWORD && pwd !== SUPER_ADMIN_PASSWORD) {
             await customAlert("Senha incorreta.");
             return;
         }
@@ -10705,27 +10636,8 @@ window.importarJSON = function (event) {
     reader.readAsText(file);
 };
 
-window.toggleLockEspirito = function (isChecked) {
-    if (isReadOnly) return;
-    currentChar.info.lockEsp = isChecked;
-    currentChar.info.lockHArm = isChecked;
-    currentChar.info.lockHObs = isChecked;
-    currentChar.info.lockHRei = isChecked;
-    
-    let chkArm = document.getElementById("chk-lockHArm");
-    let chkObs = document.getElementById("chk-lockHObs");
-    let chkRei = document.getElementById("chk-lockHRei");
-    if (chkArm) chkArm.checked = isChecked;
-    if (chkObs) chkObs.checked = isChecked;
-    if (chkRei) chkRei.checked = isChecked;
-    
-    if (typeof saveData === "function") saveData();
-    if (typeof updateUI === "function") updateUI();
-};
-
 window.toggleLockHaki = function () {
     if (isReadOnly) return;
-    let chkEsp = document.getElementById("chk-lockEsp");
     let chkArm = document.getElementById("chk-lockHArm")?.checked || false;
     let chkObs = document.getElementById("chk-lockHObs")?.checked || false;
     let chkRei = document.getElementById("chk-lockHRei")?.checked || false;
@@ -10735,8 +10647,6 @@ window.toggleLockHaki = function () {
     currentChar.info.lockHArm = chkArm;
     currentChar.info.lockHObs = chkObs;
     currentChar.info.lockHRei = chkRei;
-    
-    if (chkEsp) chkEsp.checked = allChecked;
     
     if (typeof saveData === "function") saveData();
     if (typeof updateUI === "function") updateUI();

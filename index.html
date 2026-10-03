@@ -8,6 +8,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
         <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="sidebar.css">
         <style>
             .iti { width: 100%; display: block; margin-top: 5px; }
             .iti__flag { background-image: url("https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/img/flags.png"); }
@@ -25,6 +26,8 @@
         <script src="https://unpkg.com/drag-drop-touch"></script>
     </head>
     <body>
+        <div id="sidebar-container"></div>
+
         <header>
             <div class="cloud-controls">
                 <select id="save-mode" onchange="updateSaveMode(this.value)" style="width: auto; padding: 6px; font-size: 13px; font-family: 'Segoe UI', sans-serif; border-radius: 4px;">
@@ -1027,6 +1030,7 @@
         </div>
 
         <script src="script.js"></script>
+        <script src="sidebar.js"></script>
 
     </body>
 </html>
