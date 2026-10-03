@@ -20,33 +20,39 @@ html.sbm-locked {
     overflow: hidden;
 }
 
-/* botao que abre o menu (mesmo estilo do botao do site: quadrado arredondado) */
+/* botao que abre o menu: pequeno, fica na linha do titulo do cabecalho */
 .sbm-open-btn {
-    align-self: flex-start;
-    height: 45px;
-    padding: 0 18px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 24px;
+    padding: 0;
     background-color: var(--sbm-bg);
     border: 2px solid var(--sbm-border);
     color: var(--sbm-text);
-    border-radius: var(--sbm-radius);
+    border-radius: 8px;
     font-family: Verdana, Arial, sans-serif;
-    font-size: 14px;
-    font-weight: bold;
+    font-size: 15px;
+    line-height: 1;
     cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    white-space: pre;
+    transition: all 0.2s ease;
 }
 
-.sbm-open-btn:hover {
+.sbm-open-btn:hover,
+.sbm-open-btn:focus-visible {
     border-color: var(--sbm-accent);
     color: var(--sbm-accent);
+    outline: none;
 }
 
 .sbm-open-btn.sbm-floating {
     position: fixed;
-    top: 20px;
-    left: 20px;
+    top: 10px;
+    left: 10px;
+    width: 36px;
+    height: 36px;
     z-index: 1000;
 }
 
@@ -276,6 +282,21 @@ html.sbm-locked {
 .sbm-sub .sbm-sub {
     margin-left: 10px;
     background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* pagina atual (SALVAR FICHA): destacada, como o link ativo do site */
+.sbm-link.sbm-current {
+    color: var(--sbm-accent);
+    font-weight: bold;
+    background-color: var(--sbm-hover-bg);
+}
+
+.sbm-here {
+    display: block;
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: normal;
+    opacity: 0.85;
 }
 
 .sbm-empty {

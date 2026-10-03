@@ -34,6 +34,8 @@
                 { t: "HABILIDADES ÚNICAS", href: p("habilidades-unicas.html") },
                 { t: "LINHAGENS", href: p("linhagens.html") },
                 { t: "RAÇAS", href: p("racas.html") },
+                // É esta própria página: aparece destacado ("você está aqui") e não recarrega nada.
+                { t: "SALVAR FICHA", href: "https://herikliz.github.io/New-Seas-RPG-Ficha/", current: true },
             ],
         },
         {
@@ -189,6 +191,7 @@
     /* ------------------------ montagem do menu -------------------------- */
 
     const nodes = []; // lista plana de todos os itens (para pesquisa)
+    let closeMenu = function () {}; // trocada pela função real dentro de init()
 
     function buildItem(item, depth) {
         const li = el("li", "sbm-item sbm-depth-" + Math.min(depth, 2));
@@ -201,8 +204,20 @@
         if (isLink) {
             const a = el("a", "sbm-link", item.t);
             a.href = item.href;
-            a.target = "_blank";
-            a.rel = "noopener noreferrer";
+            if (item.current) {
+                // página atual: marca "você está aqui" e só fecha o menu (não recarrega a ficha)
+                a.classList.add("sbm-current");
+                a.setAttribute("aria-current", "page");
+                a.appendChild(el("span", "sbm-here", "● você está aqui"));
+                a.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    closeMenu();
+                });
+                node.isCurrent = true;
+            } else {
+                a.target = "_blank";
+                a.rel = "noopener noreferrer";
+            }
             row.appendChild(a);
         } else {
             // grupo sem página própria: o texto inteiro abre/fecha o submenu
@@ -286,14 +301,21 @@
         container.dataset.ready = "1";
         applyTheme();
 
-        // botão que abre o menu (dentro do header; senão, flutuante)
-        const openBtn = el("button", "sbm-open-btn", "☰  Site do RPG");
+        // botão que abre o menu: pequeno, dentro da linha do título do cabeçalho
+        // (assim não cria linha nova nem aumenta a altura do cabeçalho)
+        const openBtn = el("button", "sbm-open-btn", "☰");
         openBtn.type = "button";
-        openBtn.title = "Abrir o menu do site informativo";
+        openBtn.title = "Menu do site informativo";
+        openBtn.setAttribute("aria-label", "Abrir o menu do site informativo");
         openBtn.setAttribute("aria-controls", "sbm-drawer");
         openBtn.setAttribute("aria-expanded", "false");
+        const titleRow = document.querySelector("header > span");
         const header = document.querySelector("header");
-        if (header) header.insertBefore(openBtn, header.firstChild);
+        const statusDot = document.getElementById("db-status");
+        // Fica ao lado da bolinha de status (depois de "Descolapsar Tudo"): no celular
+        // essa linha tem folga, então o cabeçalho não ganha altura.
+        if (titleRow) titleRow.insertBefore(openBtn, statusDot && statusDot.parentNode === titleRow ? statusDot : titleRow.firstChild);
+        else if (header) header.insertBefore(openBtn, header.firstChild);
         else {
             openBtn.classList.add("sbm-floating");
             document.body.appendChild(openBtn);
@@ -335,6 +357,16 @@
             topNodes.push(n);
             ul.appendChild(n.li);
         });
+        (function openPathToCurrent(list) {
+            for (const n of list) {
+                if (n.isCurrent) return true;
+                if (openPathToCurrent(n.children)) {
+                    setOpen(n, true);
+                    return true;
+                }
+            }
+            return false;
+        })(topNodes);
         emptyMsg = el("p", "sbm-empty", "Nenhum resultado.");
         emptyMsg.hidden = true;
         nav.append(ul, emptyMsg);
@@ -365,6 +397,7 @@
             if (aside.contains(document.activeElement)) openBtn.focus();
         }
 
+        closeMenu = close;
         openBtn.addEventListener("click", () => (aside.classList.contains("sbm-show") ? close() : open()));
         closeBtn.addEventListener("click", close);
         overlay.addEventListener("click", close);

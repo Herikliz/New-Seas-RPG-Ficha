@@ -12,6 +12,57 @@ let isFirebaseReady = false;
 let lastSyncedData = null;
 let iti = null;
 
+// Escapa texto digitado pelo usuário antes de colocá-lo em innerHTML ou em atributos.
+// Sem isso, um nome com aspas quebra o campo e um nome malicioso pode executar código.
+function escHtml(v) {
+    return String(v ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+// Texto seguro para usar DENTRO de onclick="fn(...)": vira um literal JS válido e escapado.
+function jsArg(v) {
+    return escHtml(JSON.stringify(String(v ?? "")));
+}
+
+// Copia texto para a área de transferência. Usa a API moderna e, se ela não existir
+// ou for bloqueada, cai no método antigo. Se nada funcionar, avisa (em vez de dizer
+// "copiado!" sem ter copiado). Retorna true/false.
+async function copiarTexto(text) {
+    let ok = false;
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+            ok = true;
+        }
+    } catch (e) {
+        ok = false;
+    }
+    if (!ok) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+            ok = document.execCommand("copy");
+        } catch (e) {
+            ok = false;
+        }
+        document.body.removeChild(ta);
+    }
+    if (!ok) {
+        await customAlert(
+            "Não foi possível copiar automaticamente. Selecione o texto e copie manualmente (Ctrl+C).",
+        );
+    }
+    return ok;
+}
+
 function applyLocalChanges(original, current, server) {
     if (JSON.stringify(original) === JSON.stringify(current)) return server;
     if (original == null || current == null || typeof current !== 'object') {
@@ -954,7 +1005,7 @@ function renderTabs() {
                 : pcObj.pc.name;
         let pcActive =
             pIdx === activePcIndex && activeNpcIndex === -1 ? "active" : "";
-        html += `<button class="btn-tab ${pcActive}" draggable="true" ondragstart="dragStart(event, ${pIdx}, -1)" ondragend="dragEnd(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondragover="allowDrop(event)" ondrop="dropOnTab(event, ${pIdx}, -1)" onclick="switchChar(${pIdx}, -1)">${pcName}</button>`;
+        html += `<button class="btn-tab ${pcActive}" draggable="true" ondragstart="dragStart(event, ${pIdx}, -1)" ondragend="dragEnd(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondragover="allowDrop(event)" ondrop="dropOnTab(event, ${pIdx}, -1)" onclick="switchChar(${pIdx}, -1)">${escHtml(pcName)}</button>`;
 
         pcObj.npcs.forEach((npc, nIdx) => {
             let npcName = npc.name.trim() === "" ? `NPC ${nIdx + 1}` : npc.name;
@@ -962,7 +1013,7 @@ function renderTabs() {
                 pIdx === activePcIndex && nIdx === activeNpcIndex
                     ? "active"
                     : "";
-            html += `<button class="btn-tab npc-tab ${npcActive}" draggable="true" ondragstart="dragStart(event, ${pIdx}, ${nIdx})" ondragend="dragEnd(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondragover="allowDrop(event)" ondrop="dropOnTab(event, ${pIdx}, ${nIdx})" onclick="switchChar(${pIdx}, ${nIdx})">${npcName}</button>`;
+            html += `<button class="btn-tab npc-tab ${npcActive}" draggable="true" ondragstart="dragStart(event, ${pIdx}, ${nIdx})" ondragend="dragEnd(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondragover="allowDrop(event)" ondrop="dropOnTab(event, ${pIdx}, ${nIdx})" onclick="switchChar(${pIdx}, ${nIdx})">${escHtml(npcName)}</button>`;
         });
         html += `<button class="btn-add" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondragover="allowDrop(event)" ondrop="dropOnAddNpc(event, ${pIdx})" onclick="addNPC(${pIdx})" title="Adicionar NPC">+ NPC</button>`;
         html += `</div>`;
@@ -1673,7 +1724,9 @@ function initFirebase() {
             loadFromCloud();
         }
         iniciarMonitoramentoBancoDeDados();
-    } catch (e) {}
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 // ---- ID da ficha: ao completar 4 caracteres já puxa, sem Enter ----
@@ -1815,7 +1868,9 @@ async function loadFromCloud() {
             saveData();
             toggleEditability();
         }
-    } catch (e) {}
+    } catch (e) {
+        console.error(e);
+    }
     setTimeout(
         () => document.getElementById("db-status").classList.remove("syncing"),
         500,
@@ -2656,16 +2711,16 @@ window.renderNavios = function () {
 
         if (isCustom) {
             html += `<div style="display: flex; gap: 5px;">
-                <input type="text" placeholder="Nome do Navio" value="${n.nomeCustom || ""}" oninput="updateNavio(${idx}, 'nomeCustom', this.value)" style="flex: 2; padding: 6px;">
-                <input type="text" class="no-sum" placeholder="HP Atual" value="${n.hpAtual !== undefined ? n.hpAtual : ""}" oninput="let cursor = this.selectionStart; updateNavio(${idx}, 'hpAtual', this.value); let formatted = currentChar.info.naviosList[${idx}].hpAtual !== undefined ? currentChar.info.naviosList[${idx}].hpAtual : ''; if(this.value != formatted) { this.value = formatted; try{this.setSelectionRange(cursor,cursor);}catch(e){} }" style="flex: 1; padding: 6px; text-align: center;">
+                <input type="text" placeholder="Nome do Navio" value="${escHtml(n.nomeCustom || "")}" oninput="updateNavio(${idx}, 'nomeCustom', this.value)" style="flex: 2; padding: 6px;">
+                <input type="text" class="no-sum" placeholder="HP Atual" value="${escHtml(n.hpAtual !== undefined ? n.hpAtual : "")}" oninput="let cursor = this.selectionStart; updateNavio(${idx}, 'hpAtual', this.value); let formatted = currentChar.info.naviosList[${idx}].hpAtual !== undefined ? currentChar.info.naviosList[${idx}].hpAtual : ''; if(this.value != formatted) { this.value = formatted; try{this.setSelectionRange(cursor,cursor);}catch(e){} }" style="flex: 1; padding: 6px; text-align: center;">
                 <span style="display:flex; align-items:center;">/</span>
-                <input type="text" class="no-sum" placeholder="HP Máx" value="${n.hpMax || ""}" oninput="let cursor = this.selectionStart; updateNavio(${idx}, 'hpMax', this.value); let formatted2 = currentChar.info.naviosList[${idx}].hpMax !== undefined ? currentChar.info.naviosList[${idx}].hpMax : ''; if(this.value != formatted2) { this.value = formatted2; try{this.setSelectionRange(cursor,cursor);}catch(e){} }" style="flex: 1; padding: 6px; text-align: center;">
+                <input type="text" class="no-sum" placeholder="HP Máx" value="${escHtml(n.hpMax || "")}" oninput="let cursor = this.selectionStart; updateNavio(${idx}, 'hpMax', this.value); let formatted2 = currentChar.info.naviosList[${idx}].hpMax !== undefined ? currentChar.info.naviosList[${idx}].hpMax : ''; if(this.value != formatted2) { this.value = formatted2; try{this.setSelectionRange(cursor,cursor);}catch(e){} }" style="flex: 1; padding: 6px; text-align: center;">
             </div>`;
         } else if (hasHp) {
             html += `<div style="display: flex; gap: 5px; align-items: center;">
                 <span style="font-size: 11px; color:#aaa;">Vida do Navio:</span>
-                <input type="text" class="no-sum" placeholder="HP Atual" value="${n.hpAtual !== undefined ? n.hpAtual : ""}" oninput="let cursor = this.selectionStart; updateNavio(${idx}, 'hpAtual', this.value); let formatted = currentChar.info.naviosList[${idx}].hpAtual !== undefined ? currentChar.info.naviosList[${idx}].hpAtual : ''; if(this.value != formatted) { this.value = formatted; try{this.setSelectionRange(cursor,cursor);}catch(e){} }" style="width: 60px; padding: 6px; text-align: center;">
-                <span style="font-size: 11px;">/ ${maxHp}</span>
+                <input type="text" class="no-sum" placeholder="HP Atual" value="${escHtml(n.hpAtual !== undefined ? n.hpAtual : "")}" oninput="let cursor = this.selectionStart; updateNavio(${idx}, 'hpAtual', this.value); let formatted = currentChar.info.naviosList[${idx}].hpAtual !== undefined ? currentChar.info.naviosList[${idx}].hpAtual : ''; if(this.value != formatted) { this.value = formatted; try{this.setSelectionRange(cursor,cursor);}catch(e){} }" style="width: 60px; padding: 6px; text-align: center;">
+                <span style="font-size: 11px;">/ ${escHtml(maxHp)}</span>
             </div>`;
         }
         html += `</div>`;
@@ -2743,7 +2798,7 @@ function renderArmasEquipadas() {
         let btnTxt = a.ativo ? "ON" : "OFF";
         finalHtml += `
             <div style="background: rgba(0,0,0,0.3); padding: 5px; border: 1px dashed ${btnCor}; border-radius: 6px; margin-bottom: 5px; display: flex; gap: 5px; align-items: center; transition: 0.2s;">
-                <input type="text" placeholder="Nome do Item/Arma" value="${a.nome || ""}" oninput="updateArmaEquipada(${idx}, 'nome', this.value)" style="flex: 2; padding: 6px;">
+                <input type="text" placeholder="Nome do Item/Arma" value="${escHtml(a.nome || "")}" oninput="updateArmaEquipada(${idx}, 'nome', this.value)" style="flex: 2; padding: 6px;">
                 <select onchange="updateArmaEquipada(${idx}, 'stat', this.value)" style="flex: 1; padding: 6px; width: auto; font-size: 11px;">
                     <optgroup label="Atributos">
                         <option value="tudoAttr" ${a.stat === "tudoAttr" ? "selected" : ""}>Todos os Atributos</option>
@@ -2784,8 +2839,8 @@ function renderArmasEquipadas() {
                     <option value="pct" ${a.type === "pct" ? "selected" : ""}>%</option>
                     <option value="flat" ${a.type === "flat" ? "selected" : ""}>Pts</option>
                 </select>
-                <input type="text" class="no-sum" placeholder="Valor" value="${valFmt}" oninput="let cursor = this.selectionStart; let oldLen = this.value.length; updateArmaEquipada(${idx}, 'val', this.value); let formatted = currentChar.info.armasEquipadasList[${idx}].val ? currentChar.info.armasEquipadasList[${idx}].val.toLocaleString('pt-BR') : ''; if(this.value !== formatted) { this.value = formatted; let newLen = this.value.length; try { this.setSelectionRange(cursor + (newLen - oldLen), cursor + (newLen - oldLen)); } catch(e){} }" style="width: 70px; padding: 6px; text-align: center;">
-                <input type="text" placeholder="HP" class="no-sum" value="${a.hp ? a.hp.toLocaleString("pt-BR") : ""}" oninput="let cursor = this.selectionStart; let oldLen = this.value.length; updateArmaEquipada(${idx}, 'hp', this.value); let formatted = currentChar.info.armasEquipadasList[${idx}].hp ? currentChar.info.armasEquipadasList[${idx}].hp.toLocaleString('pt-BR') : ''; if(this.value !== formatted) { this.value = formatted; let newLen = this.value.length; try { this.setSelectionRange(cursor + (newLen - oldLen), cursor + (newLen - oldLen)); } catch(e){} }" style="width: 60px; padding: 6px; text-align: center;">
+                <input type="text" class="no-sum" placeholder="Valor" value="${escHtml(valFmt)}" oninput="let cursor = this.selectionStart; let oldLen = this.value.length; updateArmaEquipada(${idx}, 'val', this.value); let formatted = currentChar.info.armasEquipadasList[${idx}].val ? currentChar.info.armasEquipadasList[${idx}].val.toLocaleString('pt-BR') : ''; if(this.value !== formatted) { this.value = formatted; let newLen = this.value.length; try { this.setSelectionRange(cursor + (newLen - oldLen), cursor + (newLen - oldLen)); } catch(e){} }" style="width: 70px; padding: 6px; text-align: center;">
+                <input type="text" placeholder="HP" class="no-sum" value="${escHtml(a.hp ? a.hp.toLocaleString("pt-BR") : "")}" oninput="let cursor = this.selectionStart; let oldLen = this.value.length; updateArmaEquipada(${idx}, 'hp', this.value); let formatted = currentChar.info.armasEquipadasList[${idx}].hp ? currentChar.info.armasEquipadasList[${idx}].hp.toLocaleString('pt-BR') : ''; if(this.value !== formatted) { this.value = formatted; let newLen = this.value.length; try { this.setSelectionRange(cursor + (newLen - oldLen), cursor + (newLen - oldLen)); } catch(e){} }" style="width: 60px; padding: 6px; text-align: center;">
                 <button type="button" class="btn btn-outline" style="padding: 4px 8px; font-size: 11px; margin: 0; color: ${btnCor}; border-color: ${btnCor}; min-width: 40px;" onclick="toggleArmaAtiva(${idx})">${btnTxt}</button>
                 <button type="button" class="btn btn-outline btn-danger" style="padding: 4px 8px; font-size: 11px; margin: 0;" onclick="removeArmaEquipada(${idx})">X</button>
             </div>
@@ -2812,14 +2867,14 @@ function renderNpcsComuns() {
         let numPts = parseInt(cPts) || "";
         finalHtml += `
             <div style="background: rgba(0,0,0,0.3); padding: 5px; border: 1px dashed #555; border-radius: 6px; margin-bottom: 5px; display: flex; gap: 5px; align-items: center;">
-                <input type="text" placeholder="Qtd" value="${cQtd ? numQtd.toLocaleString("pt-BR") : ""}" oninput="updateNpcComum(${idx}, 'quantidade', formatNpcNumber(this))" style="width: 60px;">
+                <input type="text" placeholder="Qtd" value="${escHtml(cQtd ? numQtd.toLocaleString("pt-BR") : "")}" oninput="updateNpcComum(${idx}, 'quantidade', formatNpcNumber(this))" style="width: 60px;">
                 <div style="flex: 1; display: flex; flex-direction: column; gap: 2px;">
                     <select onchange="updateNpcComum(${idx}, 'raca', this.value)" style="width: 100%;">${rHtml}</select>
-                    <input type="text" placeholder="Nome da Raça" value="${!racas[n.raca] && n.raca ? n.raca : ""}" 
+                    <input type="text" placeholder="Nome da Raça" value="${escHtml(!racas[n.raca] && n.raca ? n.raca : "")}" 
                            style="display: ${!racas[n.raca] && n.raca ? "block" : "none"};" 
                            oninput="updateNpcComum(${idx}, 'raca', this.value)">
                 </div>
-                <input type="text" placeholder="Pontos" value="${cPts ? numPts.toLocaleString("pt-BR") : ""}" oninput="updateNpcComum(${idx}, 'pontos', formatNpcNumber(this))" style="width: 80px;">
+                <input type="text" placeholder="Pontos" value="${escHtml(cPts ? numPts.toLocaleString("pt-BR") : "")}" oninput="updateNpcComum(${idx}, 'pontos', formatNpcNumber(this))" style="width: 80px;">
                 <button type="button" class="btn btn-outline btn-danger" style="padding: 2px 6px; font-size: 10px; margin: 0;" onclick="removeNpcComum(${idx})">X</button>
             </div>
         `;
@@ -2928,7 +2983,7 @@ function renderNpcsEspeciais() {
                 }
             });
             if (n[slotId] && !html.includes(`value="${n[slotId]}"`)) {
-                html += `<option value="${n[slotId]}" selected>${n[slotId]}</option>`;
+                html += `<option value="${escHtml(n[slotId])}" selected>${escHtml(n[slotId])}</option>`;
             }
             html += `</select>`;
             return html;
@@ -2937,7 +2992,7 @@ function renderNpcsEspeciais() {
         finalHtml += `
             <div style="background: rgba(0,0,0,0.3); padding: 5px; border: 1px dashed #555; border-radius: 6px; margin-bottom: 5px; display: flex; flex-direction: column; gap: 5px;">
                 <div style="display: flex; gap: 5px; align-items: center;">
-                    <input type="text" placeholder="Nome" value="${n.nome || ""}" oninput="updateNpcEspecial(${idx}, 'nome', this.value)" style="flex: 2;">
+                    <input type="text" placeholder="Nome" value="${escHtml(n.nome || "")}" oninput="updateNpcEspecial(${idx}, 'nome', this.value)" style="flex: 2;">
                     <select onchange="updateNpcEspecial(${idx}, 'sexo', this.value)" style="width: 60px;">
                         <option value="Masculino" ${n.sexo !== "Feminino" ? "selected" : ""}>Masc</option>
                         <option value="Feminino" ${n.sexo === "Feminino" ? "selected" : ""}>Fem</option>
@@ -2947,7 +3002,7 @@ function renderNpcsEspeciais() {
                         <option value="Evento" ${n.origem === "Evento" ? "selected" : ""}>Evento</option>
                         <option value="Extra-Narrada" ${n.origem === "Extra-Narrada" ? "selected" : ""}>Extra-Narrada</option>
                     </select>
-                    <input type="text" placeholder="Pontos" value="${cleanPtsStr ? pts.toLocaleString("pt-BR") : ""}" oninput="formatNpcNumber(this)" onchange="updateNpcEspecial(${idx}, 'pontos', this.value.replace(/\\D/g, ''))" style="width: 80px;">
+                    <input type="text" placeholder="Pontos" value="${escHtml(cleanPtsStr ? pts.toLocaleString("pt-BR") : "")}" oninput="formatNpcNumber(this)" onchange="updateNpcEspecial(${idx}, 'pontos', this.value.replace(/\\D/g, ''))" style="width: 80px;">
                     <button type="button" class="btn btn-outline btn-danger" style="padding: 2px 6px; font-size: 10px; margin: 0;" onclick="removeNpcEspecial(${idx})">X</button>
                 </div>
                 <div style="display: flex; gap: 5px;">
@@ -3138,9 +3193,9 @@ function renderTecnicas() {
                 <select onchange="updateTecnica(${idx}, 'estilo', this.value)" style="margin-bottom:5px; background-color:#222; border:1px solid #555; color:var(--text); padding:4px; font-size:11px; border-radius:4px;">
                     ${styleOptions}
                 </select>
-                <textarea placeholder="Nome da Técnica (Ex: Golpe Rápido)" oninput="updateTecnica(${idx}, 'nome', this.value)" style="min-height:38px; margin-bottom:5px; text-align:justify; padding-top:8px;">${t.nome}</textarea>
-                <textarea placeholder="Descrição da Técnica" oninput="updateTecnica(${idx}, 'desc', this.value)" style="min-height:50px; margin-bottom:5px; text-align:justify;">${t.desc}</textarea>
-                <textarea placeholder="Efeito / Buff (Ex: Perde 10% de Res)" oninput="updateTecnica(${idx}, 'efeito', this.value)" style="min-height:38px; text-align:justify; padding-top:8px;">${t.efeito}</textarea>
+                <textarea placeholder="Nome da Técnica (Ex: Golpe Rápido)" oninput="updateTecnica(${idx}, 'nome', this.value)" style="min-height:38px; margin-bottom:5px; text-align:justify; padding-top:8px;">${escHtml(t.nome)}</textarea>
+                <textarea placeholder="Descrição da Técnica" oninput="updateTecnica(${idx}, 'desc', this.value)" style="min-height:50px; margin-bottom:5px; text-align:justify;">${escHtml(t.desc)}</textarea>
+                <textarea placeholder="Efeito / Buff (Ex: Perde 10% de Res)" oninput="updateTecnica(${idx}, 'efeito', this.value)" style="min-height:38px; text-align:justify; padding-top:8px;">${escHtml(t.efeito)}</textarea>
             </div>
         `;
     });
@@ -3189,8 +3244,8 @@ function renderLogs() {
                     <label style="color:var(--warning);">Entrada ${idx + 1}</label>
                     <button type="button" class="btn btn-outline" style="color:var(--danger); border-color:var(--danger); font-size:10px; padding:2px 6px;" onclick="removeLog(${idx})">Remover</button>
                 </div>
-                <input type="text" placeholder="Ex: Semana 1 (Semana Normal [09/02/2026 – 15/02/2026])" value="${l.titulo}" oninput="updateLog(${idx}, 'titulo', this.value)" style="margin-bottom:5px;">
-                <textarea placeholder="- Auto-narrada [฿50.000.000 | 250 pontos]\n- Interação [300 pontos | 2 treinos de técnicas]\n- Recrutar NPCs [Humanos: 25 NPCs]\n- Trabalho [Tipo 1: ฿30.000.000]\n- Treino de Técnicas [150 pontos | 6 treinos de técnicas]\n- Treino Padrão [250 pontos]" oninput="updateLog(${idx}, 'conteudo', this.value)" style="min-height:80px;">${l.conteudo}</textarea>
+                <input type="text" placeholder="Ex: Semana 1 (Semana Normal [09/02/2026 – 15/02/2026])" value="${escHtml(l.titulo)}" oninput="updateLog(${idx}, 'titulo', this.value)" style="margin-bottom:5px;">
+                <textarea placeholder="- Auto-narrada [฿50.000.000 | 250 pontos]\n- Interação [300 pontos | 2 treinos de técnicas]\n- Recrutar NPCs [Humanos: 25 NPCs]\n- Trabalho [Tipo 1: ฿30.000.000]\n- Treino de Técnicas [150 pontos | 6 treinos de técnicas]\n- Treino Padrão [250 pontos]" oninput="updateLog(${idx}, 'conteudo', this.value)" style="min-height:80px;">${escHtml(l.conteudo)}</textarea>
             </div>
         `;
     });
@@ -3933,7 +3988,7 @@ function updateUI() {
                     <option value="pct" ${b.type === 'pct' ? 'selected' : ''}>%</option>
                     <option value="flat" ${b.type === 'flat' ? 'selected' : ''}>Pts</option>
                 </select>
-                <input type="text" class="no-sum" placeholder="Valor" value="${valFmt}" oninput="let cursor = this.selectionStart; let oldLen = this.value.length; updateCustomRaceBuff(${num}, ${idx}, 'val', this.value); let formatted = currentChar.info['${fieldList}'][${idx}].val ? currentChar.info['${fieldList}'][${idx}].val.toLocaleString('pt-BR') : ''; if(this.value !== formatted) { this.value = formatted; let newLen = this.value.length; try { this.setSelectionRange(cursor + (newLen - oldLen), cursor + (newLen - oldLen)); } catch(e){} }" style="width: 60px; padding: 4px; font-size: 11px; text-align: center; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
+                <input type="text" class="no-sum" placeholder="Valor" value="${escHtml(valFmt)}" oninput="let cursor = this.selectionStart; let oldLen = this.value.length; updateCustomRaceBuff(${num}, ${idx}, 'val', this.value); let formatted = currentChar.info['${fieldList}'][${idx}].val ? currentChar.info['${fieldList}'][${idx}].val.toLocaleString('pt-BR') : ''; if(this.value !== formatted) { this.value = formatted; let newLen = this.value.length; try { this.setSelectionRange(cursor + (newLen - oldLen), cursor + (newLen - oldLen)); } catch(e){} }" style="width: 60px; padding: 4px; font-size: 11px; text-align: center; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
                 <button type="button" class="btn btn-outline btn-danger" style="padding: 2px 6px; font-size: 10px; margin: 0;" onclick="removeCustomRaceBuffRow(${num}, ${idx})">X</button>
             </div>`;
         });
@@ -4230,7 +4285,7 @@ function updateUI() {
         availableStylesToHide.forEach((stName) => {
             let checked = i.hiddenStyles.includes(stName) ? "checked" : "";
             hiddenStylesHtml += `<label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
-                <input type="checkbox" onchange="toggleHiddenStyle('${stName.replace(/'/g, "\\'")}', this.checked)" style="width:auto; margin:0;" ${checked}> Ocultar ${stName}
+                <input type="checkbox" onchange="toggleHiddenStyle(${jsArg(stName)}, this.checked)" style="width:auto; margin:0;" ${checked}> Ocultar ${stName}
             </label>`;
         });
         hiddenStylesHtml += `<label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
@@ -4244,7 +4299,7 @@ function updateUI() {
         let htmlAlc = '<option value="">-- Nenhuma --</option>';
         if (i.alcunhasList) {
             i.alcunhasList.forEach((a) => {
-                htmlAlc += `<option value="${a.nome}">${a.nome}</option>`;
+                htmlAlc += `<option value="${escHtml(a.nome)}">${escHtml(a.nome)}</option>`;
             });
         }
         if (selAlcunha.innerHTML !== htmlAlc) selAlcunha.innerHTML = htmlAlc;
@@ -4269,7 +4324,7 @@ function updateUI() {
                     let isActive = i.alcunhaCondicoes[cond];
                     let btnCor = isActive ? "var(--success)" : "#444";
                     let btnTxt = isActive ? "ON" : "OFF";
-                    condHtml += `<button type="button" class="btn btn-outline" style="padding: 2px 8px; font-size: 10px; margin: 0; color: ${btnCor}; border-color: ${btnCor};" onclick="toggleAlcunhaCondicao('${cond.replace(/'/g, "\\'")}')">${cond}: ${btnTxt}</button>`;
+                    condHtml += `<button type="button" class="btn btn-outline" style="padding: 2px 8px; font-size: 10px; margin: 0; color: ${btnCor}; border-color: ${btnCor};" onclick="toggleAlcunhaCondicao(${jsArg(cond)})">${cond}: ${btnTxt}</button>`;
                 });
             }
         }
@@ -5047,7 +5102,7 @@ function updateUI() {
                 ? patenteGender[i.patente][gKey]
                 : i.patente;
             if (selPatente.tagName.toLowerCase() === "select") {
-                selPatente.innerHTML = `<option value="${i.patente}">${dName}</option>`;
+                selPatente.innerHTML = `<option value="${escHtml(i.patente)}">${escHtml(dName)}</option>`;
                 selPatente.value = i.patente;
             } else {
                 selPatente.value = dName;
@@ -5123,12 +5178,12 @@ function updateUI() {
     if (isSp) {
         allowedSpClasses.forEach((cls) => {
             let display = getClassDisplayName(`${cls} 1`, i.sexo, i.genero);
-            html1 += `<option value="${cls} 1">${display}</option>`;
+            html1 += `<option value="${cls} 1">${escHtml(display)}</option>`;
         });
     } else {
         baseClassesList.forEach((c) => {
             let display = getClassDisplayName(`${c} 1`, i.sexo, i.genero);
-            html1 += `<option value="${c} 1">${display}</option>`;
+            html1 += `<option value="${c} 1">${escHtml(display)}</option>`;
         });
     }
 
@@ -5200,7 +5255,7 @@ function updateUI() {
                 i.sexo,
                 i.genero
             );
-            html += `<option value="${chosenSpBase} ${slot.spLvl}">${display}</option>`;
+            html += `<option value="${escHtml(chosenSpBase)} ${escHtml(slot.spLvl)}">${escHtml(display)}</option>`;
         }
     } else {
         let counts = {};
@@ -5223,7 +5278,7 @@ function updateUI() {
                     i.sexo,
                     i.genero
                 );
-                html += `<option value="${c} ${counts[c]}">${display}</option>`;
+                html += `<option value="${c} ${counts[c]}">${escHtml(display)}</option>`;
             }
         });
     }
@@ -5277,7 +5332,7 @@ function updateUI() {
             baseClassesList.forEach((c) => {
                 if (c !== masteredClass && CLASS_CONFLICTS[masteredClass] !== c) {
                     let display = getBaseClassName(c, i.sexo, i.genero);
-                    extraOptions += `<option value="${c}">${display}</option>`;
+                    extraOptions += `<option value="${c}">${escHtml(display)}</option>`;
                 }
             });
 
@@ -5294,7 +5349,7 @@ function updateUI() {
                 ) {
                     el.disabled = isReadOnly ? true : false;
                     let slotOptions = slot.prev
-                        ? `<option value="">-- Selecione --</option><option value="${i.classe6}">${getBaseClassName(i.classe6, i.sexo, i.genero)}</option>`
+                        ? `<option value="">-- Selecione --</option><option value="${escHtml(i.classe6)}">${escHtml(getBaseClassName(i.classe6, i.sexo, i.genero))}</option>`
                         : extraOptions;
                     if (el.innerHTML !== slotOptions) el.innerHTML = slotOptions;
                     if (
@@ -6070,7 +6125,7 @@ function updateUI() {
     );
 
     habsDisponiveis.forEach((hab) => {
-        habSelectHtml += `<option value="${hab}">${formatHabDisplay(hab)}</option>`;
+        habSelectHtml += `<option value="${escHtml(hab)}">${escHtml(formatHabDisplay(hab))}</option>`;
     });
 
     i.habilidadesExclusivas.forEach((hab) => {
@@ -6084,8 +6139,8 @@ function updateUI() {
               : "";
 
         habListHtml += `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:4px 8px; border-radius:4px; border:1px solid #444;">
-                <span style="font-size:12px;">${formatHabDisplay(hab)}</span>
-                ${mandText ? `<span style="font-size:10px; color:#aaa;">${mandText}</span>` : `<button class="btn btn-outline btn-danger" style="padding:2px 6px; font-size:10px; margin:0;" onclick="removeHabilidade('${hab}')">X</button>`}
+                <span style="font-size:12px;">${escHtml(formatHabDisplay(hab))}</span>
+                ${mandText ? `<span style="font-size:10px; color:#aaa;">${mandText}</span>` : `<button class="btn btn-outline btn-danger" style="padding:2px 6px; font-size:10px; margin:0;" onclick="removeHabilidade(${jsArg(hab)})">X</button>`}
             </div>`;
     });
     let habSelEl = document.getElementById("hab-select");
@@ -7639,7 +7694,7 @@ function updateUI() {
         calcFormTexto += `<br>`;
     }
     if (totalIgnRes > 0) {
-        calcFormTexto += `Resistência Ignorada: ${calcResInimiga.toLocaleString("pt-BR")} - ${totalIgnRes}% *(${ignResSourcesTexts.join(" + ")})* = ${calcResBruta.toLocaleString("pt-BR")}<br>`;
+        calcFormTexto += `Resistência Ignorada: ${calcResInimiga.toLocaleString("pt-BR")} - ${totalIgnRes}% *(${escHtml(ignResSourcesTexts.join(" + "))})* = ${calcResBruta.toLocaleString("pt-BR")}<br>`;
     }
     calcFormTexto += `Dano Básico: ${calcAttrVal.toLocaleString("pt-BR")} × (${K.toLocaleString("pt-BR")} / (${K.toLocaleString("pt-BR")} + ${calcRes.toLocaleString("pt-BR")})) = ${danoFisico.toLocaleString("pt-BR")}`;
 
@@ -7654,7 +7709,7 @@ function updateUI() {
                 ? danoFisico + danoBonusResNegativa
                 : danoFisico;
         let flatSourcesText = danoFinalFlatSources.length > 0 ? ` *(${danoFinalFlatSources.join(" + ")})*` : "";
-        calcFormTexto += `<br><span style="color:#0dcaf0;">Bônus Fixo: ${baseSomaText.toLocaleString("pt-BR")} + ${extraFlatDano.toLocaleString("pt-BR")}${flatSourcesText} = ${baseComFlat.toLocaleString("pt-BR")}</span>`;
+        calcFormTexto += `<br><span style="color:#0dcaf0;">Bônus Fixo: ${baseSomaText.toLocaleString("pt-BR")} + ${extraFlatDano.toLocaleString("pt-BR")}${escHtml(flatSourcesText)} = ${baseComFlat.toLocaleString("pt-BR")}</span>`;
     }
     if (totalPctDano !== 0) {
         let valToPrint =
@@ -7662,7 +7717,7 @@ function updateUI() {
                 ? calcDanoAntesIgnorado
                 : calcDanoFinal;
         let pctSourcesText = danoFinalPctSources.length > 0 ? ` *(${danoFinalPctSources.join(" + ")})*` : "";
-        calcFormTexto += `<br><span style="color:#ffc107;">Dano com Buff Final: ${baseComFlat.toLocaleString("pt-BR")} + ${totalPctDano}%${pctSourcesText} = ${valToPrint.toLocaleString("pt-BR")}</span>`;
+        calcFormTexto += `<br><span style="color:#ffc107;">Dano com Buff Final: ${baseComFlat.toLocaleString("pt-BR")} + ${totalPctDano}%${escHtml(pctSourcesText)} = ${valToPrint.toLocaleString("pt-BR")}</span>`;
     }
     if (reducaoDanoGeral > 0) {
         calcFormTexto += `<br><span style="color:#dc3545;">Dano Ignorado: ${calcDanoAntesIgnorado.toLocaleString("pt-BR")} - ${reducaoDanoGeral}% = ${calcDanoFinal.toLocaleString("pt-BR")}</span>`;
@@ -7823,7 +7878,7 @@ function updateUI() {
             estFormula += `<span style="color:#a461ff;">+ ${custoHaki.toLocaleString("pt-BR")} (Haki)</span><br>`;
         if (totalRedEstamina > 0) {
             fontesRedEstamina.sort((a, b) => a.localeCompare(b));
-            estFormula += `<span style="color:var(--warning);">Redução: -${totalRedEstamina}% (${fontesRedEstamina.join(" + ")})</span><br>`;
+            estFormula += `<span style="color:var(--warning);">Redução: -${totalRedEstamina}% (${escHtml(fontesRedEstamina.join(" + "))})</span><br>`;
         }
         estFormula += `Gasto Total: ${custoEstTotal.toLocaleString("pt-BR")} de Estamina`;
     } else {
@@ -9540,12 +9595,7 @@ async function copyFicha() {
     let text =
         window.copyDataFichaPronta ||
         document.getElementById("resBox").textContent;
-    let tempArea = document.createElement("textarea");
-    tempArea.value = text;
-    document.body.appendChild(tempArea);
-    tempArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(tempArea);
+    if (!(await copiarTexto(text))) return;
     await customAlert("Ficha copiada para a área de transferência!");
 }
 
@@ -9599,12 +9649,7 @@ async function copyFichaManual() {
         await customAlert("Nada para copiar!");
         return;
     }
-    let tempArea = document.createElement("textarea");
-    tempArea.value = text;
-    document.body.appendChild(tempArea);
-    tempArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(tempArea);
+    if (!(await copiarTexto(text))) return;
     await customAlert("Ficha Manual copiada para a área de transferência!");
 }
 
@@ -9614,12 +9659,7 @@ async function copyAtributos() {
         await customAlert("Nada para copiar!");
         return;
     }
-    let tempArea = document.createElement("textarea");
-    tempArea.value = text;
-    document.body.appendChild(tempArea);
-    tempArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(tempArea);
+    if (!(await copiarTexto(text))) return;
     await customAlert("Atributos copiados para a área de transferência!");
 }
 
@@ -9629,23 +9669,13 @@ async function copyTecnicas() {
         await customAlert("Nada para copiar!");
         return;
     }
-    let tempArea = document.createElement("textarea");
-    tempArea.value = text;
-    document.body.appendChild(tempArea);
-    tempArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(tempArea);
+    if (!(await copiarTexto(text))) return;
     await customAlert("Técnicas copiadas para a área de transferência!");
 }
 
 async function copyLog() {
     let text = document.getElementById("logBox").textContent;
-    let tempArea = document.createElement("textarea");
-    tempArea.value = text;
-    document.body.appendChild(tempArea);
-    tempArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(tempArea);
+    if (!(await copiarTexto(text))) return;
     await customAlert("Log copiado para a área de transferência!");
 }
 
@@ -9678,12 +9708,7 @@ async function copyPartialLog() {
         });
     }
     let text = logOut.trim();
-    let tempArea = document.createElement("textarea");
-    tempArea.value = text;
-    document.body.appendChild(tempArea);
-    tempArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(tempArea);
+    if (!(await copiarTexto(text))) return;
     await customAlert(
         numToCopy === 1
             ? "Última entrada copiada com sucesso!"
@@ -9933,7 +9958,6 @@ window.puxarVelocidade = async function () {
     let el = document.getElementById("total-v");
     let passivo = parseInt(el.dataset.passive) || 0;
     let ativo = parseInt(el.dataset.active) || 0;
-    let baseRefl = currentChar.substats.refl || 0;
     let baseVcorp = currentChar.substats.vcorp || 0;
     let proporcao = passivo > 0 ? baseVcorp / passivo : 0;
     let val = baseVcorp;
@@ -10078,12 +10102,7 @@ window.copiarDano = async function () {
     let finalStr = document.getElementById("calc-dano-final").textContent;
     let formStr = document.getElementById("calc-formula").innerText;
     let text = `*Dano Final:* ${finalStr}\n_Fórmula:_\n${formStr}`;
-    let tempArea = document.createElement("textarea");
-    tempArea.value = text;
-    document.body.appendChild(tempArea);
-    tempArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(tempArea);
+    if (!(await copiarTexto(text))) return;
     await customAlert("Cálculo de Dano copiado para a área de transferência!");
 };
 
@@ -10091,12 +10110,7 @@ window.copiarEstamina = async function () {
     let finalStr = document.getElementById("estamina-custo-final").textContent;
     let formStr = document.getElementById("estamina-formula").innerText;
     let text = `*Custo de Estamina:* ${finalStr}\n_Fórmula:_\n${formStr}`;
-    let tempArea = document.createElement("textarea");
-    tempArea.value = text;
-    document.body.appendChild(tempArea);
-    tempArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(tempArea);
+    if (!(await copiarTexto(text))) return;
     await customAlert(
         "Cálculo de Estamina copiado para a área de transferência!",
     );
