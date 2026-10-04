@@ -61,7 +61,7 @@
             <div class="three-col-grid">
                 <div class="box">
                     <div class="box-title" id="title-boxIden" style="color: var(--info);" onclick="toggleBox('boxIden')">
-                        <span>Identidade <span onclick="openInfoModal('Identidade', 'Preencha os campos básicos do personagem. Para a alcunha, clique no botão + para adicionar e na engrenagem ou lápis para editar e aplicar buffs globais. A Localização Atual deve ser sincronizada com a ilha em que você está narrando no momento. Não deixe os campos obrigatórios vazios para evitar falhas na contagem da ficha.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxIden" class="toggle-icon">▼</span>
+                        <span>Identidade <span onclick="openInfoModal('Identidade', 'Preencha os campos básicos do personagem. Cada personagem tem uma única Alcunha: clique no botão + para criá-la e no lápis para editá-la, aplicar buffs globais ou apagá-la. A Localização Atual deve ser sincronizada com a ilha em que você está narrando no momento. Não deixe os campos obrigatórios vazios para evitar falhas na contagem da ficha.'); event.stopPropagation();" style="cursor: pointer; font-size: 0.9em; opacity: 0.8; margin-left: 5px;">ⓘ</span></span><span id="icon-boxIden" class="toggle-icon">▼</span>
                     </div>
                     <div id="wrapper-boxIden" class="box-content">
                         <div class="input-group"><label>Nome do Personagem</label><input type="text" id="pc-name" oninput="updateField('name', null, this.value)"></div>
@@ -69,9 +69,9 @@
                             <div class="input-group">
                                 <label>Alcunha</label>
                                 <div style="display:flex; gap:5px;">
-                                    <select id="info-alcunha" onchange="updateField('info', 'alcunhaAtiva', this.value)" style="flex:1;"></select>
-                                    <button type="button" class="btn btn-outline btn-success" style="padding:4px 8px; font-size:14px; display:flex; align-items:center;" onclick="openAlcunhaModal()" title="Criar Nova Alcunha">+</button>
-                                    <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:14px; display:flex; align-items:center;" onclick="editAlcunhaModal()" title="Editar Alcunha Ativa">✏️</button>
+                                    <input type="text" id="info-alcunha" readonly placeholder="Nenhuma - clique em + para criar" style="flex:1; cursor:default;">
+                                    <button type="button" id="btn-add-alcunha" class="btn btn-outline btn-success" style="padding:4px 8px; font-size:14px; display:flex; align-items:center;" onclick="openAlcunhaModal()" title="Criar Alcunha">+</button>
+                                    <button type="button" id="btn-edit-alcunha" class="btn btn-outline" style="padding:4px 8px; font-size:14px; display:none; align-items:center;" onclick="editAlcunhaModal()" title="Editar ou apagar a Alcunha">✏️</button>
                                 </div>
                                 <div id="alcunha-condicoes-container" style="margin-top: 5px; display: flex; flex-wrap: wrap; gap: 5px;"></div>
                             </div>
@@ -997,7 +997,7 @@
 
         <div id="modal-alcunha" class="modal-overlay">
             <div class="modal-box" style="width: 400px; max-height: 80vh; overflow-y: auto;">
-                <div id="modal-alcunha-title" class="modal-msg" style="font-weight:bold; color:var(--info);">Criar Nova Alcunha</div>
+                <div id="modal-alcunha-title" class="modal-msg" style="font-weight:bold; color:var(--info);">Criar Alcunha</div>
                 <input type="text" id="alcunha-nome" placeholder="Nome da Alcunha" style="margin-bottom: 10px; text-align:center;">
                 <label style="display:flex; align-items:center; gap:5px; justify-content:center; margin:0 auto 10px auto; width:fit-content; font-size:12px; cursor:pointer;">
                     <input type="checkbox" id="alcunha-has-buff" onchange="document.getElementById('alcunha-buffs-container').style.display = this.checked ? 'block' : 'none'"> Dá algum buff?

@@ -63,6 +63,134 @@ async function copiarTexto(text) {
     return ok;
 }
 
+// ---------- Buffs descritos em texto (Alcunha e itens do inventário) ----------
+const NOMES_BUFF = {
+    tudo: "Todos os Atributos",
+    tudoAttr: "Todos os Atributos",
+    tudoEsp: "Todo o Espírito",
+    tudoAmi: "Toda a Akuma",
+    d: "Destreza",
+    f: "Força",
+    r: "Resistência",
+    v: "Velocidade",
+    refl: "Reflexo",
+    vcorp: "Vel. Corporal",
+    vAgua: "Velocidade (Água)",
+    reflAgua: "Reflexo (Água)",
+    vcorpAgua: "Vel. Corporal (Água)",
+    esp: "Espírito",
+    ha: "Haki do Armamento",
+    ho: "Haki da Observação",
+    hr: "Haki do Rei",
+    amiAlc: "Alcance",
+    amiDur: "Durabilidade",
+    amiPot: "Potência",
+    amiVel: "Velocidade",
+    amiDesp: "Despertar",
+    dano: "Dano Final",
+    ignRes: "Ignorar Resistência",
+    ignDanoGeral: "Ignorar Dano Geral",
+    ignDanoAmi: "Ignorar Dano Akuma",
+    redEstamina: "Redução de Estamina",
+};
+
+// ["A", "B", "C"] -> "A, B e C"
+function juntarComE(itens) {
+    return itens.length > 1
+        ? itens.slice(0, -1).join(", ") + " e " + itens[itens.length - 1]
+        : itens[0];
+}
+
+// [{stat, type, val}, ...] -> "[+30% em Destreza e Resistência; +10% em Velocidade]"
+// Buffs com o mesmo valor são agrupados; grupos diferentes são separados por "; ".
+function textoBuffs(buffArray) {
+    let grupos = {};
+    buffArray.forEach((b) => {
+        let chave = (b.val >= 0 ? "+" : "") + b.val + (b.type === "pct" ? "%" : "");
+        if (!grupos[chave]) grupos[chave] = [];
+        let nome = NOMES_BUFF[b.stat] || b.stat;
+        if (!grupos[chave].includes(nome)) grupos[chave].push(nome);
+    });
+    let textos = [];
+    for (let k in grupos) textos.push(`${k} em ${juntarComE(grupos[k])}`);
+    return `[${textos.join("; ")}]`;
+}
+
+// minúsculas, sem acento e com espaços simples (para comparar nomes)
+function normalizarTexto(t) {
+    return String(t ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+// Itens de "Itens e Armas Equipadas (Buffs Ativos)" que estão LIGADOS, agrupados pelo nome
+// (um item com vários buffs vira uma entrada só). Itens sem nome ou desligados ficam de fora.
+function listarItensComBuffAtivo(info) {
+    let mapa = new Map();
+    (info.armasEquipadasList || []).forEach((a) => {
+        if (!a || !a.ativo || !a.stat) return;
+        let val = parseInt(a.val) || 0;
+        // tira "[...]" do nome: se o jogador já escreveu o buff no nome, não repete
+        let nome = String(a.nome || "").replace(/\[[^\]]*\]/g, " ").replace(/\s+/g, " ").trim();
+        if (!nome || val === 0) return;
+        let chave = normalizarTexto(nome);
+        if (!mapa.has(chave)) mapa.set(chave, { chave, nome, buffs: [] });
+        mapa.get(chave).buffs.push({ stat: a.stat, type: a.type, val });
+    });
+    return [...mapa.values()].map((it) => ({ ...it, texto: textoBuffs(it.buffs) }));
+}
+
+// Coloca os itens ligados no inventário da Ficha Pronta SEM duplicar: se o item já está
+// escrito no inventário, aquela linha ganha o "[+30% em Destreza]"; se não está, entra no fim.
+// invLinhas = linhas já com "* " na frente.
+function aplicarItensAtivosNoInventario(invLinhas, info) {
+    let itens = listarItensComBuffAtivo(info);
+    if (itens.length === 0) return invLinhas;
+    let usados = new Set();
+    let escapeRe = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    let saida = invLinhas.map((linha) => {
+        // "[...]" que o jogador escreveu à mão sai: o texto certo é gerado a partir do item
+        let corpo = linha.replace(/^\s*\*\s*/, "").replace(/\[[^\]]*\]/g, " ").replace(/\s+/g, " ").trim();
+        let norm = normalizarTexto(corpo);
+        if (norm.length !== corpo.length) return linha; // normalização mudou o tamanho: não arrisca
+        for (let it of itens) {
+            if (usados.has(it.chave)) continue;
+            // aceita "Nome", "2x Nome", "Nome - descrição", "Nome (algo)"; NÃO aceita "Nome Longo"
+            let re = new RegExp(
+                "^((?:\\d+\\s*x\\s*|x\\s*\\d+\\s+)?)" + escapeRe(it.chave) + "(?=$|\\s*[(\\-\u2013\\u2014:,;/|])",
+            );
+            let m = re.exec(norm);
+            if (!m) continue;
+            usados.add(it.chave);
+            let antes = corpo.slice(0, m[1].length);
+            let depois = corpo.slice(m[0].length).trim();
+            return `* ${antes}${it.nome} ${it.texto}${depois ? " " + depois : ""}`;
+        }
+        return linha;
+    });
+    itens.forEach((it) => {
+        if (!usados.has(it.chave)) saida.push(`* ${it.nome} ${it.texto}`);
+    });
+    return saida;
+}
+
+// Cada personagem tem UMA Alcunha. Se houver mais de uma (fichas antigas), fica só a que
+// estava escolhida; se havia várias e nenhuma escolhida, nenhuma fica.
+function normalizarAlcunhaUnica(info) {
+    if (!info || !Array.isArray(info.alcunhasList)) return;
+    let lista = info.alcunhasList.filter((a) => a && a.nome);
+    if (lista.length > 1) {
+        let escolhida = lista.find((a) => a.nome === info.alcunhaAtiva);
+        lista = escolhida ? [escolhida] : [];
+    }
+    if (lista.length !== info.alcunhasList.length) info.alcunhasList = lista;
+    let nome = lista.length === 1 ? lista[0].nome : "";
+    if (info.alcunhaAtiva !== nome) info.alcunhaAtiva = nome;
+}
+
 function applyLocalChanges(original, current, server) {
     if (JSON.stringify(original) === JSON.stringify(current)) return server;
     if (original == null || current == null || typeof current !== 'object') {
@@ -578,7 +706,7 @@ const linhagens = {
     "Nico": { req: ["Humano"] },
     "Sakazuki": { f: 0.25, r: 0.2, req: ["Humano"] },
     "Shinryoku": { v: 0.1, f: 0.15, req: ["Tontatta"] },
-    "Silvers": { req: ["Humano"] },
+    "Silvers": { esp: 0.2, req: ["Humano"] },
     "Tenryūbito: Família Donquixote": { d: 0.1, ami: 0.15, req: ["Humano"] },
     "Tenryūbito: Família Figarland": { d: 0.1, esp: 0.15, req: ["Humano"] },
     "Tom": { f: 0.1, r: 0.1, req: ["Tritão"] },
@@ -2213,6 +2341,7 @@ function runFallbackChecks() {
         charsToCheck.forEach((c) => {
             if (!c) return;
             if (!c.info) c.info = {};
+            normalizarAlcunhaUnica(c.info); // fichas antigas com várias Alcunhas
             if (typeof c.info.recompensa === "string")
                 c.info.recompensa =
                     parseInt(c.info.recompensa.replace(/\D/g, "")) || "";
@@ -3277,10 +3406,15 @@ window.toggleAlcunhaCondicao = function (condName) {
 let editingAlcunhaOldName = "";
 
 function openAlcunhaModal() {
+    // só pode existir uma Alcunha: se já existe, abre para editar
+    if (currentChar && currentChar.info.alcunhasList && currentChar.info.alcunhasList.length > 0) {
+        editAlcunhaModal();
+        return;
+    }
     if (isReadOnly) return;
     editingAlcunhaOldName = "";
     document.getElementById("modal-alcunha-title").innerText =
-        "Criar Nova Alcunha";
+        "Criar Alcunha";
     document.getElementById("alcunha-nome").value = "";
     document.getElementById("alcunha-has-buff").checked = false;
     document.getElementById("alcunha-buffs-container").style.display = "none";
@@ -3374,16 +3508,8 @@ function saveAlcunha() {
     }
     if (!currentChar.info.alcunhasList) currentChar.info.alcunhasList = [];
 
-    if (editingAlcunhaOldName !== "") {
-        let idx = currentChar.info.alcunhasList.findIndex(
-            (a) => a.nome === editingAlcunhaOldName,
-        );
-        if (idx !== -1) {
-            currentChar.info.alcunhasList[idx] = { nome, buffs };
-        }
-    } else {
-        currentChar.info.alcunhasList.push({ nome, buffs });
-    }
+    // Só existe uma Alcunha por personagem: salvar sempre substitui a anterior.
+    currentChar.info.alcunhasList = [{ nome, buffs }];
 
     currentChar.info.alcunhaAtiva = nome;
     document.getElementById("modal-alcunha").style.display = "none";
@@ -3399,14 +3525,8 @@ function deleteAlcunha() {
         !currentChar.info.alcunhaAtiva
     )
         return;
-    let targetName = editingAlcunhaOldName || currentChar.info.alcunhaAtiva;
-    currentChar.info.alcunhasList = currentChar.info.alcunhasList.filter(
-        (a) => a.nome !== targetName,
-    );
-    currentChar.info.alcunhaAtiva =
-        currentChar.info.alcunhasList.length > 0
-            ? currentChar.info.alcunhasList[0].nome
-            : "";
+    currentChar.info.alcunhasList = [];
+    currentChar.info.alcunhaAtiva = "";
     document.getElementById("modal-alcunha").style.display = "none";
     saveData();
     updateUI();
@@ -3837,26 +3957,31 @@ function updateUI() {
     const container = document.querySelector(".container");
     const btn = document.getElementById("btn-layout");
 
-    let oldMeta = document.querySelector('meta[name="viewport"]');
-    if (oldMeta) oldMeta.remove();
-
-    let newMeta = document.createElement("meta");
-    newMeta.name = "viewport";
-
+    // Viewport sem limite de zoom, para o zoom por pinça funcionar no celular.
+    // (O iPhone não dá zoom sozinho ao tocar num campo porque, em telas de toque,
+    // os campos têm 16px: ver style.css.) A tag é reaproveitada, não recriada a cada update.
+    let viewportContent;
     if (charData.layoutMode === "vertical") {
         container.classList.add("vertical-mode");
         document.body.classList.remove("pc-mode");
-        newMeta.content =
-            "width=device-width, initial-scale=1.0, maximum-scale=1.0";
+        viewportContent = "width=device-width, initial-scale=1.0";
         if (btn) btn.textContent = "🖥️Modo PC";
     } else {
         container.classList.remove("vertical-mode");
         document.body.classList.add("pc-mode");
-        newMeta.content = "width=1400";
+        viewportContent = "width=1400";
         if (btn) btn.textContent = "📱Modo Lista";
     }
-    document.head.appendChild(newMeta);
+    let metaViewport = document.querySelector('meta[name="viewport"]');
+    if (!metaViewport) {
+        metaViewport = document.createElement("meta");
+        metaViewport.name = "viewport";
+        document.head.appendChild(metaViewport);
+    }
+    if (metaViewport.content !== viewportContent)
+        metaViewport.content = viewportContent;
     let i = currentChar.info;
+    normalizarAlcunhaUnica(i); // garante uma única Alcunha, mesmo em dados vindos de fora
     let isNPC = currentChar.isNPC;
 
     [
@@ -4316,17 +4441,18 @@ function updateUI() {
         hideStylesContainer.innerHTML = hiddenStylesHtml;
     }
 
-    let selAlcunha = document.getElementById("info-alcunha");
-    if (selAlcunha) {
-        let htmlAlc = '<option value="">-- Nenhuma --</option>';
-        if (i.alcunhasList) {
-            i.alcunhasList.forEach((a) => {
-                htmlAlc += `<option value="${escHtml(a.nome)}">${escHtml(a.nome)}</option>`;
-            });
-        }
-        if (selAlcunha.innerHTML !== htmlAlc) selAlcunha.innerHTML = htmlAlc;
-        selAlcunha.value = i.alcunhaAtiva || "";
+    // Alcunha única: o campo só mostra o nome; "+" aparece sem Alcunha e o lápis com Alcunha.
+    let alcunhaUnica =
+        i.alcunhasList && i.alcunhasList.length > 0 ? i.alcunhasList[0] : null;
+    let campoAlcunha = document.getElementById("info-alcunha");
+    if (campoAlcunha) {
+        let nomeAlcunha = alcunhaUnica ? alcunhaUnica.nome : "";
+        if (campoAlcunha.value !== nomeAlcunha) campoAlcunha.value = nomeAlcunha;
     }
+    let btnAddAlcunha = document.getElementById("btn-add-alcunha");
+    let btnEditAlcunha = document.getElementById("btn-edit-alcunha");
+    if (btnAddAlcunha) btnAddAlcunha.style.display = alcunhaUnica ? "none" : "flex";
+    if (btnEditAlcunha) btnEditAlcunha.style.display = alcunhaUnica ? "flex" : "none";
 
     let condContainer = document.getElementById("alcunha-condicoes-container");
     if (condContainer) {
@@ -8875,39 +9001,11 @@ function updateUI() {
 
     let alcunhaOut = "";
     if (!i.alcunhasList || i.alcunhasList.length === 0) {
-        alcunhaOut = "🔒" + (window.isGeneratingManual ? "\n\n  : ᓩ _𝐀ʟᴄᴜɴʜᴀs 𝐑ᴇsᴇʀᴠᴀs:_\n> 🔒" : "");
+        alcunhaOut = "🔒";
     } else {
         let formatAlcunha = (alcObj) => {
             if (alcObj && alcObj.buffs && alcObj.buffs.length > 0) {
-                let names = {
-                    tudo: "Todos os Atributos",
-                    tudoAttr: "Todos os Atributos",
-                    tudoEsp: "Todo o Espírito",
-                    tudoAmi: "Toda a Akuma",
-                    d: "Destreza",
-                    f: "Força",
-                    r: "Resistência",
-                    v: "Velocidade",
-                    refl: "Reflexo",
-                    vcorp: "Vel. Corporal",
-                    vAgua: "Velocidade (Água)",
-                    reflAgua: "Reflexo (Água)",
-                    vcorpAgua: "Vel. Corporal (Água)",
-                    esp: "Espírito",
-                    ha: "Haki do Armamento",
-                    ho: "Haki da Observação",
-                    hr: "Haki do Rei",
-                    amiAlc: "Alcance",
-                    amiDur: "Durabilidade",
-                    amiPot: "Potência",
-                    amiVel: "Velocidade",
-                    amiDesp: "Despertar",
-                    dano: "Dano Final",
-                    ignRes: "Ignorar Resistência",
-                    ignDanoGeral: "Ignorar Dano Geral",
-                    ignDanoAmi: "Ignorar Dano Akuma",
-                    redEstamina: "Redução de Estamina",
-                };
+                let buildStringForGroup = (buffArray) => textoBuffs(buffArray);
                 let condGroups = { "": [] };
                 alcObj.buffs.forEach((b) => {
                     let cName =
@@ -8915,29 +9013,6 @@ function updateUI() {
                     if (!condGroups[cName]) condGroups[cName] = [];
                     condGroups[cName].push(b);
                 });
-                let buildStringForGroup = (buffArray) => {
-                    let buffGroups = {};
-                    buffArray.forEach((b) => {
-                        let key =
-                            (b.val >= 0 ? "+" : "") +
-                            b.val +
-                            (b.type === "pct" ? "%" : "");
-                        if (!buffGroups[key]) buffGroups[key] = [];
-                        buffGroups[key].push(names[b.stat] || b.stat);
-                    });
-                    let buffStrings = [];
-                    for (let k in buffGroups) {
-                        let items = buffGroups[k];
-                        let joined =
-                            items.length > 1
-                                ? items.slice(0, -1).join(", ") +
-                                  " e " +
-                                  items[items.length - 1]
-                                : items[0];
-                        buffStrings.push(`${k} em ${joined}`);
-                    }
-                    return `[${buffStrings.join("; ")}]`;
-                };
                 let lines = [];
                 if (condGroups[""].length > 0) {
                     lines.push(
@@ -8958,20 +9033,11 @@ function updateUI() {
             return alcObj ? alcObj.nome : "";
         };
 
-        let ativa = i.alcunhasList.find((a) => a.nome === i.alcunhaAtiva);
+        // Só existe uma Alcunha por personagem (as antigas reservas não existem mais).
+        let ativa =
+            i.alcunhasList.find((a) => a.nome === i.alcunhaAtiva) ||
+            i.alcunhasList[0];
         alcunhaOut = formatAlcunha(ativa);
-
-        let reservas = i.alcunhasList.filter((a) => a.nome !== i.alcunhaAtiva);
-        if (reservas.length > 0) {
-            reservas.sort((a, b) => a.nome.localeCompare(b.nome));
-            let title =
-                reservas.length === 1 ? "𝐀ʟᴄᴜɴʜᴀ 𝐑ᴇsᴇʀᴠᴀ" : "𝐀ʟᴄᴜɴʜᴀs 𝐑ᴇsᴇʀᴠᴀs";
-            alcunhaOut +=
-                `\n\n  : ᓩ _${title}:_\n` +
-                reservas.map((r) => `> ${formatAlcunha(r)}`).join("\n");
-        } else if (window.isGeneratingManual) {
-            alcunhaOut += `\n\n  : ᓩ _𝐀ʟᴄᴜɴʜᴀs 𝐑ᴇsᴇʀᴠᴀs:_\n> 🔒`;
-        }
     }
 
     let displayLinhagem = "Nenhuma";
@@ -9144,6 +9210,9 @@ function updateUI() {
             })
             .filter((l) => l !== "");
     }
+
+    // Itens com buff ligado entram no inventário (sem duplicar o que já está escrito nele)
+    invLines = aplicarItensAtivosNoInventario(invLines, i);
 
     if (i.naviosList && i.naviosList.length > 0) {
         i.naviosList.forEach((navio) => {
