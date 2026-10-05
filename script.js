@@ -179,6 +179,39 @@ function aplicarItensAtivosNoInventario(invLinhas, info) {
 
 // Cada personagem tem UMA Alcunha. Se houver mais de uma (fichas antigas), fica só a que
 // estava escolhida; se havia várias e nenhuma escolhida, nenhuma fica.
+// ---------- Estrutura mínima de um personagem ----------
+// Fichas vindas da nuvem, de importação ou de versões antigas podem não ter alguma
+// chave (ex.: stats.esp). O resto do código assume que elas existem, e a falta de UMA
+// delas derrubava o updateUI inteiro (a Ficha Pronta ficava em branco). Aqui tudo é
+// completado com 0 e valores null são tratados como "não existe".
+const STATS_PADRAO = { f: 0, d: 0, r: 0, v: 0, esp: 0, ami: 0 };
+const SUBSTATS_PADRAO = {
+    refl: 0,
+    vcorp: 0,
+    hArm: 0,
+    hObs: 0,
+    hRei: 0,
+    amiAlc: 0,
+    amiDur: 0,
+    amiPot: 0,
+    amiVel: 0,
+    amiDesp: 0,
+};
+function garantirEstruturaPersonagem(c) {
+    if (!c || typeof c !== "object") return;
+    if (!c.info || typeof c.info !== "object") c.info = {};
+    if (!c.stats || typeof c.stats !== "object") c.stats = {};
+    if (!c.substats || typeof c.substats !== "object") c.substats = {};
+    for (let k in STATS_PADRAO)
+        if (c.stats[k] === undefined || c.stats[k] === null) c.stats[k] = STATS_PADRAO[k];
+    for (let k in SUBSTATS_PADRAO)
+        if (c.substats[k] === undefined || c.substats[k] === null)
+            c.substats[k] = SUBSTATS_PADRAO[k];
+    for (let k in c.info) if (c.info[k] === null) delete c.info[k];
+    if (!Array.isArray(c.tecnicasList)) c.tecnicasList = [];
+    if (!Array.isArray(c.logList)) c.logList = [];
+}
+
 function normalizarAlcunhaUnica(info) {
     if (!info || !Array.isArray(info.alcunhasList)) return;
     let lista = info.alcunhasList.filter((a) => a && a.nome);
@@ -2561,20 +2594,7 @@ function runFallbackChecks() {
                 delete c.info.customBuffF2; delete c.info.customBuffD2; delete c.info.customBuffR2; delete c.info.customBuffV2;
             }
 
-            if (!c.stats) c.stats = { f: 0, d: 0, r: 0, v: 0, esp: 0, ami: 0 };
-            if (!c.substats)
-                c.substats = {
-                    refl: 0,
-                    vcorp: 0,
-                    hArm: 0,
-                    hObs: 0,
-                    hRei: 0,
-                    amiAlc: 0,
-                    amiDur: 0,
-                    amiPot: 0,
-                    amiVel: 0,
-                    amiDesp: 0,
-                };
+            garantirEstruturaPersonagem(c); // stats/substats/listas completos, sem null
             if (!c.tecnicasList) c.tecnicasList = [];
             c.tecnicasList.forEach((t) => {
                 if (typeof t.estilo === "undefined") t.estilo = "";
@@ -3853,6 +3873,13 @@ function strCalc(
     itemFlat = 0,
     zoanBonus = 0,
 ) {
+    // valores ausentes/inválidos contam como 0 (antes: erro ao chamar toLocaleString)
+    base = Number(base) || 0;
+    bonus = Number(bonus) || 0;
+    flat = Number(flat) || 0;
+    itemBonus = Number(itemBonus) || 0;
+    itemFlat = Number(itemFlat) || 0;
+    zoanBonus = Number(zoanBonus) || 0;
     let passive = Math.round((base + flat) * (1 + bonus));
     let parts = [base.toLocaleString("pt-BR")];
     if (flat !== 0)
@@ -3953,7 +3980,28 @@ window.receberSalario = async function () {
     await customAlert("Salário resgatado com sucesso!");
 };
 
+// Rede de segurança: se algo falhar ao atualizar a tela, a Ficha Pronta mostra o erro
+// (e o console registra os detalhes) em vez de ficar parada com o texto antigo, sem
+// ninguém saber por quê. Antes de atualizar, o personagem é sempre completado.
 function updateUI() {
+    try {
+        garantirEstruturaPersonagem(currentChar);
+        updateUICore();
+        window.__ultimoErroUpdateUI = null;
+    } catch (e) {
+        console.error("Erro ao atualizar a ficha:", e);
+        window.__ultimoErroUpdateUI = e;
+        let box = document.getElementById("resBox");
+        if (box)
+            box.textContent =
+                "⚠️ Não foi possível atualizar a Ficha Pronta.\n\nErro: " +
+                (e && e.message ? e.message : e) +
+                "\n\nOs dados da ficha NÃO foram perdidos. Avise o administrador e informe a mensagem acima.";
+    }
+}
+
+
+function updateUICore() {
     const container = document.querySelector(".container");
     const btn = document.getElementById("btn-layout");
 
