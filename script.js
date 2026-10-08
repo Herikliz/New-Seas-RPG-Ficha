@@ -3914,6 +3914,84 @@ function strCalc(
     return activeStr;
 }
 
+// ---------- Ranking (lido pelo site informativo) ----------
+// Mesma matemática do strCalc, mas devolvendo só o NÚMERO final (o que aparece depois do "=").
+function valorFinalCalc(base, bonus, flat = 0, itemBonus = 0, itemFlat = 0, zoanBonus = 0) {
+    base = Number(base) || 0;
+    bonus = Number(bonus) || 0;
+    flat = Number(flat) || 0;
+    itemBonus = Number(itemBonus) || 0;
+    itemFlat = Number(itemFlat) || 0;
+    zoanBonus = Number(zoanBonus) || 0;
+    let valor = Math.round((base + flat) * (1 + bonus));
+    if (zoanBonus !== 0) valor = Math.round(valor * (1 + zoanBonus));
+    if (itemBonus !== 0 || itemFlat !== 0)
+        valor = Math.round((valor + itemFlat) * (1 + itemBonus));
+    return valor;
+}
+
+// Cada personagem/NPC guarda um pequeno resumo (char.ranking) com os mesmos números da
+// Ficha Pronta. O site informativo só lê isso para montar o ranking: não recalcula nada.
+const RANKING_VERSAO = 1;
+const rankingPronto = (c) => !!(c && c.ranking && c.ranking.v === RANKING_VERSAO);
+const rankingFalhou = new WeakSet(); // personagens que deram erro: não tenta de novo
+let rankingEmAndamento = false;
+
+// Personagens/NPCs que o jogador nunca abriu (ou fichas antigas) ainda não têm o resumo.
+// Aqui ele é calculado em segundo plano, aos poucos, trocando de personagem por baixo dos
+// panos e voltando para o que o jogador estava vendo. Roda uma vez; depois não faz nada.
+function preencherRankingsFaltantes() {
+    if (isReadOnly || rankingEmAndamento || !charData || !Array.isArray(charData.pcs)) return;
+    const alvos = [];
+    charData.pcs.forEach((pObj, pIdx) => {
+        if (!pObj) return;
+        if (pObj.pc && !rankingPronto(pObj.pc) && !rankingFalhou.has(pObj.pc)) alvos.push([pIdx, -1]);
+        (pObj.npcs || []).forEach((n, nIdx) => {
+            if (n && !rankingPronto(n) && !rankingFalhou.has(n)) alvos.push([pIdx, nIdx]);
+        });
+    });
+    if (alvos.length === 0) return;
+    rankingEmAndamento = true;
+    const fichaAlvo = charData;
+    const proximoLote = () => {
+        if (charData !== fichaAlvo) {
+            rankingEmAndamento = false; // outra ficha foi carregada: recomeça quando atualizar
+            return;
+        }
+        const pcAnt = activePcIndex, npcAnt = activeNpcIndex, charAnt = currentChar;
+        try {
+            alvos.splice(0, 8).forEach(([p, n]) => {
+                const pObj = charData.pcs[p];
+                const c = pObj ? (n === -1 ? pObj.pc : (pObj.npcs || [])[n]) : null;
+                if (!c) return;
+                try {
+                    activePcIndex = p;
+                    activeNpcIndex = n;
+                    currentChar = c;
+                    garantirEstruturaPersonagem(c);
+                    updateUICore();
+                    if (!rankingPronto(c)) rankingFalhou.add(c);
+                } catch (e) {
+                    console.error("Ranking: não foi possível calcular um personagem", e);
+                    rankingFalhou.add(c);
+                }
+            });
+        } finally {
+            activePcIndex = pcAnt;
+            activeNpcIndex = npcAnt;
+            currentChar = charAnt;
+            try {
+                updateUICore(); // devolve a tela ao personagem que o jogador estava vendo
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        if (alvos.length > 0) setTimeout(proximoLote, 30);
+        else rankingEmAndamento = false;
+    };
+    setTimeout(proximoLote, 0);
+}
+
 function formatRaceStr(rName, aName, isFem) {
     let isFemaleRace = isFem;
     if (currentChar && currentChar.info) {
@@ -3988,6 +4066,8 @@ function updateUI() {
         garantirEstruturaPersonagem(currentChar);
         updateUICore();
         window.__ultimoErroUpdateUI = null;
+        clearTimeout(window.__rankingTimer);
+        window.__rankingTimer = setTimeout(preencherRankingsFaltantes, 600);
     } catch (e) {
         console.error("Erro ao atualizar a ficha:", e);
         window.__ultimoErroUpdateUI = e;
@@ -8537,6 +8617,35 @@ function updateUICore() {
             }
         }
         attrOut += `\n`;
+    }
+
+    // ---- Resumo para o ranking do site informativo (os mesmos números da Ficha Pronta) ----
+    {
+        let espVisivel = totalFinal >= reqEsp && ESP > 0;
+        currentChar.ranking = {
+            v: RANKING_VERSAO,
+            base: totalBase,
+            total: totalFinal,
+            akuma:
+                AMI > 0
+                    ? valorFinalCalc(AMI, bonus.ami, flatBonus.ami, itemBonus.ami, itemFlat.ami)
+                    : 0,
+            esp: espVisivel
+                ? valorFinalCalc(ESP, bonus.esp, flatBonus.esp, itemBonus.esp, itemFlat.esp)
+                : 0,
+            ha:
+                espVisivel && HA > 0
+                    ? valorFinalCalc(HA, bonus.ha, flatBonus.ha, itemBonus.ha, itemFlat.ha)
+                    : 0,
+            ho:
+                espVisivel && HO > 0
+                    ? valorFinalCalc(HO, bonus.ho, flatBonus.ho, itemBonus.ho, itemFlat.ho)
+                    : 0,
+            hr:
+                espVisivel && HR > 0
+                    ? valorFinalCalc(HR, bonus.hr, flatBonus.hr, itemBonus.hr, itemFlat.hr)
+                    : 0,
+        };
     }
 
     if ((totalFinal >= reqEsp && ESP > 0) || window.isGeneratingManual) {
