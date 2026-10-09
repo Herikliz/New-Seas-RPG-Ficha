@@ -2039,6 +2039,7 @@ async function loadFromCloud() {
 }
 
 function saveData(force = false) {
+    if (window.__rankingEmLote) return; // cálculo do ranking em lote: nunca salva a ficha aberta
     if (isReadOnly) return;
     let saveMode = document.getElementById("save-mode");
     if (saveMode && saveMode.value === "manual" && !force) {
@@ -3991,6 +3992,104 @@ function preencherRankingsFaltantes() {
     };
     setTimeout(proximoLote, 0);
 }
+
+// ---------- Atualização em lote do ranking (usada pelo site informativo) ----------
+// O site informativo carrega esta Ficha escondida (mesmo domínio) e chama
+// rankingAtualizarFichas() para calcular, com o motor desta página, o resumo de ranking de
+// várias fichas de uma vez e gravar SOMENTE o campo "ranking" de cada personagem/NPC.
+// Cada ficha é lida e gravada dentro de uma transação: se um jogador salvar a mesma ficha
+// ao mesmo tempo, o Firestore refaz a operação com os dados novos, então nenhuma alteração
+// de jogador é perdida. Nada além do "ranking" é alterado.
+
+// Calcula o ranking de todos os personagens de um documento que ainda não o têm.
+// Trabalha numa CÓPIA (o motor mexe nos dados); só o "ranking" é devolvido para o original.
+function rankingCalcularNoDocumento(dados, ehEspecial) {
+    const copia = JSON.parse(JSON.stringify(dados));
+    const salvo = {
+        cd: charData, p: activePcIndex, n: activeNpcIndex, c: currentChar,
+        adm: isSuperAdmin, ro: isReadOnly,
+    };
+    let alterados = 0, falhas = 0;
+    window.__rankingEmLote = true;
+    try {
+        charData = copia;
+        isSuperAdmin = !!ehEspecial; // NPCS e NPCI são vistos em modo administrador
+        isReadOnly = false;
+        runFallbackChecks();
+        (copia.pcs || []).forEach((pCopia, p) => {
+            const pOrig = dados.pcs && dados.pcs[p];
+            if (!pCopia || !pOrig) return;
+            const alvos = [[pCopia.pc, pOrig.pc, -1]];
+            (pCopia.npcs || []).forEach((n, i) => alvos.push([n, (pOrig.npcs || [])[i], i]));
+            alvos.forEach(([c, orig, n]) => {
+                if (!c || !orig || rankingPronto(orig)) return;
+                try {
+                    activePcIndex = p;
+                    activeNpcIndex = n;
+                    currentChar = c;
+                    garantirEstruturaPersonagem(c);
+                    updateUICore();
+                    if (rankingPronto(c)) {
+                        orig.ranking = JSON.parse(JSON.stringify(c.ranking));
+                        alterados++;
+                    } else falhas++;
+                } catch (e) {
+                    console.error("Ranking: personagem não calculado", e);
+                    falhas++;
+                }
+            });
+        });
+    } finally {
+        window.__rankingEmLote = false;
+        charData = salvo.cd;
+        activePcIndex = salvo.p;
+        activeNpcIndex = salvo.n;
+        currentChar = salvo.c;
+        isSuperAdmin = salvo.adm;
+        isReadOnly = salvo.ro;
+    }
+    return { alterados, falhas };
+}
+
+// ids: lista de IDs de ficha. aoProgredir(feitos, total) é opcional.
+// Devolve { atualizados:[{id,dados}], semMudanca:[{id,dados}], falhas:[{id,erro}], semCalculo:n }
+window.rankingAtualizarFichas = async function (ids, aoProgredir) {
+    for (let t = 0; t < 100 && !db; t++) await new Promise((r) => setTimeout(r, 200));
+    if (!db) throw new Error("O Firebase da Ficha não ficou disponível.");
+    const resultado = { atualizados: [], semMudanca: [], falhas: [], semCalculo: 0 };
+    const fila = Array.from(new Set(ids || []));
+    const total = fila.length;
+    let feitos = 0;
+    const trabalhador = async () => {
+        while (fila.length) {
+            const id = fila.shift();
+            try {
+                const ref = db.collection("fichas_op").doc(id);
+                const r = await db.runTransaction(async (t) => {
+                    const snap = await t.get(ref);
+                    if (!snap.exists) return { estado: "inexistente" };
+                    const dados = snap.data();
+                    const calc = rankingCalcularNoDocumento(dados, id === "NPCS" || id === "NPCI");
+                    if (calc.alterados > 0) t.update(ref, { pcs: dados.pcs });
+                    return { estado: calc.alterados > 0 ? "atualizado" : "semMudanca", dados, falhas: calc.falhas };
+                });
+                if (r.estado === "atualizado") resultado.atualizados.push({ id, dados: r.dados, falhas: r.falhas || 0 });
+                else if (r.estado === "semMudanca") resultado.semMudanca.push({ id, dados: r.dados, falhas: r.falhas || 0 });
+                resultado.semCalculo += r.falhas || 0;
+            } catch (e) {
+                console.error("Ranking: ficha " + id + " não atualizada", e);
+                resultado.falhas.push({ id, erro: (e && e.message) || String(e) });
+            }
+            feitos++;
+            if (typeof aoProgredir === "function") {
+                try { aoProgredir(feitos, total); } catch (e) { /* o progresso é só informativo */ }
+            }
+        }
+    };
+    // 4 fichas ao mesmo tempo: o cálculo de cada uma é síncrono, então não se misturam.
+    await Promise.all([trabalhador(), trabalhador(), trabalhador(), trabalhador()]);
+    return resultado;
+};
 
 function formatRaceStr(rName, aName, isFem) {
     let isFemaleRace = isFem;
