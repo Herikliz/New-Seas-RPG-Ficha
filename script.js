@@ -2420,6 +2420,7 @@ function runFallbackChecks() {
                 selClasseDF: "d",
                 selDF: "d",
                 selRV: "r",
+                ciborgue: 0,
                 selLinDF: "d",
                 selLinRV: "r",
                 selLin4: "d",
@@ -4091,6 +4092,34 @@ window.rankingAtualizarFichas = async function (ids, aoProgredir) {
     return resultado;
 };
 
+// Ciborgue: modificação (não é raça) que qualquer personagem pode ter. A fase é escolhida pelo usuário.
+const CIBORGUE_FASES = {
+    1: { bonus: 0.15, fem: "Básica", masc: "Básico" },
+    2: { bonus: 0.25, fem: "Intermediária", masc: "Intermediário" },
+    3: { bonus: 0.4, fem: "Avançada", masc: "Avançado" },
+};
+
+function ciborgueFase(info) {
+    let n = parseInt(info && info.ciborgue, 10);
+    return CIBORGUE_FASES[n] ? n : 0;
+}
+
+// Texto que vai ao lado da raça: " [Ciborgue Básica]" (ou "" sem ciborgue)
+function ciborgueRotulo(info) {
+    let n = ciborgueFase(info);
+    if (!n) return "";
+    let fem;
+    if (info.genero === "Mulher") fem = true;
+    else if (info.genero === "Homem" || info.genero === "Não-binário") fem = false;
+    else fem = info.sexo === "Feminino";
+    return ` [Ciborgue ${fem ? CIBORGUE_FASES[n].fem : CIBORGUE_FASES[n].masc}]`;
+}
+
+function setCiborgue(fase) {
+    if (isReadOnly) return;
+    updateField("info", "ciborgue", ciborgueFase({ ciborgue: fase }));
+}
+
 function formatRaceStr(rName, aName, isFem) {
     let isFemaleRace = isFem;
     if (currentChar && currentChar.info) {
@@ -4457,6 +4486,15 @@ function updateUICore() {
         } else {
             boxCharRacas.style.display = "none";
         }
+    }
+
+    for (let f = 0; f <= 3; f++) {
+        let cb = document.getElementById("cib-" + f);
+        if (!cb) continue;
+        let ativo = ciborgueFase(i) === f;
+        cb.classList.toggle("active", ativo);
+        cb.setAttribute("aria-pressed", String(ativo));
+        cb.disabled = !!isReadOnly;
     }
 
     let anim1 = document.getElementById("info-animal");
@@ -4877,7 +4915,7 @@ function updateUICore() {
                         return;
                     let targets = [b.stat];
                     if (b.stat === "tudo" || b.stat === "tudoAttr")
-                        targets = ["d", "f", "r", "v", "refl", "vcorp"];
+                        targets = ["d", "f", "r", "v"];
                     else if (b.stat === "tudoEsp")
                         targets = ["esp", "ha", "ho", "hr"];
                     else if (b.stat === "tudoAmi")
@@ -4901,6 +4939,12 @@ function updateUICore() {
 
         if (tComb > 0 && i.selClasseDF) {
             tBonus[i.selClasseDF] += tComb * 0.05;
+        }
+        let tCib = ciborgueFase(i);
+        if (tCib) {
+            ["d", "f", "r", "v"].forEach((t) => {
+                tBonus[t] += CIBORGUE_FASES[tCib].bonus;
+            });
         }
         if (tempLn !== "Charlotte") {
             if (racas[tempRc]) {
@@ -6115,7 +6159,7 @@ function updateUICore() {
                     return;
                 let targets = [b.stat];
                 if (b.stat === "tudo" || b.stat === "tudoAttr")
-                    targets = ["d", "f", "r", "v", "refl", "vcorp"];
+                    targets = ["d", "f", "r", "v"];
                 else if (b.stat === "tudoEsp")
                     targets = ["esp", "ha", "ho", "hr"];
                 else if (b.stat === "tudoAmi")
@@ -6296,7 +6340,7 @@ function updateUICore() {
                 if (val !== 0) {
                     let targets = [a.stat];
                     if (a.stat === "tudo" || a.stat === "tudoAttr")
-                        targets = ["d", "f", "r", "v", "refl", "vcorp"];
+                        targets = ["d", "f", "r", "v"];
                     else if (a.stat === "tudoEsp")
                         targets = ["esp", "ha", "ho", "hr"];
                     else if (a.stat === "tudoAmi")
@@ -6340,6 +6384,14 @@ function updateUICore() {
 
     if (combatenteLevel > 0) {
         bonus[i.selClasseDF] += combatenteLevel * 0.05;
+    }
+
+    // Ciborgue: buff passivo em todos os atributos (soma no total, como as raças/linhagens)
+    let cibFase = ciborgueFase(i);
+    if (cibFase) {
+        ["d", "f", "r", "v"].forEach((t) => {
+            bonus[t] += CIBORGUE_FASES[cibFase].bonus;
+        });
     }
 
     let applyCustomRaceBuffToTotal = (num) => {
@@ -9254,6 +9306,7 @@ function updateUICore() {
                   "";
         racaOutput += ` / ${raca2Output}`;
     }
+    racaOutput = (racaOutput + ciborgueRotulo(i)).trim();
 
     let alcunhaOut = "";
     if (!i.alcunhasList || i.alcunhasList.length === 0) {

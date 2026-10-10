@@ -176,6 +176,18 @@
                                     <select id="info-selDF" onchange="updateField('info', 'selDF', this.value)" style="flex: 1;"><option value="d">Destreza</option><option value="f">Força</option></select>
                                     <select id="info-selRV" onchange="updateField('info', 'selRV', this.value)" style="display:none; flex: 1;"><option value="r">Resistência</option><option value="v">Velocidade</option></select>
                                 </div>
+                                <div id="box-ciborgue" class="ciborgue-box">
+                                    <span class="ciborgue-label">Ciborgue (modificação)</span>
+                                    <div class="ciborgue-seg" role="group" aria-label="Fase de Ciborgue">
+                                        <button type="button" id="cib-0" data-fase="0" onclick="setCiborgue(0)" title="Sem modificação de ciborgue">Não</button>
+                                        <span class="ciborgue-sep">|</span>
+                                        <button type="button" id="cib-1" data-fase="1" onclick="setCiborgue(1)" title="Básica: +15% em todos os atributos">1</button>
+                                        <span class="ciborgue-sep">-</span>
+                                        <button type="button" id="cib-2" data-fase="2" onclick="setCiborgue(2)" title="Intermediária: +25% em todos os atributos">2</button>
+                                        <span class="ciborgue-sep">-</span>
+                                        <button type="button" id="cib-3" data-fase="3" onclick="setCiborgue(3)" title="Avançada: +40% em todos os atributos">3</button>
+                                    </div>
+                                </div>
                             </div>
                             <div class="input-group" id="container-linhagem">
                                 <label>Linhagem</label>

@@ -203,6 +203,58 @@ body.pc-mode header {
     background-color: var(--success);
 }
 
+/* Ciborgue: seletor de fase [ Nao | 1 - 2 - 3 ] */
+.ciborgue-box {
+    margin-top: 6px;
+}
+
+.ciborgue-label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-bottom: 3px;
+}
+
+.ciborgue-seg {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background-color: #2a2a2a;
+}
+
+.ciborgue-seg button {
+    min-width: 30px;
+    padding: 4px 8px;
+    background: transparent;
+    color: inherit;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.ciborgue-seg button:hover:not(:disabled) {
+    border-color: currentColor;
+}
+
+.ciborgue-seg button.active {
+    background-color: var(--success);
+    color: #fff;
+}
+
+.ciborgue-seg button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.ciborgue-sep {
+    opacity: 0.5;
+}
+
 input,
 textarea,
 select {
