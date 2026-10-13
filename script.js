@@ -272,6 +272,15 @@ const ADMIN_PASSWORD = "Ben10";
 // protegem nada de verdade. Para proteção real use Firebase Auth + regras do
 // Firestore. Estão aqui, em um lugar só, para facilitar a troca.
 const SUPER_ADMIN_PASSWORD = "Ben10000"; // libera os limites de regras (isSuperAdmin)
+// Modo ADM: só vale quando a Ficha é aberta pelo arquivo ficha-adm.html, que leva para o
+// index.html com "#fichadeadmsteetgroovesteetfodabigsmoke" no endereço. Nesse modo, toda pergunta "digite a senha" é
+// respondida sozinha com a senha ADM (Ben10), como se ela tivesse sido digitada. NÃO liga o
+// Super ADM (Ben10000). Funciona também com a página aberta direto do computador (file://).
+const MODO_ADMIN = window.location.hash === "#fichadeadmsteetgroovesteetfodabigsmoke";
+function pedirSenhaAdm(mensagem) {
+    if (MODO_ADMIN) return Promise.resolve(ADMIN_PASSWORD);
+    return customPrompt(mensagem);
+}
 const NPCS_DOC_PASSWORD = "ventilador"; // senha extra do documento especial "NPCS"
 
 let currentDocId = "";
@@ -1196,7 +1205,7 @@ async function deleteCurrentChar() {
     }
 
     if (charData.password && charData.password.trim() !== "") {
-        let pwd = await customPrompt(
+        let pwd = await pedirSenhaAdm(
             "Digite a senha da ficha para confirmar a exclusão:",
         );
         if (
@@ -1973,7 +1982,7 @@ async function loadFromCloud() {
                 }
             }
             if (data.password && data.password.trim() !== "") {
-                let entered = await customPrompt(
+                let entered = await pedirSenhaAdm(
                     "Esta ficha é protegida por senha. Digite a senha para editar (ou cancele para apenas visualizar a ficha):",
                 );
                 if (
@@ -1989,7 +1998,7 @@ async function loadFromCloud() {
                         );
                 } else {
                     if (entered === SUPER_ADMIN_PASSWORD) isSuperAdmin = true;
-                    await customAlert("Acesso concedido!");
+                    if (!MODO_ADMIN) await customAlert("Acesso concedido!");
                 }
             }
 
@@ -2170,7 +2179,7 @@ async function managePassword() {
     }
 
     if (charData.password && charData.password.trim() !== "") {
-        let oldPass = await customPrompt(
+        let oldPass = await pedirSenhaAdm(
             "Digite a senha atual para autorizar a mudança:",
         );
         if (
@@ -10199,7 +10208,7 @@ async function changeFichaID() {
     try {
         const docRef = await db.collection("fichas_op").doc(novoId).get();
         if (docRef.exists) {
-            let conf = await customPrompt(
+            let conf = await pedirSenhaAdm(
                 `ATENÇÃO: Já existe uma ficha salva no ID "${novoId}". Digite a SENHA DE ADM para sobrescrevê-la e apagar a ficha que está lá:`,
             );
             if (conf !== ADMIN_PASSWORD && conf !== SUPER_ADMIN_PASSWORD) {
@@ -10249,7 +10258,7 @@ async function deleteFichaID() {
         await customAlert("Nenhuma ficha foi carregada para ser apagada.");
         return;
     }
-    let conf = await customPrompt(
+    let conf = await pedirSenhaAdm(
         `ATENÇÃO: Você está prestes a apagar COMPLETAMENTE o ID "${currentDocId}" do banco de dados. Digite a SENHA DE ADM para confirmar:`,
     );
     if (conf !== ADMIN_PASSWORD && conf !== SUPER_ADMIN_PASSWORD) {
@@ -10298,7 +10307,7 @@ async function saveBackup() {
     if (doc.exists) {
         let data = doc.data();
         if (data.backupPassword) {
-            let pass = await customPrompt(
+            let pass = await pedirSenhaAdm(
                 "Digite a senha atual do backup para autorizar a substituição:",
             );
             if (
@@ -10356,7 +10365,7 @@ async function loadBackup() {
         return;
     }
     let data = doc.data();
-    let pass = await customPrompt("Digite a senha do backup para carregá-lo:");
+    let pass = await pedirSenhaAdm("Digite a senha do backup para carregá-lo:");
     if (
         pass !== data.backupPassword &&
         pass !== ADMIN_PASSWORD &&
@@ -10755,7 +10764,7 @@ window.promoverCargo = async function () {
     }
 
     if (!isSuperAdminValid && nextRank === "Almirante-de-Frota") {
-        let pwd = await customPrompt(
+        let pwd = await pedirSenhaAdm(
             "A promoção para Almirante-de-Frota exige autorização. Digite a senha de ADM:",
         );
         if (pwd !== ADMIN_PASSWORD && pwd !== SUPER_ADMIN_PASSWORD) {
@@ -10763,7 +10772,7 @@ window.promoverCargo = async function () {
             return;
         }
     } else if (!isSuperAdminValid && nextRank === "Eixo") {
-        let pwd = await customPrompt(
+        let pwd = await pedirSenhaAdm(
             "A promoção para Eixo exige autorização. Digite a senha de ADM:",
         );
         if (pwd !== ADMIN_PASSWORD && pwd !== SUPER_ADMIN_PASSWORD) {
