@@ -854,29 +854,74 @@ const allStyles = [
     "Tōryū",
     "Yari Style",
 ];
-// Tōryū: o jogador escolhe 1, 2 ou 3 (info.toryu1..4). Vazio/ausente conta como 1,
-// então as fichas que já tinham Tōryū viram Ittōryū sem precisar mexer em nada.
-const TORYU_NOMES = { 1: "Ittōryū", 2: "Nitōryū", 3: "Santōryū" };
+// ===================== TŌRYŪ: QUANTIDADE DE ESPADAS =====================
+// O jogador escolhe a quantidade no seletor [ 1 - 2 - 3 ] (info.toryu1..4).
+// Vazio/ausente conta como 1: as fichas que já tinham Tōryū viram Ittōryū sozinhas.
+//
+// PARA ADICIONAR MAIS ESPADAS: basta acrescentar uma linha na lista abaixo, com o
+// número seguido do nome que deve aparecer em "Estilos de Luta". Exemplo:
+//     4: "Yontōryū",
+// O botão novo aparece sozinho no seletor, em fileiras de TORYU_POR_LINHA botões
+// (a última fileira, se tiver menos botões, ocupa a largura toda). Os números
+// precisam ser seguidos (1, 2, 3, 4, 5...), sem pular.
+const TORYU_NOMES = {
+    1: "Ittōryū",
+    2: "Nitōryū",
+    3: "Santōryū",
+    4: "Yontōryū",
+    5: "Gokutōryū",
+    6: "Rokutōryū",
+    7: "Nanatōryū",
+    8: "Hattōryū",
+    9: "Kyūtōryū"
+};
+const TORYU_POR_LINHA = 3; // quantos botões por fileira
+
 // O que fica SALVO (ex.: lista de estilos ocultos) é sempre "Tōryū", nunca a variação:
-// assim trocar o número 1/2/3 não faz nada se perder.
+// assim trocar o número não faz nada se perder.
 function chaveEstiloSalvo(nome) {
     return Object.values(TORYU_NOMES).includes(nome) ? "Tōryū" : nome;
 }
-// Número 1/2/3 do Tōryū do espaço n (vazio ou inválido = 1).
+// Número do Tōryū do espaço n (vazio ou inválido = 1).
 function nomeToryuNumero(i, n) {
     let v = parseInt(i["toryu" + n], 10);
-    return v >= 1 && v <= 3 ? v : 1;
+    return TORYU_NOMES[v] ? v : 1;
 }
 window.setToryu = function (n, v) {
     if (isReadOnly) return;
     updateField("info", "toryu" + n, String(v));
 };
+// Cria os botões do seletor (uma vez por espaço) a partir de TORYU_NOMES.
+function montarSeletorToryu(el, n) {
+    if (el.dataset.montado === "1") return;
+    el.dataset.montado = "1";
+    el.textContent = "";
+    let numeros = Object.keys(TORYU_NOMES).map(Number).sort((x, y) => x - y);
+    for (let ini = 0; ini < numeros.length; ini += TORYU_POR_LINHA) {
+        let linha = document.createElement("div");
+        linha.className = "ciborgue-seg";
+        numeros.slice(ini, ini + TORYU_POR_LINHA).forEach((v, k) => {
+            if (k > 0) {
+                let sep = document.createElement("span");
+                sep.className = "ciborgue-sep";
+                sep.textContent = "-";
+                linha.appendChild(sep);
+            }
+            let bt = document.createElement("button");
+            bt.type = "button";
+            bt.id = "toryu" + n + "-" + v;
+            bt.textContent = String(v);
+            bt.title = TORYU_NOMES[v];
+            bt.addEventListener("click", () => window.setToryu(n, v));
+            linha.appendChild(bt);
+        });
+        el.appendChild(linha);
+    }
+}
 function nomeEstiloExibido(i, n) {
     let st = i["estilo" + n];
     if (st !== "Tōryū") return st;
-    let v = parseInt(i["toryu" + n], 10);
-    if (!(v >= 1 && v <= 3)) v = 1;
-    return TORYU_NOMES[v];
+    return TORYU_NOMES[nomeToryuNumero(i, n)];
 }
 
 const classStyles = {
@@ -6023,15 +6068,16 @@ function updateUICore() {
         }
         let elToryu = document.getElementById("info-toryu" + n);
         if (elToryu) {
-            elToryu.style.display = i["estilo" + n] === "Tōryū" ? "inline-flex" : "none";
-            let vAtual = parseInt(nomeToryuNumero(i, n), 10);
-            for (let v = 1; v <= 3; v++) {
-                let bt = document.getElementById("toryu" + n + "-" + v);
-                if (!bt) continue;
-                bt.classList.toggle("active", vAtual === v);
-                bt.setAttribute("aria-pressed", String(vAtual === v));
+            montarSeletorToryu(elToryu, n);
+            elToryu.style.display = i["estilo" + n] === "Tōryū" ? "flex" : "none";
+            let vAtual = nomeToryuNumero(i, n);
+            Object.keys(TORYU_NOMES).forEach((k) => {
+                let bt = document.getElementById("toryu" + n + "-" + k);
+                if (!bt) return;
+                bt.classList.toggle("active", vAtual === Number(k));
+                bt.setAttribute("aria-pressed", String(vAtual === Number(k)));
                 bt.disabled = !!isReadOnly;
-            }
+            });
         }
     });
 

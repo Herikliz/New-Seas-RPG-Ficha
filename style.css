@@ -692,3 +692,22 @@ option {
         font-size: 16px !important;
     }
 }
+
+/* Tōryū: seletor de espadas, ocupa a largura toda abaixo do nome; fileiras de 3 */
+.toryu-seg {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+}
+
+.toryu-seg .ciborgue-seg {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+}
+
+.toryu-seg .ciborgue-seg button {
+    flex: 1;
+}
