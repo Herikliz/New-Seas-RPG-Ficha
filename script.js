@@ -65,7 +65,6 @@ async function copiarTexto(text) {
 
 // ---------- Buffs descritos em texto (Alcunha e itens do inventário) ----------
 const NOMES_BUFF = {
-    tudo: "Todos os Atributos",
     tudoAttr: "Todos os Atributos",
     tudoEsp: "Todo o Espírito",
     tudoAmi: "Toda a Akuma",
@@ -855,6 +854,31 @@ const allStyles = [
     "Tōryū",
     "Yari Style",
 ];
+// Tōryū: o jogador escolhe 1, 2 ou 3 (info.toryu1..4). Vazio/ausente conta como 1,
+// então as fichas que já tinham Tōryū viram Ittōryū sem precisar mexer em nada.
+const TORYU_NOMES = { 1: "Ittōryū", 2: "Nitōryū", 3: "Santōryū" };
+// O que fica SALVO (ex.: lista de estilos ocultos) é sempre "Tōryū", nunca a variação:
+// assim trocar o número 1/2/3 não faz nada se perder.
+function chaveEstiloSalvo(nome) {
+    return Object.values(TORYU_NOMES).includes(nome) ? "Tōryū" : nome;
+}
+// Número 1/2/3 do Tōryū do espaço n (vazio ou inválido = 1).
+function nomeToryuNumero(i, n) {
+    let v = parseInt(i["toryu" + n], 10);
+    return v >= 1 && v <= 3 ? v : 1;
+}
+window.setToryu = function (n, v) {
+    if (isReadOnly) return;
+    updateField("info", "toryu" + n, String(v));
+};
+function nomeEstiloExibido(i, n) {
+    let st = i["estilo" + n];
+    if (st !== "Tōryū") return st;
+    let v = parseInt(i["toryu" + n], 10);
+    if (!(v >= 1 && v <= 3)) v = 1;
+    return TORYU_NOMES[v];
+}
+
 const classStyles = {
     "Arqueólogo": ["Instinto Animal"],
     "Artista": ["Armadilha de Cores", "Escultura de Forma"],
@@ -3697,6 +3721,7 @@ function updateField(category, field, value) {
     if (
         field.startsWith("estilo") ||
         field.startsWith("freestyle") ||
+        field.startsWith("toryu") ||
         field === "raca" ||
         field === "raca2" ||
         field === "linhagem"
@@ -4704,9 +4729,9 @@ function updateUICore() {
         let hiddenStylesHtml = "";
         if (!i.hiddenStyles) i.hiddenStyles = [];
         availableStylesToHide.forEach((stName) => {
-            let checked = i.hiddenStyles.includes(stName) ? "checked" : "";
+            let checked = i.hiddenStyles.includes(chaveEstiloSalvo(stName)) ? "checked" : "";
             hiddenStylesHtml += `<label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
-                <input type="checkbox" onchange="toggleHiddenStyle(${jsArg(stName)}, this.checked)" style="width:auto; margin:0;" ${checked}> Ocultar ${stName}
+                <input type="checkbox" onchange="toggleHiddenStyle(${jsArg(chaveEstiloSalvo(stName))}, this.checked)" style="width:auto; margin:0;" ${checked}> Ocultar ${stName}
             </label>`;
         });
         hiddenStylesHtml += `<label style="margin:0; font-size:10px; color:#aaa; text-transform:none; cursor:pointer; display:flex; gap:5px; align-items:center;">
@@ -4923,7 +4948,7 @@ function updateUICore() {
                     )
                         return;
                     let targets = [b.stat];
-                    if (b.stat === "tudo" || b.stat === "tudoAttr")
+                    if (b.stat === "tudoAttr")
                         targets = ["d", "f", "r", "v"];
                     else if (b.stat === "tudoEsp")
                         targets = ["esp", "ha", "ho", "hr"];
@@ -5996,6 +6021,18 @@ function updateUICore() {
                 i["estilo" + n] === "Freestyle" ? "block" : "none";
             elFree.value = i["freestyle" + n] || "";
         }
+        let elToryu = document.getElementById("info-toryu" + n);
+        if (elToryu) {
+            elToryu.style.display = i["estilo" + n] === "Tōryū" ? "inline-flex" : "none";
+            let vAtual = parseInt(nomeToryuNumero(i, n), 10);
+            for (let v = 1; v <= 3; v++) {
+                let bt = document.getElementById("toryu" + n + "-" + v);
+                if (!bt) continue;
+                bt.classList.toggle("active", vAtual === v);
+                bt.setAttribute("aria-pressed", String(vAtual === v));
+                bt.disabled = !!isReadOnly;
+            }
+        }
     });
 
     let reqEsp = rc === "Kuja" || ln === "Silvers" ? 12000 : 15000;
@@ -6167,7 +6204,7 @@ function updateUICore() {
                 )
                     return;
                 let targets = [b.stat];
-                if (b.stat === "tudo" || b.stat === "tudoAttr")
+                if (b.stat === "tudoAttr")
                     targets = ["d", "f", "r", "v"];
                 else if (b.stat === "tudoEsp")
                     targets = ["esp", "ha", "ho", "hr"];
@@ -6348,7 +6385,7 @@ function updateUICore() {
                 let val = parseInt(a.val) || 0;
                 if (val !== 0) {
                     let targets = [a.stat];
-                    if (a.stat === "tudo" || a.stat === "tudoAttr")
+                    if (a.stat === "tudoAttr")
                         targets = ["d", "f", "r", "v"];
                     else if (a.stat === "tudoEsp")
                         targets = ["esp", "ha", "ho", "hr"];
@@ -9146,7 +9183,7 @@ function updateUICore() {
         if (!i.hiddenStyles) i.hiddenStyles = [];
 
         estilosKeys.forEach((stKey) => {
-            if (i.hiddenStyles.includes(stKey)) return;
+            if (i.hiddenStyles.includes(chaveEstiloSalvo(stKey))) return;
 
             let stKeyContent = "";
             let stKeyContentCopy = "";
@@ -9251,7 +9288,7 @@ function updateUICore() {
             return i["freestyle" + n] && i["freestyle" + n].trim() !== ""
                 ? `Freestyle: ${i["freestyle" + n]}`
                 : "Freestyle";
-        return st;
+        return nomeEstiloExibido(i, n);
     };
     let e1 = formatStyle(1);
     if (e1) estilosText += `* ${e1}\n`;
