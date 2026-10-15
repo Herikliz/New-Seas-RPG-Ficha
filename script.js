@@ -550,7 +550,10 @@ const akumasFixas = {
         "Yomi Yomi no Mi",
         "Zushi Zushi no Mi",
     ],
-    "Paramecia Especial": ["Karan Karan no Mi", "Mochi Mochi no Mi"],
+    "Paramecia Especial": [
+        "Karan Karan no Mi",
+        "Mochi Mochi no Mi"
+    ],
     Logia: [
         "Ame Ame no Mi",
         "Chikyū Chikyū no Mi",
@@ -586,6 +589,7 @@ const akumasFixas = {
         "Kame Kame no Mi",
         "Mogu Mogu no Mi",
         "Mushi Mushi no Mi, Modelo: Besouro-Rinoceronte",
+        "Mushi Mushi no Mi, Modelo: Mosca-Varejeira-Verde",
         "Mushi Mushi no Mi, Modelo: Vespa-Mandarina",
         "Neko Neko no Mi, Modelo: Leão",
         "Neko Neko no Mi, Modelo: Leopardo",
@@ -641,12 +645,12 @@ const akumasFixas = {
 };
 
 const shipData = {
-    Bote: { hp: 3, gender: "m" },
+    "Bote": { hp: 3, gender: "m" },
     "Barco Pesqueiro": { hp: 5, gender: "m" },
-    Escuna: { hp: 7, gender: "f" },
-    Brigue: { hp: 8, gender: "m" },
-    Caravela: { hp: 9, gender: "f" },
-    Fragata: { hp: 10, gender: "f" },
+    "Escuna": { hp: 7, gender: "f" },
+    "Brigue": { hp: 8, gender: "m" },
+    "Caravela": { hp: 9, gender: "f" },
+    "Fragata": { hp: 10, gender: "f" },
     "Gran General": { hp: 12, gender: "m" },
     "C-15 Kenpachi": { hp: 5, gender: "m" },
     "Z-10 Perci": { hp: 7, gender: "m" },
@@ -663,7 +667,7 @@ const shipData = {
     "Holandês Voador": { hp: null, gender: "m" },
     "Vingança da Rainha Ana": { hp: null, gender: "f" },
     "Silent Mary": { hp: null, gender: "f" },
-    Pequod: { hp: null, gender: "m" },
+    "Pequod": { hp: null, gender: "m" },
 };
 const baseClassesList = [
     "Arqueólogo",
@@ -690,24 +694,24 @@ const EXTRA_CLASS_SLOTS = [
 const CLASS_CONFLICTS = { Combatente: "Atirador", Atirador: "Combatente" };
 const racas = {
     "Braços Longos": { f: 0.3, r: 0.15 },
-    Bucaneiro: { f: 0.35, r: 0.4 },
-    Gigante: { f: 0.4, r: 0.35, v: -0.05 },
-    Humano: {},
-    Kuja: {},
-    Kumate: { f: 0.3, v: 0.15 },
-    Lunariano: { v: 0.45, r: 0.5 },
+    "Bucaneiro": { f: 0.35, r: 0.4 },
+    "Gigante": { f: 0.4, r: 0.35, v: -0.05 },
+    "Humano": {},
+    "Kuja": {},
+    "Kumate": { f: 0.3, v: 0.15 },
+    "Lunariano": { v: 0.45, r: 0.5 },
     "Meio-Gigante": { f: 0.25, r: 0.25 },
-    Mink: { v: 0.2, r: 0.15 },
-    Oni: { f: 0.4, r: 0.4 },
+    "Mink": { v: 0.2, r: 0.15 },
+    "Oni": { f: 0.4, r: 0.4 },
     "Pernas Longas": { v: 0.3, f: 0.15 },
     "Povo do Céu: Birkan": { d: 0.25, v: 0.25 },
     "Povo do Céu: Shandia": { d: 0.25, v: 0.25 },
     "Povo do Céu: Skypieano": { d: 0.25, v: 0.25 },
-    Sereiano: { d: 0.25, r: 0.15 },
-    Tontatta: { v: 0.25, f: 0.2 },
+    "Sereiano": { d: 0.25, r: 0.15 },
+    "Tontatta": { v: 0.25, f: 0.2 },
     "Três-Olhos": { v: 0.15, r: 0.15, d: 0.15 },
-    Tritão: { f: 0.25, r: 0.25 },
-    Wotan: { f: 0.3, r: 0.25 },
+    "Tritão": { f: 0.25, r: 0.25 },
+    "Wotan": { f: 0.3, r: 0.25 },
 };
 const linhagens = {
     "Nenhuma": {},
