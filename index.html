@@ -188,6 +188,19 @@
                                         <button type="button" id="cib-3" data-fase="3" onclick="setCiborgue(3)" title="Avançada: +40% em todos os atributos">3</button>
                                     </div>
                                 </div>
+                                <div id="box-padrinho" class="ciborgue-box">
+                                    <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:11px; text-transform:uppercase;"><input type="checkbox" id="info-apadrinhado" onchange="updateField('info', 'apadrinhado', this.checked)" style="width:auto; margin:0;"> <span id="lbl-discipulo">Discípulo de Combatente</span></label>
+                                    <div id="box-padrinhoDados" style="display:none; flex-direction:column; gap:5px; margin-top:5px;">
+                                        <input type="text" id="info-padrinhoNome" placeholder="Nome do Mestre" oninput="updateField('info', 'padrinhoNome', this.value)">
+                                        <select id="info-padrinhoAttr" onchange="updateField('info', 'padrinhoAttr', this.value)" title="Atributo que recebe +10%">
+                                            <option value="">- Atributo (+10%) -</option>
+                                            <option value="d">Destreza</option>
+                                            <option value="f">Força</option>
+                                            <option value="r">Resistência</option>
+                                            <option value="v">Velocidade</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                             <div class="input-group" id="container-linhagem">
                                 <label>Linhagem</label>
@@ -1045,6 +1058,7 @@
             </div>
         </div>
 
+        <script src="dados-fixos.js"></script>
         <script src="script.js"></script>
         <script src="sidebar.js"></script>
 

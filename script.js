@@ -285,372 +285,13 @@ const NPCS_DOC_PASSWORD = "ventilador"; // senha extra do documento especial "NP
 let currentDocId = "";
 document.getElementById("doc-id").value = currentDocId;
 
-const ilhasFixas = {
-    "East Blue": [
-        "Base da Marinha G-03",
-        "Clockwork",
-        "Conomi",
-        "Cozia",
-        "Dawn",
-        "Gecko",
-        "Goat",
-        "Ilha dos Animais Raros",
-        "Ilha Navio de Guerra",
-        "Ilha Shimotsuki",
-        "Kumate",
-        "Mirrorball",
-        "Organ",
-        "Oykot",
-        "Polestar",
-        "Tequila Wolf",
-        "Yotsuba",
-    ],
-    "West Blue": [
-        "Ballywood",
-        "Base da Marinha G-12",
-        "God Valley",
-        "Ilusia",
-        "Kano",
-        "Las Camp",
-        "Ohara",
-        "Soja",
-        "Thriller Bark",
-        "Toroa",
-    ],
-    "North Blue": [
-        "Base da Marinha G-11",
-        "Deul",
-        "Downs",
-        "Flevance",
-        "Kuen",
-        "Lvneel",
-        "Minion",
-        "Notice",
-        "Polo Norte",
-        "Rakesh",
-        "Rubeck",
-        "Spider Miles",
-        "Swallow",
-        "Welbems",
-        "Whiteland",
-    ],
-    "South Blue": [
-        "Base da Marinha G-10",
-        "Baterilla",
-        "Briss",
-        "Centaurea",
-        "Karate",
-        "Kutsukku",
-        "Reino Negro de Drum",
-        "Roshwan",
-        "Samba",
-        "Samuwanai",
-        "Sorbet",
-        "Taya",
-        "Torino",
-        "Tumi",
-        "Vespa",
-    ],
-    Paraíso: [
-        "Baltigo",
-        "Banaro",
-        "Base da Marinha G-01",
-        "Base da Marinha G-02",
-        "Base da Marinha G-08",
-        "Boin",
-        "Cactus",
-        "Corrente Tarai",
-        "Drum",
-        "Enies Lobby",
-        "Foolshout",
-        "Ilha dos Homens-Peixe",
-        "Ilha Spa",
-        "Jaya",
-        "Karakuri",
-        "Kenzan",
-        "Kuraigana",
-        "Kyuka",
-        "Little Garden",
-        "Long Ring Long Land",
-        "Lulusia",
-        "Mary Geoise",
-        "Merveille",
-        "Momoiro",
-        "Namakura",
-        "Nanimonai",
-        "Pucci",
-        "Sabaody",
-        "San Faldo",
-        "Sandy",
-        "Skypiea",
-        "Water 7",
-    ],
-    "Novo Mundo": [
-        "Applenine",
-        "Base da Marinha G-09",
-        "Base da Marinha G-13",
-        "Base da Marinha G-14",
-        "Base da Marinha G-15",
-        "Dressrosa",
-        "Egghead",
-        "Elbaf",
-        "Foodvalten",
-        "Green Bit",
-        "Hachinosu",
-        "Mystoria",
-        "Prodence",
-        "Punk Hazard",
-        "Raijin",
-        "Risky Red",
-        "Wano",
-        "Whole Cake",
-        "Yukiryu",
-    ],
-    "Calm Belt": [
-        "Amazon Lily",
-        "Base da Marinha G-05",
-        "Base da Marinha G-06",
-        "Base da Marinha G-07",
-        "Ecdysis",
-        "Impel Down",
-        "Rusukaina",
-        "Shitsurakujima",
-    ],
-    "Localização Desconhecida": [
-        "Arkham Island",
-        "Atlantis",
-        "Gran Tesoro",
-        "Ilha do Sol",
-        "Zou",
-    ],
-};
-
-const akumasFixas = {
-    Paramecia: [
-        "Awa Awa no Mi",
-        "Baku Baku no Mi",
-        "Bane Bane no Mi",
-        "Bara Bara no Mi",
-        "Bari Bari no Mi",
-        "Bata Bata no Mi",
-        "Beri Beri no Mi",
-        "Beta Beta no Mi",
-        "Bijo Bijo no Mi",
-        "Bisu Bisu no Mi",
-        "Bomu Bomu no Mi",
-        "Buki Buki no Mi",
-        "Buku Buku no Mi",
-        "Chiyu Chiyu no Mi",
-        "Choki Choki no Mi",
-        "Deka Deka no Mi",
-        "Dero Dero no Mi",
-        "Doa Doa no Mi",
-        "Doku Doku no Mi",
-        "Doru Doru no Mi",
-        "Fude Fude no Mi",
-        "Fuku Fuku no Mi",
-        "Fuwa Fuwa no Mi",
-        "Gabu Gabu no Mi",
-        "Gasha Gasha no Mi",
-        "Gatsu Gatsu no Mi",
-        "Genso Genso no Mi",
-        "Giro Giro no Mi",
-        "Gocha Gocha no Mi",
-        "Goe Goe no Mi",
-        "Gomu Gomu no Mi",
-        "Goru Goru no Mi",
-        "Gura Gura no Mi",
-        "Guru Guru no Mi",
-        "Gutsu Gutsu no Mi",
-        "Hana Hana no Mi",
-        "Hemo Hemo no Mi",
-        "Hira Hira no Mi",
-        "Hiso Hiso no Mi",
-        "Hobi Hobi no Mi",
-        "Hone Hone no Mi",
-        "Horo Horo no Mi",
-        "Horu Horu no Mi",
-        "Hoya Hoya no Mi",
-        "Iro Iro no Mi",
-        "Ishi Ishi no Mi",
-        "Ito Ito no Mi",
-        "Jake Jake no Mi",
-        "Jara Jara no Mi",
-        "Jiki Jiki no Mi",
-        "Juku Juku no Mi",
-        "Kachi Kachi no Mi",
-        "Kage Kage no Mi",
-        "Kama Kama no Mi",
-        "Kegawa Kegawa no Mi",
-        "Kesshō Kesshō no Mi",
-        "Kibi Kibi no Mi",
-        "Kira Kira no Mi",
-        "Kiro Kiro no Mi",
-        "Kobu Kobu no Mi",
-        "Kon Kon no Mi",
-        "Koro Koro no Mi",
-        "Kuku Kuku no Mi",
-        "Kuri Kuri no Mi",
-        "Kyubu Kyubu no Mi",
-        "Maki Maki no Mi",
-        "Mane Mane no Mi",
-        "Masu Masu no Mi",
-        "Mato Mato no Mi",
-        "Memo Memo no Mi",
-        "Mero Mero no Mi",
-        "Mini Mini no Mi",
-        "Mira Mira no Mi",
-        "Moa Moa no Mi",
-        "Modo Modo no Mi",
-        "Mosa Mosa no Mi",
-        "Muchi Muchi no Mi",
-        "Nagi Nagi no Mi",
-        "Nawa Nawa no Mi",
-        "Nemu Nemu no Mi",
-        "Netsu Netsu no Mi",
-        "Nikyu Nikyu no Mi",
-        "Noko Noko no Mi",
-        "Noku Noku no Mi",
-        "Nomi Nomi no Mi",
-        "Nori Nori no Mi",
-        "Noro Noro no Mi",
-        "Nui Nui no Mi",
-        "Nuke Nuke no Mi",
-        "Ope Ope no Mi",
-        "Ori Ori no Mi",
-        "Oshi Oshi no Mi",
-        "Oto Oto no Mi",
-        "Pamu Pamu no Mi",
-        "Pero Pero no Mi",
-        "Peto Peto no Mi",
-        "Poke Poke no Mi",
-        "Rashin Rashin no Mi",
-        "Riki Riki no Mi",
-        "Sabi Sabi no Mi",
-        "Shari Shari no Mi",
-        "Shibo Shibo no Mi",
-        "Shiku Shiku no Mi",
-        "Shima Shima no Mi",
-        "Shiro Shiro no Mi",
-        "Soru Soru no Mi",
-        "Sube Sube no Mi",
-        "Sui Sui no Mi",
-        "Suji Suji no Mi",
-        "Suke Suke no Mi",
-        "Supa Supa no Mi",
-        "Toge Toge no Mi",
-        "Toki Toki no Mi",
-        "Ton Ton no Mi",
-        "Toshi Toshi no Mi",
-        "Tsutsu Tsutsu no Mi",
-        "Uta Uta no Mi",
-        "Wapu Wapu no Mi",
-        "Wara Wara no Mi",
-        "Woshu Woshu no Mi",
-        "Yomi Yomi no Mi",
-        "Zushi Zushi no Mi",
-    ],
-    "Paramecia Especial": [
-        "Karan Karan no Mi",
-        "Mochi Mochi no Mi"
-    ],
-    Logia: [
-        "Ame Ame no Mi",
-        "Chikyū Chikyū no Mi",
-        "Gasu Gasu no Mi",
-        "Goro Goro no Mi",
-        "Hie Hie no Mi",
-        "Kaze Kaze no Mi",
-        "Kumo Kumo no Mi",
-        "Magu Magu no Mi",
-        "Mera Mera no Mi",
-        "Moku Moku no Mi",
-        "Mori Mori no Mi",
-        "Numa Numa no Mi",
-        "Pasa Pasa no Mi",
-        "Pika Pika no Mi",
-        "Suna Suna no Mi",
-        "Susu Susu no Mi",
-        "Toro Toro no Mi",
-        "Yami Yami no Mi",
-        "Yuki Yuki no Mi",
-    ],
-    Zoan: [
-        "Batto Batto no Mi",
-        "Gama Gama no Mi",
-        "Hebi Hebi no Mi, Modelo: Anaconda",
-        "Hebi Hebi no Mi, Modelo: Cobra-Real",
-        "Hito Hito no Mi",
-        "Inu Inu no Mi, Modelo: Cão de Caça",
-        "Inu Inu no Mi, Modelo: Cão-Guaxinim",
-        "Inu Inu no Mi, Modelo: Chacal",
-        "Inu Inu no Mi, Modelo: Dachshund",
-        "Inu Inu no Mi, Modelo: Lobo",
-        "Kame Kame no Mi",
-        "Mogu Mogu no Mi",
-        "Mushi Mushi no Mi, Modelo: Besouro-Rinoceronte",
-        "Mushi Mushi no Mi, Modelo: Mosca-Varejeira-Verde",
-        "Mushi Mushi no Mi, Modelo: Vespa-Mandarina",
-        "Neko Neko no Mi, Modelo: Leão",
-        "Neko Neko no Mi, Modelo: Leopardo",
-        "Neko Neko no Mi, Modelo: Onça-Pintada",
-        "Neko Neko no Mi, Modelo: Tigre-de-BengalaBengala",
-        "Rako Rako no Mi",
-        "Sara Sara no Mi, Modelo: Axolote",
-        "Tama Tama no Mi",
-        "Tori Tori no Mi, Modelo: Águia",
-        "Tori Tori no Mi, Modelo: Albatroz",
-        "Tori Tori no Mi, Modelo: Falcão",
-        "Uma Uma no Mi",
-        "Usagi Usagi no Mi",
-        "Ushi Ushi no Mi, Modelo: Bisão",
-        "Ushi Ushi no Mi, Modelo: Girafa",
-        "Ushi Ushi no Mi, Modelo: Rinoceronte",
-        "Zou Zou no Mi",
-    ],
-    "Zoan Ancestral": [
-        "Kumo Kumo no Mi, Modelo: Rosamygale grauvogeli",
-        "Neko Neko no Mi, Modelo: Tigre-Dente-de-Sabre",
-        "Ryū Ryū no Mi, Modelo: Alossauro",
-        "Ryū Ryū no Mi, Modelo: Braquiossauro",
-        "Ryū Ryū no Mi, Modelo: Espinossauro",
-        "Ryū Ryū no Mi, Modelo: Paquicefalossauro",
-        "Ryū Ryū no Mi, Modelo: Pteranodonte",
-        "Ryū Ryū no Mi, Modelo: Tiranossauro Rex",
-        "Ryū Ryū no Mi, Modelo: Triceratops",
-        "Zou Zou no Mi, Modelo: Mamute",
-    ],
-    "Zoan Mítica": [
-        "Batto Batto no Mi, Modelo: Vampiro",
-        "Hebi Hebi no Mi, Modelo: Kaijū",
-        "Hebi Hebi no Mi, Modelo: Yamata no Orochi",
-        "Hito Hito no Mi, Modelo: Daibutsu",
-        "Hito Hito no Mi, Modelo: Estátua",
-        "Hito Hito no Mi, Modelo: O Anfitrião",
-        "Hito Hito no Mi, Modelo: Ōnyūdō",
-        "Inu Inu no Mi, Modelo: Bake-Danuki",
-        "Inu Inu no Mi, Modelo: Cérbero",
-        "Inu Inu no Mi, Modelo: Ōkuchi no Makami",
-        "Inu Inu no Mi, Modelo: Raposa de Nove Caudas",
-        "Ryū Ryū no Mi, Modelo: Dragão Ocidental",
-        "Ryū Ryū no Mi, Modelo: Kirin",
-        "Tori Tori no Mi, Modelo: Fênix",
-        "Tori Tori no Mi, Modelo: Nue",
-        "Tori Tori no Mi, Modelo: Pássaro de Cinzas",
-        "Tori Tori no Mi, Modelo: Pássaro de Gelo",
-        "Tori Tori no Mi, Modelo: Thunderbird",
-        "Uma Uma no Mi, Modelo: Pégaso",
-        "Uo Uo no Mi, Modelo: Carpa Seiryū",
-    ],
-};
-
 const shipData = {
-    "Bote": { hp: 3, gender: "m" },
+    Bote: { hp: 3, gender: "m" },
     "Barco Pesqueiro": { hp: 5, gender: "m" },
-    "Escuna": { hp: 7, gender: "f" },
-    "Brigue": { hp: 8, gender: "m" },
-    "Caravela": { hp: 9, gender: "f" },
-    "Fragata": { hp: 10, gender: "f" },
+    Escuna: { hp: 7, gender: "f" },
+    Brigue: { hp: 8, gender: "m" },
+    Caravela: { hp: 9, gender: "f" },
+    Fragata: { hp: 10, gender: "f" },
     "Gran General": { hp: 12, gender: "m" },
     "C-15 Kenpachi": { hp: 5, gender: "m" },
     "Z-10 Perci": { hp: 7, gender: "m" },
@@ -667,7 +308,7 @@ const shipData = {
     "Holandês Voador": { hp: null, gender: "m" },
     "Vingança da Rainha Ana": { hp: null, gender: "f" },
     "Silent Mary": { hp: null, gender: "f" },
-    "Pequod": { hp: null, gender: "m" },
+    Pequod: { hp: null, gender: "m" },
 };
 const baseClassesList = [
     "Arqueólogo",
@@ -694,24 +335,24 @@ const EXTRA_CLASS_SLOTS = [
 const CLASS_CONFLICTS = { Combatente: "Atirador", Atirador: "Combatente" };
 const racas = {
     "Braços Longos": { f: 0.3, r: 0.15 },
-    "Bucaneiro": { f: 0.35, r: 0.4 },
-    "Gigante": { f: 0.4, r: 0.35, v: -0.05 },
-    "Humano": {},
-    "Kuja": {},
-    "Kumate": { f: 0.3, v: 0.15 },
-    "Lunariano": { v: 0.45, r: 0.5 },
+    Bucaneiro: { f: 0.35, r: 0.4 },
+    Gigante: { f: 0.4, r: 0.35, v: -0.05 },
+    Humano: {},
+    Kuja: {},
+    Kumate: { f: 0.3, v: 0.15 },
+    Lunariano: { v: 0.45, r: 0.5 },
     "Meio-Gigante": { f: 0.25, r: 0.25 },
-    "Mink": { v: 0.2, r: 0.15 },
-    "Oni": { f: 0.4, r: 0.4 },
+    Mink: { v: 0.2, r: 0.15 },
+    Oni: { f: 0.4, r: 0.4 },
     "Pernas Longas": { v: 0.3, f: 0.15 },
     "Povo do Céu: Birkan": { d: 0.25, v: 0.25 },
     "Povo do Céu: Shandia": { d: 0.25, v: 0.25 },
     "Povo do Céu: Skypieano": { d: 0.25, v: 0.25 },
-    "Sereiano": { d: 0.25, r: 0.15 },
-    "Tontatta": { v: 0.25, f: 0.2 },
+    Sereiano: { d: 0.25, r: 0.15 },
+    Tontatta: { v: 0.25, f: 0.2 },
     "Três-Olhos": { v: 0.15, r: 0.15, d: 0.15 },
-    "Tritão": { f: 0.25, r: 0.25 },
-    "Wotan": { f: 0.3, r: 0.25 },
+    Tritão: { f: 0.25, r: 0.25 },
+    Wotan: { f: 0.3, r: 0.25 },
 };
 const linhagens = {
     "Nenhuma": {},
@@ -872,12 +513,6 @@ const TORYU_NOMES = {
     1: "Ittōryū",
     2: "Nitōryū",
     3: "Santōryū",
-    4: "Yontōryū",
-    5: "Gokutōryū",
-    6: "Rokutōryū",
-    7: "Nanatōryū",
-    8: "Hattōryū",
-    9: "Kyūtōryū"
 };
 const TORYU_POR_LINHA = 3; // quantos botões por fileira
 
@@ -2503,6 +2138,9 @@ function runFallbackChecks() {
                 selDF: "d",
                 selRV: "r",
                 ciborgue: 0,
+                apadrinhado: false,
+                padrinhoNome: "",
+                padrinhoAttr: "",
                 selLinDF: "d",
                 selLinRV: "r",
                 selLin4: "d",
@@ -4182,6 +3820,26 @@ const CIBORGUE_FASES = {
     3: { bonus: 0.4, fem: "Avançada", masc: "Avançado" },
 };
 
+// Discípulo de Combatente: se marcado, +10% no atributo escolhido (Destreza, Força,
+// Resistência ou Velocidade). Sem atributo escolhido, não dá buff. Para mudar a
+// porcentagem, altere PADRINHO_BONUS (0.1 = 10%).
+const PADRINHO_BONUS = 0.1;
+// Título (masculino/feminino conforme o GÊNERO do personagem; sem gênero, usa o sexo).
+function tituloDiscipulo(info) {
+    let fem;
+    if (info.genero === "Mulher") fem = true;
+    else if (info.genero === "Homem" || info.genero === "Não-binário") fem = false;
+    else fem = info.sexo === "Feminino";
+    return fem
+        ? { tela: "Discípula de Combatente", fichaPronta: "𝐃ɪsᴄɪ́ᴘᴜʟᴀ ᴅᴇ 𝐂ᴏᴍʙᴀᴛᴇɴᴛᴇ" }
+        : { tela: "Discípulo de Combatente", fichaPronta: "𝐃ɪsᴄɪ́ᴘᴜʟᴏ ᴅᴇ 𝐂ᴏᴍʙᴀᴛᴇɴᴛᴇ" };
+}
+function padrinhoAtributo(info) {
+    return info && info.apadrinhado === true && ["d", "f", "r", "v"].includes(info.padrinhoAttr)
+        ? info.padrinhoAttr
+        : "";
+}
+
 function ciborgueFase(info) {
     let n = parseInt(info && info.ciborgue, 10);
     return CIBORGUE_FASES[n] ? n : 0;
@@ -4290,7 +3948,6 @@ function updateUI() {
                 "\n\nOs dados da ficha NÃO foram perdidos. Avise o administrador e informe a mensagem acima.";
     }
 }
-
 
 function updateUICore() {
     const container = document.querySelector(".container");
@@ -4580,6 +4237,15 @@ function updateUICore() {
         cb.disabled = !!isReadOnly;
     }
 
+    let chkPadrinho = document.getElementById("info-apadrinhado");
+    if (chkPadrinho) {
+        chkPadrinho.checked = i.apadrinhado === true;
+        let lblDiscipulo = document.getElementById("lbl-discipulo");
+        if (lblDiscipulo) lblDiscipulo.textContent = tituloDiscipulo(i).tela;
+        let boxPadrinho = document.getElementById("box-padrinhoDados");
+        if (boxPadrinho) boxPadrinho.style.display = i.apadrinhado === true ? "flex" : "none";
+    }
+
     let anim1 = document.getElementById("info-animal");
     if (["Tritão", "Wotan", "Mink"].includes(i.raca)) {
         anim1.style.display = "block";
@@ -4652,6 +4318,8 @@ function updateUICore() {
         "nacionalidade",
         "localizacao",
         "recrutadoPor",
+        "padrinhoNome",
+        "padrinhoAttr",
         "tripulacao",
         "pirataStatus",
         "akumaNome",
@@ -4673,6 +4341,7 @@ function updateUICore() {
         let el = document.getElementById("info-" + f);
         if (el) {
             let val = i[f] || "";
+            if (f === "nacionalidade" || f === "localizacao") garantirOpcaoNoSelect(el, val);
             if (el.value != val) el.value = val;
         }
     });
@@ -4683,6 +4352,7 @@ function updateUICore() {
     if (selAkumaSync) {
         let akumaEsperada =
             i.akumaNome && i.akumaNome !== "" ? i.akumaNome : "nenhuma";
+        if (akumaEsperada !== "nenhuma") garantirOpcaoNoSelect(selAkumaSync, akumaEsperada);
         if (
             selAkumaSync.value !== akumaEsperada &&
             Array.from(selAkumaSync.options).some((o) => o.value === akumaEsperada)
@@ -5023,6 +4693,8 @@ function updateUICore() {
         if (tComb > 0 && i.selClasseDF) {
             tBonus[i.selClasseDF] += tComb * 0.05;
         }
+        let tPad = padrinhoAtributo(i);
+        if (tPad) tBonus[tPad] += PADRINHO_BONUS;
         let tCib = ciborgueFase(i);
         if (tCib) {
             ["d", "f", "r", "v"].forEach((t) => {
@@ -6483,6 +6155,8 @@ function updateUICore() {
     }
 
     // Ciborgue: buff passivo em todos os atributos (soma no total, como as raças/linhagens)
+    let padAttr = padrinhoAtributo(i);
+    if (padAttr) bonus[padAttr] += PADRINHO_BONUS;
     let cibFase = ciborgueFase(i);
     if (cibFase) {
         ["d", "f", "r", "v"].forEach((t) => {
@@ -10073,7 +9747,7 @@ ${sexoGeneroOut}
 > ${i.sangue || ""}
 ${histPersOut}
   : ᓩ _𝐀ᴘᴀʀᴇ̂ɴᴄɪᴀ:_
-> ${i.aparencia || ""}${(!i.recrutadoPor || i.recrutadoPor.trim() === "") && !window.isGeneratingManual ? "" : `\n\n  : ᓩ _𝐑ᴇᴄʀᴜᴛᴀᴅᴏ ᴘᴏʀ:_\n> ${i.recrutadoPor || ""}`}${currentDocId === "NPCS" || currentDocId === "NPCI" ? "" : `\n\n  : ᓩ _𝐈ᴅ:_\n> ${currentDocId || ""}`}${((parseInt(i.aliadosEspiritoContagiante) || 0) > 0 || window.isGeneratingManual) ? `\n\n  : ᓩ _𝐀ʟɪᴀᴅᴏs ᴄᴏᴍ 𝐄sᴘɪ́ʀɪᴛᴏ 𝐂ᴏɴᴛᴀɢɪᴀɴᴛᴇ:_\n> ${(parseInt(i.aliadosEspiritoContagiante) || 0) > 0 ? parseInt(i.aliadosEspiritoContagiante) : ""}` : ""}
+> ${i.aparencia || ""}${(!i.recrutadoPor || i.recrutadoPor.trim() === "") && !window.isGeneratingManual ? "" : `\n\n  : ᓩ _𝐑ᴇᴄʀᴜᴛᴀᴅᴏ ᴘᴏʀ:_\n> ${i.recrutadoPor || ""}`}${i.apadrinhado === true && ((i.padrinhoNome && i.padrinhoNome.trim() !== "") || window.isGeneratingManual) ? `\n\n  : ᓩ _${tituloDiscipulo(i).fichaPronta}:_\n> ${i.padrinhoNome || ""}` : ""}${currentDocId === "NPCS" || currentDocId === "NPCI" ? "" : `\n\n  : ᓩ _𝐈ᴅ:_\n> ${currentDocId || ""}`}${((parseInt(i.aliadosEspiritoContagiante) || 0) > 0 || window.isGeneratingManual) ? `\n\n  : ᓩ _𝐀ʟɪᴀᴅᴏs ᴄᴏᴍ 𝐄sᴘɪ́ʀɪᴛᴏ 𝐂ᴏɴᴛᴀɢɪᴀɴᴛᴇ:_\n> ${(parseInt(i.aliadosEspiritoContagiante) || 0) > 0 ? parseInt(i.aliadosEspiritoContagiante) : ""}` : ""}
 
   : ᓩ _𝐍ᴀᴄɪᴏɴᴀʟɪᴅᴀᴅᴇ:_
 > ${i.nacionalidade || "Desconhecida"}
@@ -10754,6 +10428,24 @@ window.selecionarAkuma = function (novoAkumaNome) {
     if (typeof updateUI === "function") updateUI();
 };
 
+// Se a ficha já tem um valor (Akuma, ilha) que não está nas listas de dados-fixos.js,
+// o valor continua aparecendo no seletor (em "Fora da lista") em vez de sumir da tela.
+function garantirOpcaoNoSelect(select, valor) {
+    if (!select || !valor || valor === "nenhuma") return;
+    if (Array.from(select.options).some((o) => o.value === valor)) return;
+    let grupo = select.querySelector('optgroup[data-fora-da-lista]');
+    if (!grupo) {
+        grupo = document.createElement("optgroup");
+        grupo.label = "Fora da lista";
+        grupo.setAttribute("data-fora-da-lista", "1");
+        select.appendChild(grupo);
+    }
+    let opt = document.createElement("option");
+    opt.value = valor;
+    opt.textContent = valor;
+    grupo.appendChild(opt);
+}
+
 // Preenche os selects de Akuma, Nacionalidade e Localização com os dados fixos do
 // jogo (akumasFixas / ilhasFixas). Não depende do Firebase: roda uma vez no init().
 function preencherSelectsFixos() {
@@ -10790,6 +10482,7 @@ function preencherSelectsFixos() {
     }
     if (selectAkuma) {
         selectAkuma.innerHTML = akumaHTML;
+        garantirOpcaoNoSelect(selectAkuma, currentAkumaVal === "nenhuma" ? "" : currentAkumaVal);
         selectAkuma.value = currentAkumaVal;
     }
 
@@ -10817,10 +10510,12 @@ function preencherSelectsFixos() {
     }
     if (selectNac) {
         selectNac.innerHTML = ilhasHTML;
+        garantirOpcaoNoSelect(selectNac, currentNacVal);
         selectNac.value = currentNacVal;
     }
     if (selectLoc) {
         selectLoc.innerHTML = ilhasHTML;
+        garantirOpcaoNoSelect(selectLoc, currentLocVal);
         selectLoc.value = currentLocVal;
     }
 }
