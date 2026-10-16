@@ -3934,6 +3934,7 @@ function updateUI() {
     try {
         garantirEstruturaPersonagem(currentChar);
         updateUICore();
+        if (window.__edicaoManualVerificar) window.__edicaoManualVerificar();
         window.__ultimoErroUpdateUI = null;
         clearTimeout(window.__rankingTimer);
         window.__rankingTimer = setTimeout(preencherRankingsFaltantes, 600);
@@ -8845,6 +8846,7 @@ function updateUICore() {
             availableStylesMap["estilo" + n] = dName;
         }
     });
+    window.__estilosMapa = availableStylesMap; // usado pela edição manual (edicao-manual.js)
 
     let tecnicasOut = "";
     let tecnicasOutCopy = "";
@@ -8853,7 +8855,7 @@ function updateUICore() {
         currentChar.tecnicasList.some((t) => t.nome || t.desc || t.efeito);
     let trAcum = i.treinosAcumulados ? i.treinosAcumulados : 0;
 
-    if (hasValidTecnica || trAcum > 0) {
+    if (hasValidTecnica || trAcum > 0 || window.__edicaoManualAtiva) {
         tecnicasOut += "▬▬▬▬  [ 𝐓ᴇ́ᴄɴɪᴄᴀs ]  ▬▬▬▬\n\n";
         tecnicasOut += `Treinos Acumulados: ${trAcum.toLocaleString("pt-BR")}\n\n`;
         tecnicasOutCopy += "▬▬▬▬  [ 𝐓ᴇ́ᴄɴɪᴄᴀs ]  ▬▬▬▬\n\n";
@@ -9747,7 +9749,7 @@ ${sexoGeneroOut}
 > ${i.sangue || ""}
 ${histPersOut}
   : ᓩ _𝐀ᴘᴀʀᴇ̂ɴᴄɪᴀ:_
-> ${i.aparencia || ""}${(!i.recrutadoPor || i.recrutadoPor.trim() === "") && !window.isGeneratingManual ? "" : `\n\n  : ᓩ _𝐑ᴇᴄʀᴜᴛᴀᴅᴏ ᴘᴏʀ:_\n> ${i.recrutadoPor || ""}`}${i.apadrinhado === true && ((i.padrinhoNome && i.padrinhoNome.trim() !== "") || window.isGeneratingManual) ? `\n\n  : ᓩ _${tituloDiscipulo(i).fichaPronta}:_\n> ${i.padrinhoNome || ""}` : ""}${currentDocId === "NPCS" || currentDocId === "NPCI" ? "" : `\n\n  : ᓩ _𝐈ᴅ:_\n> ${currentDocId || ""}`}${((parseInt(i.aliadosEspiritoContagiante) || 0) > 0 || window.isGeneratingManual) ? `\n\n  : ᓩ _𝐀ʟɪᴀᴅᴏs ᴄᴏᴍ 𝐄sᴘɪ́ʀɪᴛᴏ 𝐂ᴏɴᴛᴀɢɪᴀɴᴛᴇ:_\n> ${(parseInt(i.aliadosEspiritoContagiante) || 0) > 0 ? parseInt(i.aliadosEspiritoContagiante) : ""}` : ""}
+> ${i.aparencia || ""}${(!i.recrutadoPor || i.recrutadoPor.trim() === "") && !window.isGeneratingManual && !window.__edicaoManualAtiva ? "" : `\n\n  : ᓩ _𝐑ᴇᴄʀᴜᴛᴀᴅᴏ ᴘᴏʀ:_\n> ${i.recrutadoPor || ""}`}${i.apadrinhado === true && ((i.padrinhoNome && i.padrinhoNome.trim() !== "") || window.isGeneratingManual) ? `\n\n  : ᓩ _${tituloDiscipulo(i).fichaPronta}:_\n> ${i.padrinhoNome || ""}` : ""}${currentDocId === "NPCS" || currentDocId === "NPCI" ? "" : `\n\n  : ᓩ _𝐈ᴅ:_\n> ${currentDocId || ""}`}${((parseInt(i.aliadosEspiritoContagiante) || 0) > 0 || window.isGeneratingManual || window.__edicaoManualAtiva) ? `\n\n  : ᓩ _𝐀ʟɪᴀᴅᴏs ᴄᴏᴍ 𝐄sᴘɪ́ʀɪᴛᴏ 𝐂ᴏɴᴛᴀɢɪᴀɴᴛᴇ:_\n> ${(parseInt(i.aliadosEspiritoContagiante) || 0) > 0 ? parseInt(i.aliadosEspiritoContagiante) : ""}` : ""}
 
   : ᓩ _𝐍ᴀᴄɪᴏɴᴀʟɪᴅᴀᴅᴇ:_
 > ${i.nacionalidade || "Desconhecida"}
@@ -9786,7 +9788,8 @@ ${attrOut}${tecnicasOut}`;
     window.copyDataAtributos =
         `▬▬▬▬  [ 𝐒ᴛᴀᴛᴜs ]  ▬▬▬▬\nHP: ${i.hpAtual.toLocaleString("pt-BR")} / ${totalHP.toLocaleString("pt-BR")}\n\n↠  *𝐀ᴛʀɪʙᴜᴛᴏs*\n* Base: ${totalBase.toLocaleString("pt-BR")}\n* Total: ${totalFinal.toLocaleString("pt-BR")}\n\n${attrOut}`.trim();
     window.copyDataTecnicas = tecnicasOutCopy.trim();
-    document.getElementById("resBox").textContent = out.trim();
+    // Edição manual (ADM): enquanto a pessoa digita na Ficha Pronta, o texto dela não é reescrito.
+    if (!window.__manualPreservar) document.getElementById("resBox").textContent = out.trim();
     window.copyDataFichaPronta = out
         .replace(tecnicasOut, tecnicasOutCopy)
         .trim();
