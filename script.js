@@ -272,10 +272,10 @@ const ADMIN_PASSWORD = "Ben10";
 // Firestore. Estão aqui, em um lugar só, para facilitar a troca.
 const SUPER_ADMIN_PASSWORD = "Ben10000"; // libera os limites de regras (isSuperAdmin)
 // Modo ADM: só vale quando a Ficha é aberta pelo arquivo ficha-adm.html, que leva para o
-// index.html com "#fichadeadmsteetgroovesteetfodabigsmoke" no endereço. Nesse modo, toda pergunta "digite a senha" é
+// index.html com "#Ben10" no endereço. Nesse modo, toda pergunta "digite a senha" é
 // respondida sozinha com a senha ADM (Ben10), como se ela tivesse sido digitada. NÃO liga o
 // Super ADM (Ben10000). Funciona também com a página aberta direto do computador (file://).
-const MODO_ADMIN = window.location.hash === "#fichadeadmsteetgroovesteetfodabigsmoke";
+const MODO_ADMIN = window.location.hash === "#Ben10";
 function pedirSenhaAdm(mensagem) {
     if (MODO_ADMIN) return Promise.resolve(ADMIN_PASSWORD);
     return customPrompt(mensagem);
